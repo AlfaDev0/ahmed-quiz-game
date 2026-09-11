@@ -276,6 +276,61 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 /* ==== SHARE ==== */
 .btn-share{margin-top:8px;width:100%;padding:12px;border:none;border-radius:14px;background:var(--bg3);color:var(--text);font-family:inherit;font-weight:800;font-size:14px;cursor:pointer}
 
+/* ==== STUDY LIBRARY ==== */
+.study-banner{display:flex;align-items:center;gap:12px;margin:14px 16px 4px;padding:16px;background:linear-gradient(135deg,#00C9A7,#1286FF 55%,#6C63FF);border-radius:20px;box-shadow:0 8px 25px rgba(18,134,255,.35);cursor:pointer;position:relative;overflow:hidden}
+.study-banner:before{content:'📚';position:absolute;font-size:90px;left:-10px;top:-15px;opacity:.15;transform:rotate(-15deg)}
+.sb-ico{font-size:36px;flex-shrink:0;z-index:1}
+.sb-info{flex:1;z-index:1}
+.sb-info b{font-size:16px}
+.sb-info p{font-size:12px;opacity:.92}
+.sb-prog{height:5px;background:rgba(255,255,255,.3);border-radius:3px;margin-top:7px;overflow:hidden}
+.sb-fill{height:100%;width:0;background:#fff;border-radius:3px;transition:width .5s}
+.sb-btn{background:#fff;color:#1286FF;border:none;padding:9px 20px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer;z-index:1;flex-shrink:0}
+.parts{padding:16px;display:flex;flex-direction:column;gap:14px}
+.part-card{border-radius:20px;padding:22px 18px;color:#fff;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.35);transition:.25s}
+.part-card:active{transform:scale(.98)}
+.part-card>.pi{font-size:44px;display:block;margin-bottom:8px}
+.part-card h3{font-size:21px;margin-bottom:4px}
+.part-card p{font-size:13px;opacity:.95;margin-bottom:12px}
+.part-prog-row{display:flex;align-items:center;gap:10px;color:#fff}
+.part-prog-bar{flex:1;height:6px;background:rgba(255,255,255,.35);border-radius:3px;overflow:hidden}
+.part-prog-fill{height:100%;background:#fff;border-radius:3px;transition:width .5s}
+.part-prog-txt{font-size:12px;font-weight:800}
+.subj-card{display:flex;align-items:center;gap:13px;background:var(--bg2);border:1px solid var(--bg3);border-radius:16px;padding:14px;margin:10px 16px;cursor:pointer;transition:.2s}
+.subj-card:active{transform:scale(.98)}
+.subj-ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.subj-info{flex:1}
+.subj-info b{font-size:15px}
+.subj-info p{font-size:12px;color:var(--dim)}
+.subj-book-n{font-size:11px;color:var(--gold);font-weight:800}
+.book-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:16px;margin:10px 16px;overflow:hidden}
+.book-head{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer}
+.book-head:active{background:var(--bg3)}
+.book-ico{font-size:26px}
+.book-info{flex:1}
+.book-info b{font-size:15px;display:block}
+.book-info span{font-size:12px;color:var(--dim)}
+.ch-list{padding:0 14px 14px;display:flex;flex-direction:column;gap:9px}
+.ch-row{display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:14px;padding:13px;cursor:pointer;border:1.5px solid transparent;transition:.2s}
+.ch-row:active{transform:scale(.98)}
+.ch-row.locked{opacity:.45}
+.ch-link{font-size:12px;width:15px;position:relative}
+.ch-stars{font-size:13px;width:64px;text-align:center;flex-shrink:0}
+.ch-stars b{display:block;font-size:11px;color:var(--dim)}
+.ch-info{flex:1}
+.ch-info b{font-size:14px;display:block;margin-bottom:2px}
+.ch-info span{font-size:11.5px;color:var(--dim)}
+.ch-arrow{color:var(--dim);font-size:14px}
+.read-body{padding:16px}
+.read-chapter{font-size:20px;font-weight:900;margin-bottom:14px;background:linear-gradient(135deg,#6C63FF,#FF6B6B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;justify-content:center}
+.read-sec{background:var(--bg2);border-radius:16px;padding:16px;margin-bottom:14px;border-right:4px solid var(--primary)}
+.read-sec h4{font-size:16px;margin-bottom:8px;color:var(--gold)}
+.read-sec p{font-size:13.5px;line-height:2;color:var(--text);opacity:.94}
+.read-quiz-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;font-family:inherit;font-weight:900;font-size:17px;cursor:pointer;box-shadow:0 8px 25px rgba(76,175,80,.4)}
+.r-stars{font-size:26px;letter-spacing:6px;margin:6px 0 12px;text-align:center}
+.r-stars .off{opacity:.2}
+.study-hidden{display:none}
+
 @media(min-width:481px){#app{border-left:1px solid var(--bg3);border-right:1px solid var(--bg3)}}
 </style>
 </head>
@@ -313,6 +368,16 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         <p>اكسب 50 عملة ذهبية إضافية</p>
       </div>
       <button class="daily-btn" id="dailyBtn">ابدأ</button>
+    </div>
+
+    <div class="study-banner" id="studyBanner">
+      <span class="sb-ico">📚</span>
+      <div class="sb-info">
+        <b>المكتبة التعليمية</b>
+        <p>اقرأ واختبر — الأدبي والعلمي</p>
+        <div class="sb-prog"><div class="sb-fill" id="studyFill"></div></div>
+      </div>
+      <button class="sb-btn">ادخل</button>
     </div>
 
     <div class="chip-row" id="diffChips">
@@ -400,6 +465,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
           <span class="r-reward">⭐ +<span id="rXp">0</span> خبرة</span>
         </div>
         <button class="btn-main" id="replayBtn">🔄 إعادة اللعب</button>
+        <div class="r-stars" id="rStars" style="display:none"></div>
         <button class="btn-sec" id="homeBtn">🏠 الرئيسية</button>
         <button class="btn-share" id="shareBtn">📤 شارك نتيجتك</button>
         <button class="btn-share" id="inviteBtn" style="background:var(--primary)">⚔️ تحدَّ صديقك بنفس الأسئلة</button>
@@ -499,6 +565,24 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     </div>
   </div>
 
+  <!-- STUDY -->
+  <div id="study" class="screen">
+    <div class="page-head"><button class="icon-btn" id="studyBackHome">→</button><h2>📚 المكتبة التعليمية</h2></div>
+    <div id="studyParts" class="parts"></div>
+  </div>
+  <div id="studyBooks" class="screen">
+    <div class="page-head"><button class="icon-btn" id="studyBackParts">→</button><h2 id="sbTitle">المواد</h2></div>
+    <div id="studyBooksWrap"></div>
+  </div>
+  <div id="studyBook" class="screen">
+    <div class="page-head"><button class="icon-btn" id="studyBackBooks">→</button><h2 id="stbTitle">الفصول</h2></div>
+    <div id="studyChapters"></div>
+  </div>
+  <div id="studyRead" class="screen">
+    <div class="page-head"><button class="icon-btn" id="studyBackBook">→</button><h2 id="srTitle">القراءة</h2></div>
+    <div id="studyReadBody"></div>
+  </div>
+
   <div class="bottom">
     <button class="nav-btn active" data-nav="home"><span class="ni">🏠</span>الرئيسية</button>
     <button class="nav-btn" data-nav="shop"><span class="ni">🛒</span>المتجر</button>
@@ -525,9 +609,10 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 </div>
 <div class="toast" id="toast"></div>
 <script src="questions.js"></script>
+<script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{}};
 const SETDEF={sound:true,vib:true,dark:true,notif:false,qCount:20,timer:20};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null}
@@ -565,7 +650,7 @@ function sfx(type){
 function vibe(p){if(set.vib&&navigator.vibrate)navigator.vibrate(p)}
 
 /* ================= SHOW ================= */
-const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats'};
+const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats',study:'study',studyBooks:'studyBooks',studyBook:'studyBook',studyRead:'studyRead'};
 function show(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.getElementById(scrPairs[s]||'home').classList.add('active');
@@ -613,6 +698,7 @@ function updateHome(){
   const wb=document.getElementById('weekBtn'),mb=document.getElementById('monthBtn');
   if(wb)wb.textContent=S.weekPaid?'تم ✓':(S.weekBest>0?'سجل: '+S.weekBest:'ابدأ');
   if(mb)mb.textContent=S.monthPaid?'تم ✓':(S.monthBest>0?'سجل: '+S.monthBest:'ابدأ');
+  if(typeof renderStudyFill==='function')renderStudyFill();
 }
 function checkDaily(){
   const today=new Date().toDateString();
@@ -1093,10 +1179,10 @@ function bindEvents(){
     startGame('culture',true);
   };
   document.getElementById('exitGame').onclick=()=>{
-    clearInterval(timer);set.timer=origTimer;saveSet();show('home');updateHome();checkDaily();
+    clearInterval(timer);set.timer=origTimer;saveSet();studyCtx=null;show('home');updateHome();checkDaily();
   };
-  document.getElementById('replayBtn').onclick=()=>startGame(curCat,false);
-  document.getElementById('homeBtn').onclick=()=>{show('home');updateHome();checkDaily()};
+  document.getElementById('replayBtn').onclick=()=>{if(replayStudy){replayStudy()}else{startGame(curCat,false)}};
+  document.getElementById('homeBtn').onclick=()=>{studyCtx=null;show('home');updateHome();checkDaily()};
   document.getElementById('shareBtn').onclick=shareResult;
   document.getElementById('inviteBtn').onclick=buildChallengeLink;
   document.getElementById('weekBtn').onclick=()=>startChallenge('week');
@@ -1151,6 +1237,14 @@ function bindEvents(){
   document.getElementById('ltMonth').onclick=()=>setLbTab('ltMonth');
   document.getElementById('ltAll').onclick=()=>setLbTab('ltAll');
   document.querySelector('.lb-tab.active')&&setLbTab('ltAll');
+  // STUDY NAV
+  if(window.STUDY){
+    document.getElementById('studyBanner').onclick=()=>{renderStudyParts();show('study')};
+    document.getElementById('studyBackHome').onclick=()=>{show('home');updateHome()};
+    document.getElementById('studyBackParts').onclick=()=>{renderStudyParts();show('study')};
+    document.getElementById('studyBackBooks').onclick=()=>{openStudyPart(window._studyPi);show('studyBooks')};
+    document.getElementById('studyBackBook').onclick=()=>{openStudySubject(window._studyPi,window._studySi);show('studyBook')};
+  }
   // PWA install
   let defEv;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();defEv=e;showInstall(defEv)});
 }
@@ -1181,6 +1275,136 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 
 load();loadSet();bindEvents();
 updateHome();applySettings();
+</script>
+<script>
+/* ================= STUDY LIBRARY ================= */
+var studyCtx=null,replayStudy=null,_studyPi=0,_studySi=0;
+function chKey(pi,si,bi,ci){return pi+'.'+si+'.'+bi+'.'+ci}
+function getChStars(k){if(!S||!S.study)return 0;return (S.study[k]||{}).stars||0}
+function totalChapters(){let n=0;if(!window.STUDY)return n;window.STUDY.forEach(p=>p.subjects.forEach(s=>s.books.forEach(b=>n+=b.chapters.length)));return n}
+function totalStudied(){let n=0;if(!S||!S.study)return n;Object.keys(S.study).forEach(k=>{if(S.study[k]&&S.study[k].done)n++});return n}
+function renderStudyFill(){
+  const t=totalChapters(),d=totalStudied(),el=document.getElementById('studyFill');
+  if(el)el.style.width=(t?Math.round(d/t*100):0)+'%';
+}
+function renderStudyParts(){
+  const el=document.getElementById('studyParts');el.innerHTML='';
+  if(!window.STUDY)return;
+  window.STUDY.forEach((p,pi)=>{
+    let done=0;
+    p.subjects.forEach((s,si)=>s.books.forEach((b,bi)=>b.chapters.forEach((c,ci)=>{if(getChStars(chKey(pi,si,bi,ci))>0)done++})));
+    const pct=Math.round(done/totalChaptersOfPart(pi)*100)||0;
+    const d=document.createElement('div');d.className='part-card';d.style.background=p.grad;
+    d.innerHTML='<span class="pi">'+p.icon+'</span><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-prog-row"><div class="part-prog-bar"><div class="part-prog-fill" style="width:'+pct+'%"></div></div><span class="part-prog-txt">'+done+' ⭐</span></div>';
+    d.onclick=()=>openStudyPart(pi);el.appendChild(d);
+  });
+}
+function totalChaptersOfPart(pi){let n=0;window.STUDY[pi].subjects.forEach(s=>s.books.forEach(b=>n+=b.chapters.length));return n}
+function openStudyPart(pi){
+  _studyPi=pi;const p=window.STUDY[pi];
+  document.getElementById('sbTitle').textContent=p.name;
+  const el=document.getElementById('studyBooksWrap');el.innerHTML='';
+  p.subjects.forEach((s,si)=>{
+    const chCount=s.books.reduce((n,b)=>n+b.chapters.length,0);
+    let stars=0;
+    s.books.forEach((b,bi)=>b.chapters.forEach((c,ci)=>stars+=getChStars(chKey(pi,si,bi,ci))));
+    const d=document.createElement('div');d.className='subj-card';
+    d.innerHTML='<div class="subj-ico" style="background:'+s.color+'22;border:1.5px solid '+s.color+'">'+s.icon+'</div><div class="subj-info"><b>'+s.name+'</b><p>'+s.books.length+' كتاب · '+chCount+' فصل · إجمالي '+stars+' ⭐</p></div><span class="subj-arrow">▶</span>';
+    d.onclick=()=>openStudySubject(pi,si);el.appendChild(d);
+  });
+  show('studyBooks');
+}
+function openStudySubject(pi,si){
+  _studySi=si;const p=window.STUDY[pi],s=p.subjects[si];
+  document.getElementById('stbTitle').textContent=s.name;
+  const el=document.getElementById('studyChapters');el.innerHTML='';
+  s.books.forEach((b,bi)=>{
+    const wrap=document.createElement('div');wrap.className='book-card';
+    const head=document.createElement('div');head.className='book-head';
+    head.innerHTML='<span class="book-ico">'+b.icon+'</span><div class="book-info"><b>'+b.title+'</b><span>'+b.chapters.length+' فصول · اقرأ ثم اختبر نفسك</span></div><span class="subj-arrow">▼</span>';
+    const list=document.createElement('div');list.className='ch-list';
+    const toggle=()=>{const vis=list.style.display==='none';list.style.display=vis?'block':'none';const sa=head.querySelector&&head.querySelector('.subj-arrow');if(sa)sa.textContent=vis?'▲':'▼'};
+    head.onclick=toggle;wrap.appendChild(head);wrap.appendChild(list);el.appendChild(wrap);
+    b.chapters.forEach((ch,ci)=>{
+      const k=chKey(pi,si,bi,ci),stars=getChStars(k);
+      const row=document.createElement('div');row.className='ch-row';
+      row.innerHTML='<div class="ch-info"><b>الفصل '+(ci+1)+' — '+ch.title+'</b><span>'+ch.read.length+' مقطع شرح · '+ch.qs.length+' سؤال</span></div><div class="ch-stars">'+(!stars?'<b>لم تبدأ</b>':'<b>⭐'.repeat(stars)+(stars<3?'·الرابط: '+stars+'/3':'')+'</b>')+'</div><span class="ch-arrow">▶</span>';
+      row.onclick=()=>openChapter(pi,si,bi,ci,ch);
+      if(ci===0)toggle();
+      list.appendChild(row);
+    });
+  });
+  show('studyBook');
+}
+function openChapter(pi,si,bi,ci,ch){
+  _studyPi=pi;_studySi=si;
+  document.getElementById('srTitle').textContent='الفصل '+(ci+1)+' — '+ch.title;
+  const el=document.getElementById('studyReadBody');el.innerHTML='';
+  const head=document.createElement('div');head.className='read-chapter';head.textContent=ch.title;el.appendChild(head);
+  ch.read.forEach((sec,i)=>{
+    const d=document.createElement('div');d.className='read-sec';
+    d.innerHTML='<h4>📖 '+(i+1)+'. '+sec.h+'</h4><p>'+sec.t+'</p>';
+    el.appendChild(d);
+  });
+  const btn=document.createElement('button');btn.className='read-quiz-btn';
+  btn.innerHTML='🎯 اختبر نفسك — '+ch.qs.length+' أسئلة';
+  btn.onclick=()=>startStudyQuiz(pi,si,bi,ci,ch);el.appendChild(btn);
+  show('studyRead');
+}
+function startStudyQuiz(pi,si,bi,ci,ch){
+  const p=window.STUDY[pi],s=p.subjects[si],b=s.books[bi];
+  studyCtx={key:chKey(pi,si,bi,ci),pi,si,bi,ci,ch,catName:s.name+' · '+b.title,partName:p.name};
+  curCat='study';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
+  const pool=ch.qs.map(q=>({q:q.q,a:q.a,c:q.c,d:q.d||'medium',hint:q.hint||('تأمل في الفصل')}));
+  shuffle(pool);questions=pool;
+  origTimer=set.timer;
+  document.getElementById('gCat').textContent=studyCtx.partName+' — '+studyCtx.catName;
+  replayStudy=()=>startStudyQuiz(pi,si,bi,ci,ch);
+  show('game');showQ();updateLL();
+}
+const origFinish=finish;
+finish=function(){if(studyCtx){finishStudy()}else{origFinish()}};
+function finishStudy(){
+  clearInterval(timer);set.timer=origTimer;saveSet();
+  const ctx=studyCtx,acc=questions.length?Math.round(cor/questions.length*100):0;
+  const stars=acc>=90?3:acc>=70?2:acc>=50?1:0;
+  S.study=S.study||{};S.study[ctx.key]=S.study[ctx.key]||{stars:0,done:false};
+  if(stars>(S.study[ctx.key].stars||0))S.study[ctx.key].stars=stars;
+  S.study[ctx.key].done=true;
+  const reward=Math.floor(score/2)+stars*10;
+  S.coins+=reward;S.totalCoins+=reward;
+  S.games++;S.correct+=cor;S.wrong+=wro;
+  if(streak>S.bestStreak)S.bestStreak=streak;
+  if(score>S.bestScore)S.bestScore=score;
+  if(cor===questions.length){S.perfect++;S.lifelines.hint++}
+  S.xp+=score;
+  let lvup=false;
+  while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;lvup=true}
+  checkAchv();save();updateHome();
+  let em,t;
+  if(acc>=90){em='🏆';t='أداء خرافي!';confetti();sfx('win')}
+  else if(acc>=70){em='🌟';t='أداء رائع!';confetti();sfx('win')}
+  else if(acc>=50){em='👍';t='أداء جيد'}
+  else if(acc>=30){em='💪';t='اقرأ الفصل ثم حاول مجدداً'}
+  else{em='📚';t='صدقني، اقرأ ثم عد! 📖'}
+  document.getElementById('rEmoji').textContent=em;
+  document.getElementById('rTitle').textContent=t;
+  document.getElementById('rScore').textContent=score;
+  document.getElementById('rCor').textContent=cor;
+  document.getElementById('rWro').textContent=wro;
+  document.getElementById('rAcc').textContent=acc+'%';
+  document.getElementById('rCoins').textContent=reward;
+  document.getElementById('rXp').textContent=score;
+  const rs=document.getElementById('rStars');rs.style.display='block';rs.innerHTML='';
+  for(let i=1;i<=3;i++)rs.innerHTML+='<span style="'+(i<=stars?'':'filter:grayscale(1);opacity:.3')+'">⭐</span>';
+  replayStudy=()=>startStudyQuiz(ctx.pi,ctx.si,ctx.bi,ctx.ci,ctx.ch);
+  const prev=studyCtx;studyCtx=null;
+  show('result');
+  updateChStars(prev.key,stars);
+  if(lvup){sfx('lv');showLevelUp(S.level)}
+}
+function updateChStars(key,st){/* keep stars persisted */save();renderStudyFill()}
 </script>
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
