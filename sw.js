@@ -1,8 +1,9 @@
-const CACHE_NAME = 'ahmed-quiz-v8';
+const CACHE_NAME = 'ahmed-quiz-v9';
 const urlsToCache = [
     '/',
     '/index.html',
     '/questions.js',
+    '/study.js',
     '/icons/avatar.jpg',
     '/icons/icon-192.png',
     '/icons/icon-512.png',
