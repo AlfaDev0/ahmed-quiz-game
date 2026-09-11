@@ -4,34 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#6C63FF">
-<title>تحميل لعبة تحدي الذكاء</title>
+<title>تحميل تطبيق تحدي الذكاء</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
-body{background:linear-gradient(160deg,#0F0E17,#1A1932 60%,#2a2150);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.box{max-width:430px;width:100%;text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:32px 26px;backdrop-filter:blur(6px)}
-.ico{font-size:70px}
-h1{font-size:26px;font-weight:900;margin:10px 0 6px;background:linear-gradient(135deg,#6C63FF,#FF6B6B);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-p.sub{color:#A7A9BE;font-size:14px;margin-bottom:22px}
-.big-btn{display:block;text-decoration:none;background:linear-gradient(135deg,#6C63FF,#5A52D5);color:#fff;font-weight:900;font-size:18px;padding:16px;border-radius:16px;margin-bottom:12px;box-shadow:0 8px 25px rgba(108,99,255,.45);transition:.2s}
-.big-btn:hover{transform:translateY(-2px)}
-.sec-btn{display:block;text-decoration:none;background:#232246;border:1px solid #3a3a6b;color:#fff;font-weight:700;font-size:14px;padding:13px;border-radius:14px;margin-bottom:20px}
-.count{font-size:13px;color:#FFD700;margin-top:4px}
-.qr{background:#fff;border-radius:16px;padding:10px;display:inline-block;margin:6px 0 16px}
-.qr img{width:200px;height:200px;display:block;border-radius:8px}
+body{background:linear-gradient(160deg,#0F0E17,#1A1932 60%,#2a2150);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.box{max-width:410px;width:100%;text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:30px 22px;backdrop-filter:blur(6px)}
+.ico{font-size:64px;margin-bottom:4px}
+h1{font-size:26px;font-weight:900;margin:8px 0 4px;background:linear-gradient(135deg,#6C63FF,#FF6B6B);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+p.sub{color:#A7A9BE;font-size:14px;margin-bottom:20px}
+.dl-btn{display:block;text-decoration:none;background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;font-weight:900;font-size:19px;padding:18px;border-radius:16px;margin:6px 0 16px;box-shadow:0 8px 25px rgba(76,175,80,.45);transition:.2s;border:none;cursor:pointer;width:100%;font-family:inherit}
+.dl-btn:hover{transform:translateY(-2px)}
+.info{background:rgba(0,0,0,.25);border-radius:14px;padding:16px 16px 12px;font-size:14px;line-height:1.9;text-align:right;margin:14px 0 6px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.step:last-child{border-bottom:none}
+.step .n{background:#6C63FF;color:#fff;min-width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;margin-top:4px}
+.step b{color:#FFD700}
+.step span{font-size:13px}
+.warn{margin-top:8px;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);border-radius:10px;padding:10px 12px;font-size:12px;color:#FFB4A8;text-align:right;line-height:1.8}
+.foot{margin-top:14px;color:#A7A9BE;font-size:11px}
 </style>
 </head>
 <body>
 <div class="box">
   <div class="ico">🧠</div>
   <h1>تحدي الذكاء</h1>
-  <p class="sub">جارٍ فتح اللعبة وتثبيتها على جهازك...</p>
-  <a class="big-btn" href="index.html" id="goBtn">📲 فتح وتثبيت اللعبة</a>
-  <a class="sec-btn" href="game-files.zip" download>📦 ملفات اللعبة (ZIP)</a>
-  <div class="qr"><img src="icons/qr.png" alt="QR"></div>
-  <p class="count">سيتم فتح اللعبة تلقائياً خلال ١ ثانية...</p>
+  <p class="sub">تطبيق أندرويد حقيقي — شغال بدون إنترنت</p>
+
+  <button class="dl-btn" onclick="startDownload()">📲 تحميل التطبيق الآن</button>
+
+  <div class="info">
+    <div class="step"><div class="n">1</div><div><b>حمّل الملف</b><br><span>دوس الزر فوق، الملف بينزل على طول</span></div></div>
+    <div class="step"><div class="n">2</div><div><b>افتح الملف</b><br><span>من إشعار التحميل أو من مجلد "التنزيلات"</span></div></div>
+    <div class="step"><div class="n">3</div><div><b>دوس "تثبيت"</b><br><span>وخلاص — التطبيق يظهر على شاشتك 🎉</span></div></div>
+  </div>
+
+  <div class="warn">⚠️ إذا طلب منك "السماح بالتثبيت من هذا المصدر" — فعّله، دي طريقة طبيعية لأي APK خارج جوجل بلاي.</div>
+
+  <div class="foot">الحجم 264KB فقط • تشتغل أوفلاين 100%<br>النسخة v1.0</div>
 </div>
 <script>
-setTimeout(function(){location.href='index.html'},1000);
+var APK_URL="https://github.com/AlfaDev0/ahmed-quiz-game/releases/download/v1.0/tahadi-al-zaka.apk";
+function startDownload(){
+  var a=document.createElement('a');
+  a.href=APK_URL;
+  a.download='تحدي-الذكاء.apk';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 </script>
 </body>
 </html>
