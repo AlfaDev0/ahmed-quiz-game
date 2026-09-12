@@ -674,7 +674,7 @@ function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
 const CAT_NAMES={culture:'الثقافة العامة',math:'الرياضيات',logic:'المنطق والذكاء',language:'اللغة العربية',science:'العلوم',speed:'تحدي السرعة',english:'الإنجليزية',history:'التاريخ',geography:'الجغرافيا',biology:'الأحياء',chemistry:'الكيمياء',physics:'الفيزياء',football:'كرة القدم',mixed:'الاختبار الشامل'};
-let curCat=null,questions=[],qi=0,score=0,cor=0,wro=0,streak=0,timer=null,tLeft=0,answered=false,doubleMode=false,origTimer=20,dailyMode=false,curQ=null,diffFilter='',chScope=null;
+let curCat=null,questions=[],qi=0,score=0,cor=0,wro=0,streak=0,timer=null,tLeft=0,answered=false,doubleMode=false,origTimer=20,dailyMode=false,curQ=null,diffFilter='',chScope=null,startCoins=0;
 const usedLL={fifty:false,skip:false,hint:false,double:false};
 var studyCtx=null,replayStudy=null,_studyPi=0,_studySi=0,aiCtx=null;
 
@@ -763,6 +763,7 @@ function checkDaily(){
 /* ================= GAME ================= */
 function startGame(cat,daily){
   curCat=cat;dailyMode=!!daily;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
   let pool=[...(QUESTIONS[cat]||[])];
   if(cat==='mixed'){pool=[];Object.keys(QUESTIONS).forEach(k=>pool.push(...QUESTIONS[k]))}
@@ -951,7 +952,7 @@ function finish(){
   document.getElementById('rCor').textContent=cor;
   document.getElementById('rWro').textContent=wro;
   document.getElementById('rAcc').textContent=acc+'%';
-  document.getElementById('rCoins').textContent=Math.floor(score/2)+(dailyMode?50:0)+extra;
+  document.getElementById('rCoins').textContent=S.coins-startCoins;
   document.getElementById('rXp').textContent=score;
   checkAchv();
   save();updateHome();
@@ -992,8 +993,10 @@ function checkAchv(){
 /* ================= LEADERBOARD ================= */
 function renderLB(){
   const list=document.getElementById('lbList');list.innerHTML='';
+  const tab=(document.querySelector('.lb-tab.active')&&document.querySelector('.lb-tab.active').id)||'ltAll';
+  const selfPts=tab==='ltWeek'?S.weekBest:tab==='ltMonth'?S.monthBest:S.correct*5;
   const players=LEADERBOARD_NAMES.map((p,i)=>{
-    const base=p.self?S.correct*5:50+Math.floor(Math.random()*600);
+    const base=p.self?selfPts:50+Math.floor(Math.random()*600);
     return{...p,pts:base};
   }).sort((a,b)=>b.pts-a.pts);
   players.forEach((p,i)=>{
@@ -1185,6 +1188,7 @@ function startChallenge(scope){
   if(scope==='month'&&S.monthPaid){toast('🏅 أكملت تحدي هذا الشهر!');return}
   chScope=scope;
   curCat='mixed';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
   const pool=[];Object.keys(QUESTIONS).forEach(k=>pool.push(...QUESTIONS[k]));
   shuffle(pool);
@@ -1415,6 +1419,7 @@ function startStudyQuiz(pi,si,bi,ci,ch){
   const p=window.STUDY[pi],s=p.subjects[si],b=s.books[bi];
   studyCtx={key:chKey(pi,si,bi,ci),pi,si,bi,ci,ch,catName:s.name+' · '+b.title,partName:p.name};
   curCat='study';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
   const pool=ch.qs.map(q=>({q:q.q,a:q.a,c:q.c,d:q.d||'medium',hint:q.hint||('تأمل في الفصل'),expl:q.expl}));
   shuffle(pool);questions=pool;
@@ -1432,8 +1437,8 @@ function finishStudy(){
   S.study=S.study||{};S.study[ctx.key]=S.study[ctx.key]||{stars:0,done:false};
   if(stars>(S.study[ctx.key].stars||0))S.study[ctx.key].stars=stars;
   S.study[ctx.key].done=true;
-  const reward=Math.floor(score/2)+stars*10;
-  S.coins+=reward;S.totalCoins+=reward;
+  const bonus=stars*10;
+  S.coins+=bonus;S.totalCoins+=bonus;
   S.games++;S.correct+=cor;S.wrong+=wro;
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
@@ -1454,7 +1459,7 @@ function finishStudy(){
   document.getElementById('rCor').textContent=cor;
   document.getElementById('rWro').textContent=wro;
   document.getElementById('rAcc').textContent=acc+'%';
-  document.getElementById('rCoins').textContent=reward;
+  document.getElementById('rCoins').textContent=S.coins-startCoins;
   document.getElementById('rXp').textContent=score;
   const rs=document.getElementById('rStars');rs.style.display='block';rs.innerHTML='';
   for(let i=1;i<=3;i++)rs.innerHTML+='<span style="'+(i<=stars?'':'filter:grayscale(1);opacity:.3')+'">⭐</span>';
