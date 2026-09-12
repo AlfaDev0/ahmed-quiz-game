@@ -1,9 +1,9 @@
 const fs = require('fs');
 const vm = require('vm');
 
-const html = fs.readFileSync('/home/kali/ahmed-quiz-game/index.html', 'utf8');
-const questionsJS = fs.readFileSync('/home/kali/ahmed-quiz-game/questions.js', 'utf8');
-const studyJS = fs.readFileSync('/home/kali/ahmed-quiz-game/study.js', 'utf8');
+const html = fs.readFileSync(process.env.TEST_INDEX || '/home/kali/ahmed-quiz-game/index.html', 'utf8');
+const questionsJS = fs.readFileSync(process.env.TEST_QUESTIONS || '/home/kali/ahmed-quiz-game/questions.js', 'utf8');
+const studyJS = fs.readFileSync(process.env.TEST_STUDY || '/home/kali/ahmed-quiz-game/study.js', 'utf8');
 
 // extract inline script blocks (non-src)
 const inlineBlocks = [];
