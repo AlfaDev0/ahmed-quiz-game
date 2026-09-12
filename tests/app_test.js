@@ -214,7 +214,7 @@ const t = () => sandbox.window.__dbg;
   const W = sandbox.window;
   ck('no block load errors', blockErrors === 0);
   ck('questions.js loaded (13+ categories)', Object.keys(sandbox.QUESTIONS || {}).length >= 13);
-  ck('study.js loaded (5 parts)', (W.STUDY || []).length === 5);
+  ck('study.js loaded (6 parts)', (W.STUDY || []).length === 6);
 
 // ---- data integrity ----
   let ch = 0, qs = 0, expl = 0, bad = 0;
@@ -233,10 +233,10 @@ const t = () => sandbox.window.__dbg;
       });
     });
   });
-  ck('study exactly 461 chapters', ch === 461);
-  ck('study exactly 3171 questions', qs === 3171);
+  ck('study exactly 539 chapters', ch === 539);
+  ck('study exactly 3713 questions', qs === 3713);
   ck('every chapter has title+read+valid qs', bad === 0);
-  ck('most questions have expl (' + expl + '/3171)', expl >= 3000);
+  ck('most questions have expl (' + expl + '/3713)', expl >= 3500);
 
   // all normal questions valid
   let nbad = 0, nq = 0;
@@ -271,7 +271,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 (function study() {
   sandbox.renderStudyParts(); sandbox.show('study');
   ck('study screen active', t().active() === 'study');
-  ck('five part cards', byId.studyParts.children.length === 5);
+  ck('six part cards', byId.studyParts.children.length === 6);
   sandbox.openStudyPart(0);
   ck('adabi shows 8 subjects', t().active() === 'studyBooks' && byId.studyBooksWrap.children.length === 8);
   const p0 = sandbox.window.STUDY[0];
