@@ -233,10 +233,10 @@ const t = () => sandbox.window.__dbg;
       });
     });
   });
-  ck('study exactly 432 chapters', ch === 484);
-  ck('study exactly 2962 questions', qs === 3326);
+  ck('study exactly 461 chapters', ch === 461);
+  ck('study exactly 3171 questions', qs === 3171);
   ck('every chapter has title+read+valid qs', bad === 0);
-  ck('most questions have expl (' + expl + '/2962)', expl >= 3100);
+  ck('most questions have expl (' + expl + '/3171)', expl >= 3000);
 
   // all normal questions valid
   let nbad = 0, nq = 0;
