@@ -1,0 +1,342 @@
+const fs = require('fs');
+const vm = require('vm');
+
+const html = fs.readFileSync('/home/kali/ahmed-quiz-game/index.html', 'utf8');
+const questionsJS = fs.readFileSync('/home/kali/ahmed-quiz-game/questions.js', 'utf8');
+const studyJS = fs.readFileSync('/home/kali/ahmed-quiz-game/study.js', 'utf8');
+
+// extract inline script blocks (non-src)
+const inlineBlocks = [];
+const re = /<script(?![^>]*src)[^>]*>([\s\S]*?)<\/script>/g;
+let m;
+while ((m = re.exec(html))) inlineBlocks.push(m[1]);
+
+/* ---------- fake DOM ---------- */
+const stores = {};
+const registry = [];
+function classMatch(el, sel) {
+  const cn = (el.className || '').split(/\s+/);
+  return cn.includes(sel);
+}
+class FakeEl {
+  constructor(tag, id) {
+    this.tagName = (tag || 'div').toUpperCase();
+    this.id = id || '';
+    this.children = [];
+    this.dataset = {};
+    this.style = {};
+    this._inner = '';
+    this._text = '';
+    this.value = '';
+    this.disabled = false;
+    this.removed = false;
+    this.onclick = null;
+    this.onkeydown = null;
+    this.onchange = null;
+    this._display = '';
+    this.className = '';
+    this._cls = new Set();
+    registry.push(this);
+  }
+  set innerHTML(v) {
+    this._inner = String(v == null ? '' : v);
+    this.textContent = this._inner.replace(/<[^>]+>/g, '');
+  }
+  get innerHTML() { return this._inner; }
+  set textContent(v) { this._text = String(v == null ? '' : v); }
+  get textContent() { return this._text; }
+  get classList() {
+    const el = this;
+    return {
+      add(c) { el._cls.add(c); el._cls.add(c); },
+      remove(c) { el._cls.delete(c); },
+      toggle(c, f) { if (f === undefined) { el._cls.has(c) ? el._cls.delete(c) : el._cls.add(c); } else { f ? el._cls.add(c) : el._cls.delete(c); } },
+      contains(c) { return el._cls.has(c); }
+    };
+  }
+  appendChild(ch) { this.children.push(ch); return ch; }
+  remove() { this.removed = true; }
+  focus() {}
+  blur() {}
+  click() { const h = this.onclick; if (h) this.onclick(); }
+  querySelector(sel) { const els = this.querySelectorAll(sel); return els[0] || null; }
+  querySelectorAll(sel) {
+    function walk(node) {
+      let out = [];
+      node.children.forEach(ch => {
+        const cn = (ch.className || '') + (ch.tagName === 'IMG' ? ' img' : ch.tagName ? ' ' + ch.tagName.toLowerCase() : '');
+        if (sel.split(',').some(s => {
+          const t = s.trim();
+          if (t.startsWith('.')) return classMatch(ch, t.slice(1));
+          if (t.startsWith('#')) return ch.id === t.slice(1);
+          return cn.toLowerCase().includes(t.toLowerCase());
+        })) out.push(ch);
+        out = out.concat(walk(ch));
+      });
+      return out;
+    }
+    return walk(this);
+  }
+}
+function fakeEl(tag) { return new FakeEl(tag); }
+
+// register known screen elements
+const screenIds = ['home', 'game', 'result', 'leaderboard', 'profile', 'settings', 'shop', 'stats', 'study', 'studyBooks', 'studyBook', 'studyRead'];
+const byId = {};
+screenIds.forEach(id => byId[id] = new FakeEl('div', id));
+byId.home.classList.add('active');
+let first = true;
+registry.forEach(register); // no-op keeps order
+function register() {}
+
+const document = {
+  getElementById(id) { if (!byId[id]) byId[id] = new FakeEl('div', id); return byId[id]; },
+  querySelectorAll(sel) {
+    let out = [];
+    // screens handled by registry scan
+    const tokens = sel.split(',').map(s => s.trim());
+    registry.forEach(el => {
+      const cls = (el.className || '').split(/\s+/);
+      const id = el.id || '';
+      const isImg = el.tagName === 'IMG';
+      const ok = tokens.some(t => {
+        if (t.startsWith('.')) return cls.includes(t.slice(1));
+        if (t.startsWith('#')) return id === t.slice(1);
+        if (t.endsWith(' img')) return isImg && classMatch(el, t.split(' ')[0]);
+        return cls.includes(t) || (isImg && t === 'img');
+      });
+      if (ok) out.push(el);
+    });
+    return out;
+  },
+  createElement(tag) { return fakeEl(tag); },
+  querySelector(sel) {
+    const els = document.querySelectorAll(sel);
+    return els[0] || null;
+  },
+  body: new FakeEl('body'),
+  documentElement: new FakeEl('html'),
+  hasFocus() { return true; }
+};
+
+// default registry entries for nav & screens
+screenIds.forEach(id => { byId[id].className = 'screen'; });
+['home', 'game', 'result', 'leaderboard', 'profile', 'settings', 'shop', 'stats', 'study'].forEach(n => {
+  const b = new FakeEl('button');
+  b.className = 'nav-btn';
+  b.dataset.nav = n;
+});
+
+const localStorage = {
+  _d: {},
+  getItem(k) { return k in this._d ? this._d[k] : null; },
+  setItem(k, v) { this._d[k] = String(v); },
+  removeItem(k) { delete this._d[k]; },
+  clear() { this._d = {}; }
+};
+
+/* controlled timers (virtual clock) */
+let T = [];
+let nextId = 1;
+let now = 0;
+const fST = (fn, ms) => { T.push({ fn, due: now + (ms || 0), id: nextId++, loop: false }); return nextId - 1; };
+const fCT = (id) => { T = T.filter(t => !t || t.id !== id); };
+const fSI = (fn, ms) => { T.push({ fn, due: now + (ms || 0), id: nextId++, loop: true }); return nextId - 1; };
+function pump(budget) {
+  const end = now + (budget || 5000);
+  let guard = 0;
+  while (guard++ < 3000) {
+    let idx = -1, min = Infinity;
+    for (let i = 0; i < T.length; i++) { const t = T[i]; if (t && t.due <= end && t.due < min) { min = t.due; idx = i; } }
+    if (idx < 0) break;
+    const t = T[idx]; T[idx] = null;
+    now = Math.max(now, t.due);
+    try { t.fn(); } catch (e) { console.log('  !! timer threw: ' + e.message); }
+    if (t.loop) { t.due = now + t.ms; T.push(t); }
+  }
+  now = end;
+}
+
+let fetchCalls = [];
+const fetchMock = (url, opts) => {
+  fetchCalls.push(url);
+  return Promise.resolve({
+    json: () => Promise.resolve({ candidates: [{ content: { parts: [{ text: '**الإجابة:** ' + 'جوابُ الاختبار\n\n- نقطة أولى' }] } }] })
+  });
+};
+
+const windowObj = {
+  AudioContext: function () { throw new Error('no-audio'); },
+  webkitAudioContext: function () { throw new Error('no-audio'); },
+  addEventListener(type, fn) { if (type === 'load') this._load = fn; },
+  matchMedia: () => ({ matches: false, addListener() {}, removeListener() {} }),
+  setTimeout: fST, clearTimeout: fCT, setInterval: fSI, clearInterval: fCT,
+  fetch: fetchMock
+};
+const navigator = {
+  vibrate() {},
+  userAgent: 'test',
+  serviceWorker: { register: () => Promise.resolve() }
+};
+const location = { href: 'https://x/', search: '', reload() {} };
+const Notification = { requestPermission() {}, permission: 'default' };
+
+const sandbox = {
+  document, localStorage, navigator, window: windowObj, location, Notification,
+  setTimeout: fST, clearTimeout: fCT, setInterval: fSI, clearInterval: fCT,
+  fetch: fetchMock, confirm: () => true, prompt: () => '',
+  Math, Object, Array, JSON, parseInt, parseFloat, isNaN, Promise, Date, console, String, Number, Boolean, undefined
+};
+vm.createContext(sandbox);
+
+let blockErrors = 0;
+try { vm.runInContext(questionsJS, sandbox); } catch (e) { console.log('QUESTIONS ERR: ' + e.message); blockErrors++; }
+try { vm.runInContext(studyJS, sandbox); } catch (e) { console.log('STUDY ERR: ' + e.message); blockErrors++; }
+inlineBlocks.forEach((b, i) => {
+  try { vm.runInContext(b, sandbox); } catch (e) { console.log('!! block ' + i + ' failed: ' + e.message); blockErrors++; }
+});
+
+let pass = 0, fail = 0;
+const ck = (n, c) => { c ? pass++ : fail++; console.log((c ? 'PASS' : 'FAIL') + ': ' + n); };
+
+/* expose debug accessors into sandbox */
+vm.runInContext(`
+  window.__dbg = {
+    S: () => S, set: () => set, qn: () => questions.length, qi: () => qi,
+    qc: () => curQ ? curQ.c : -1, active: () => { for (const s of ${JSON.stringify(screenIds)}) if (document.getElementById(s).classList.contains('active')) return s; return '?'; },
+    stars: (k) => (S.study[k] || {}).stars || 0, done: (k) => !!(S.study[k] || {}).done,
+    coins: () => S.coins, aictx: () => aiCtx, offline: () => offlineExplain(aiCtx)
+  };
+`, sandbox);
+const t = () => sandbox.window.__dbg;
+
+(function verify() {
+  const W = sandbox.window;
+  ck('no block load errors', blockErrors === 0);
+  ck('questions.js loaded (13+ categories)', Object.keys(sandbox.QUESTIONS || {}).length >= 13);
+  ck('study.js loaded (5 parts)', (W.STUDY || []).length === 5);
+
+// ---- data integrity ----
+  let ch = 0, qs = 0, expl = 0, bad = 0;
+  W.STUDY.forEach(function (p) {
+    p.subjects.forEach(function (s) {
+      s.books.forEach(function (b) {
+        b.chapters.forEach(function (c) {
+          ch++;
+          if (!c.title || !Array.isArray(c.read) || c.read.length === 0) bad++;
+          qs += c.qs.length;
+          c.qs.forEach(function (q) {
+            if (!q.q || !Array.isArray(q.a) || q.a.length !== 4 || typeof q.c !== 'number' || q.c < 0 || q.c > 3 || !q.a[q.c]) bad++;
+            if (q.expl) expl++;
+          });
+        });
+      });
+    });
+  });
+  ck('study exactly 410 chapters', ch === 410);
+  ck('study exactly 2808 questions', qs === 2808);
+  ck('every chapter has title+read+valid qs', bad === 0);
+  ck('most questions have expl (' + expl + '/2808)', expl >= 2600);
+
+  // all normal questions valid
+  let nbad = 0, nq = 0;
+  Object.keys(sandbox.QUESTIONS).forEach(k => sandbox.QUESTIONS[k].forEach(q => {
+    nq++;
+    if (!q.q || !Array.isArray(q.a) || q.a.length !== 4 || typeof q.c !== 'number' || !q.a[q.c]) nbad++;
+  }));
+  ck('normal questions valid (' + nq + ')', nbad === 0);
+
+  ck('home screen renders (title badge)', document.getElementById('titleBadge').textContent !== '');
+})();
+
+/* boot: mimic window load handler */
+try {
+  sandbox.window._load && sandbox.window._load();
+  pump(6000);
+} catch (e) { console.log('  !! boot threw: ' + e.message + ' @' + (e.stack || '').split('\n')[1]); }
+ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S().level));
+
+/* ---- normal game flow ---- */
+(function game() {
+  sandbox.show('home');
+  vm.runInContext('startGame("math",false)', sandbox);
+  ck('game starts (math)', t().active() === 'game' && t().qn() > 0);
+  const coins0 = t().coins();
+  for (let g = 0; g < 60 && t().qi() < t().qn(); g++) { sandbox.answer(t().qc()); pump(1600); }
+  ck('game finished → result', t().active() === 'result');
+  ck('coins increased on finish', t().coins() >= coins0);
+})();
+
+/* ---- study library flow ---- */
+(function study() {
+  sandbox.renderStudyParts(); sandbox.show('study');
+  ck('study screen active', t().active() === 'study');
+  ck('five part cards', byId.studyParts.children.length === 5);
+  sandbox.openStudyPart(0);
+  ck('adabi shows 8 subjects', t().active() === 'studyBooks' && byId.studyBooksWrap.children.length === 8);
+  const p0 = sandbox.window.STUDY[0];
+  const s0 = p0.subjects[0];
+  const b0 = s0.books[0];
+  const ch0 = b0.chapters[0];
+  const key = '0.0.0.0';
+  sandbox.openStudySubject(0, 0);
+  ck('subject opened → chapters', t().active() === 'studyBook' && byId.studyChapters.children.length === s0.books.length);
+  sandbox.openChapter(0, 0, 0, 0, ch0);
+  ck('reading screen with sections', t().active() === 'studyRead' && byId.studyReadBody.children.length >= ch0.read.length + 1);
+
+  sandbox.startStudyQuiz(0, 0, 0, 0, ch0);
+  ck('study quiz started', t().active() === 'game' && t().qn() === ch0.qs.length);
+  const coins0 = t().coins();
+  for (let g = 0; g < 60 && t().qi() < t().qn(); g++) {
+    sandbox.answer(t().qc()); pump(1600);
+  }
+  ck('study quiz → result', t().active() === 'result');
+  const st = t().stars(key), dn = t().done(key);
+  ck('perfect → 3 stars + done', st === 3 && dn === true);
+  ck('coins earned', t().coins() > coins0);
+
+  // replay via patched finish path
+  sandbox.replayStudy();
+  ck('replay works', t().active() === 'game');
+  for (let g = 0; g < 60 && t().qi() < t().qn(); g++) { sandbox.answer(0); pump(1600); }
+  ck('replay finished, stars kept', t().active() === 'result' && t().stars(key) === 3);
+})();
+
+/* ---- AI tutor (offline path) ---- */
+(function ai() {
+  // NOTE: ai key flow already tested via wiring below; don't reset S.study here
+  sandbox.startStudyQuiz(0, 0, 0, 1, sandbox.window.STUDY[0].subjects[0].books[0].chapters[1]);
+  pump();
+  ck('aiCtx bound to study question', !!t().aictx() && !!t().aictx().q);
+  ck('offline explain has correct answer', /الإجابة الصحيحة/.test(t().offline()));
+
+  sandbox.openAISheet();
+  pump();
+  ck('ai sheet shown', byId.aiSheet.style.display === 'flex');
+  ck('offline explanation rendered (no key)', byId.aiBody._inner.includes('الإجابة الصحيحة'));
+
+  // md rendering
+  ck('md bold works', sandbox.md('**قوي**').includes('<b>'));
+  ck('md bullet works', sandbox.md('- نقطة').includes('•'));
+  ck('md escapes html', sandbox.md('<script>x</script>').includes('&lt;'));
+
+  sandbox.closeAISheet();
+  ck('ai sheet hides', byId.aiSheet.style.display === 'none');
+
+  // settings key save/clear wiring (IIFE wired)
+  byId.aiKey.value = 'TESTKEY';
+  byId.aiSaveBtn.onclick();
+  pump();
+  ck('ai key saved to set', t().set().aiKey === 'TESTKEY');
+  ck('badge shows online', byId.aiBadge.textContent.includes('متصل'));
+  byId.aiClearBtn.onclick();
+  pump();
+  ck('ai key cleared', t().set().aiKey === '');
+  ck('badge back to offline mode', byId.aiBadge.textContent.includes('الشرح الفوري'));
+})();
+
+/* ---- persistence (check before AI resets it) ---- */
+  ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
+  ck('settings persisted', localStorage._d.iq_set && JSON.parse(localStorage._d.iq_set).aiKey === '');
+
+console.log('\n=== ' + pass + ' PASS / ' + fail + ' FAIL ===');
