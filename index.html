@@ -1298,6 +1298,13 @@ function bindEvents(){
     document.getElementById('studyBackParts').onclick=()=>{renderStudyParts();show('study')};
     document.getElementById('studyBackBooks').onclick=()=>{openStudyPart(window._studyPi);show('studyBooks')};
     document.getElementById('studyBackBook').onclick=()=>{openStudySubject(window._studyPi,window._studySi);show('studyBook')};
+  }else if(navigator.onLine&&!sessionStorage.getItem('iq_studyReload')){
+    sessionStorage.setItem('iq_studyReload','1');
+    setTimeout(()=>location.reload(),300);
+  }else{
+    const sb=document.getElementById('studyBanner');
+    if(sb&&sb.querySelector('.sb-info p'))sb.querySelector('.sb-info p').textContent='تعذر تحميل مكتبة التعلم — تحقق من الإنترنت';
+    if(sb)sb.classList.add('disabled');
   }
   // PWA install
   let defEv;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();defEv=e;showInstall(defEv)});
