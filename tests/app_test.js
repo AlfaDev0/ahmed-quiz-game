@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.10'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.11'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -545,6 +545,16 @@ vm.runInContext('S.weekL=null',sandbox);
 sandbox.renderWeekCard();
 ck('week card shows fresh-week state', (byId.weekCardTxt._inner||'').includes('شطارتك'));
 ck('week card stars empty for fresh week', (byId.weekCardStars._inner||'')==='');
+
+/* ---- study report export ---- */
+ck('report button wired', !!byId.reportBtn && typeof byId.reportBtn.onclick==='function');
+vm.runInContext('window.__rep=buildReportHTML()',sandbox);
+ck('report builds with personal header', (sandbox.window.__rep).includes('تقرير مذاكرتي') && (sandbox.window.__rep).includes('أحمد أيمن فكري'));
+ck('report lists library totals', (sandbox.window.__rep).includes('567 فصل') && (sandbox.window.__rep).includes('3853 سؤال'));
+ck('report has mastery section', (sandbox.window.__rep).includes('إتقاني للمكتبة'));
+vm.runInContext('S.weekL={k:weekKey(),q:10,cor:7,wro:3,coins:33}',sandbox);
+ck('report includes weekly section', (sandbox.buildReportHTML()).includes('شطارتك'));
+ck('report export is safe to invoke', (vm.runInContext('window.__repok=(()=>{try{downloadReport();return true}catch(e){return false}})()',sandbox),!!sandbox.window.__repok));
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
