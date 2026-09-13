@@ -403,6 +403,19 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .cl-item ul{margin:8px 0 0;padding:0;padding-right:18px;font-size:12.5px;line-height:1.9}
 .cl-item li{margin:2px 0}
 .about-foot{border-top:1px solid var(--bg3);margin-top:14px;padding-top:12px;font-size:12px;color:var(--dim);line-height:2}
+.about-ws{margin-top:14px;text-align:center}
+.exam-list{display:flex;flex-direction:column;gap:8px;padding:12px 16px;overflow:auto;max-height:60vh}
+.exam-part{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--bg3);cursor:pointer;text-align:right}
+.exam-part:active{transform:scale(.98)}
+.exam-part .ep-ico{font-size:22px}
+.exam-part b{font-size:14px}
+.exam-part p{font-size:11px;color:var(--dim);margin:0}
+.quest-box{position:relative}
+.speak-btn{position:absolute;bottom:10px;left:10px;width:34px;height:34px;border-radius:50%;border:none;background:var(--bg3);font-size:15px;cursor:pointer;z-index:2}
+.speak-btn:active{transform:scale(.92)}
+.r-exam{margin-top:8px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(0,201,167,.15),rgba(18,134,255,.15));border:1px solid var(--bg3);font-size:13px;text-align:center;line-height:1.9}
+.mastery-tip{margin-top:12px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,107,107,.12));border:1px solid var(--bg3);font-size:13px;line-height:1.8}
+.mastery-tip b{color:#FFD700}
 .about-foot a{color:var(--primary);font-weight:700;text-decoration:none}
 .about-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,201,167,.12);color:#00C9A7;font-weight:800;font-size:11px;border-radius:12px;padding:5px 12px;margin-top:10px}
 
@@ -453,6 +466,15 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         <div class="sb-prog"><div class="sb-fill" id="studyFill"></div></div>
       </div>
       <button class="sb-btn">ادخل</button>
+    </div>
+
+    <div class="study-banner" id="examBanner">
+      <span class="sb-ico">🎓</span>
+      <div class="sb-info">
+        <b>الامتحان الشامل</b>
+        <p>امتحان بكالوريا 2027 وزني من مسارك — درجة جامعة + نجاح/رسوب</p>
+      </div>
+      <button class="sb-btn" id="examBtn">ابدأ</button>
     </div>
 
     <div class="chip-row" id="diffChips">
@@ -511,6 +533,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     </div>
     <div class="quest-box">
       <span class="diff medium" id="diffBadge">متوسط</span>
+      <button class="speak-btn" id="speakQ" title="🔊 استمع للسؤال">🔊</button>
       <div class="quest-text" id="qText">السؤال هنا</div>
     </div>
     <div class="ans-wrap" id="ansWrap"></div>
@@ -540,6 +563,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
           <span class="r-reward">💰 +<span id="rCoins">0</span> عملة</span>
           <span class="r-reward">⭐ +<span id="rXp">0</span> خبرة</span>
         </div>
+        <div class="r-exam" id="rExamStrip" style="display:none"></div>
         <button class="btn-main" id="replayBtn">🔄 إعادة اللعب</button>
         <div class="r-stars" id="rStars" style="display:none"></div>
         <button class="btn-sec" id="homeBtn">🏠 الرئيسية</button>
@@ -694,6 +718,19 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         <button class="ai-close" id="aboutClose">✕</button>
       </div>
       <div class="ai-body" id="aboutBody"></div>
+      <div class="about-ws"><button class="btn-main" id="aboutSeen" style="display:none;min-width:70%">✅ حسناً — عرفت التحديثات</button></div>
+    </div>
+  </div>
+
+  <!-- EXAM PICKER SHEET -->
+  <div class="ai-sheet" id="examSheet" style="display:none">
+    <div class="ai-card">
+      <div class="ai-head">
+        <div class="ai-logo">🎓</div>
+        <div><b>الامتحان الشامل</b><div style="font-size:11px;color:var(--dim)">20 سؤال وزني على نمط بكالوريا 2027 — اختر مسارك</div></div>
+        <button class="ai-close" id="examClose">✕</button>
+      </div>
+      <div class="exam-list" id="examList"></div>
     </div>
   </div>
 
@@ -703,6 +740,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       <div class="ai-head">
         <div class="ai-logo">🤖</div>
         <div><b>المعلم الذكي</b><div style="font-size:11px;color:var(--dim)" id="aiModeNote">جيميني متصل — يشرح ويساعد بذكاء</div></div>
+        <button class="speak-btn" style="position:static" id="ttsAI" title="🔊 استمع لآخر رد">🔊</button>
         <button class="ai-clear" id="aiClear" title="مسح المحادثة">🗑</button>
         <button class="ai-close" id="aiClose">✕</button>
       </div>
@@ -852,7 +890,7 @@ function checkDaily(){
 
 /* ================= GAME ================= */
 function startGame(cat,daily){
-  curCat=cat;dailyMode=!!daily;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  curCat=cat;dailyMode=!!daily;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
   replayStudy=null;studyCtx=null;
   startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
@@ -1180,6 +1218,7 @@ function renderStats(){
     '</div>';
   body.insertAdjacentHTML('beforeend','<div class="st-sec"><h4>📊 أداء التصنيفات</h4>'+catBars()+'</div>');
   body.insertAdjacentHTML('beforeend','<div class="st-sec"><h4>🏅 إنجاز المستوى القادم</h4><div class="st-bar"><div class="st-fill" style="width:'+bar(S.xp,S.level*100)+'%"></div></div><div class="st-row"><span>⭐ '+S.xp+' / '+S.level*100+'</span><span>مستوى '+S.level+'</span></div></div>');
+  body.insertAdjacentHTML('beforeend','<div class="st-sec"><h4>🗺️ إتقان مسارات المكتبة (كفاءتك لكل مسار)</h4>'+masteryHTML()+'<div>'+masteryTip()+'</div></div>');
   function t(ico,l,v){return '<div class="stat-tile"><b>'+v+'</b><span>'+ico+' '+l+'</span></div>'}
   function bar(v,m){return Math.min(100,Math.round(v/m*100))}
   function catBars(){
@@ -1281,7 +1320,7 @@ function startChallenge(scope){
   if(scope==='week'&&S.weekPaid){toast('🥇 أكملت تحدي هذا الأسبوع!');return}
   if(scope==='month'&&S.monthPaid){toast('🏅 أكملت تحدي هذا الشهر!');return}
   chScope=scope;
-  curCat='mixed';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  curCat='mixed';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
   startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
   const pool=[];Object.keys(QUESTIONS).forEach(k=>pool.push(...QUESTIONS[k]));
@@ -1331,7 +1370,7 @@ function bindEvents(){
     startGame('culture',true);
   };
   document.getElementById('exitGame').onclick=()=>{
-    clearInterval(timer);set.timer=origTimer;saveSet();studyCtx=null;show('home');updateHome();checkDaily();
+    clearInterval(timer);set.timer=origTimer;saveSet();studyCtx=null;examMode=false;show('home');updateHome();checkDaily();
   };
   document.getElementById('replayBtn').onclick=()=>{if(replayStudy){replayStudy()}else{startGame(curCat,false)}};
   document.getElementById('homeBtn').onclick=()=>{studyCtx=null;show('home');updateHome();checkDaily()};
@@ -1542,7 +1581,7 @@ function startReviewQuiz(){
   if(studyCtx){studyCtx=null}
   const list=wrongQuestions();
   if(!list.length){S.wrongQs={};save();toast('لا توجد أخطاء — عمل رائع! 🎉');return}
-  curCat='review';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  curCat='review';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
   startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
   shuffle(list);
@@ -1608,7 +1647,7 @@ function openChapter(pi,si,bi,ci,ch){
 function startStudyQuiz(pi,si,bi,ci,ch){
   const p=window.STUDY[pi],s=p.subjects[si],b=s.books[bi];
   studyCtx={key:chKey(pi,si,bi,ci),pi,si,bi,ci,ch,catName:s.name+' · '+b.title,partName:p.name};
-  curCat='study';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  curCat='study';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
   startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
   const pool=ch.qs.map(q=>({q:q.q,a:q.a,c:q.c,d:q.d||'medium',hint:q.hint||('تأمل في الفصل'),expl:q.expl}));
@@ -1618,8 +1657,150 @@ function startStudyQuiz(pi,si,bi,ci,ch){
   replayStudy=()=>startStudyQuiz(pi,si,bi,ci,ch);
   show('game');showQ();updateLL();
 }
+/* ================= FEATURES: EXAM + VOICE + MASTERY + WHATS-NEW ================= */
+let examMode=false,examPi=null;
+function closeExam(){const es=document.getElementById('examSheet');if(es)es.style.display='none'}
+function renderExamList(){
+  const list=document.getElementById('examList');if(!list)return;
+  if(!window.STUDY){list.innerHTML='<p style="color:var(--dim)">المحتوى غير متاح</p>';return}
+  list.innerHTML='';
+  window.STUDY.forEach((p,pi)=>{
+    const b=document.createElement('button');b.className='exam-part';
+    let sub='',tq=0;
+    p.subjects.forEach(s=>{sub+=(sub?' · ':'')+s.name;s.books.forEach(bk=>bk.chapters.forEach(c=>tq+=c.qs.length))});
+    b.innerHTML='<span class="ep-ico">'+p.icon+'</span><div style="flex:1"><b>'+p.name+'</b><p>'+sub+'<br>'+tq.toLocaleString('ar-EG')+' سؤال · 20 سؤال امتحان × 10 درجات</p></div>';
+    b.onclick=()=>startExam(pi);
+    list.appendChild(b);
+  });
+}
+function startExam(pi){
+  if(!window.STUDY||!window.STUDY[pi]){toast('⚠️ هذا المسار غير متاح');return}
+  closeExam();
+  const pool=[];
+  window.STUDY[pi].subjects.forEach(s=>s.books.forEach(bk=>bk.chapters.forEach(c=>c.qs.forEach(q=>{
+    pool.push({q:q.q,a:q.a,c:q.c,d:q.d||'medium',hint:q.hint||('تأمل في الفصل وانتبه للتفاصيل'),expl:q.expl});
+  }))));
+  shuffle(pool);
+  const qs=pool.slice(0,20);
+  curCat='exam';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=true;examPi=pi;
+  startCoins=S.coins;
+  usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
+  questions=qs;origTimer=set.timer;
+  document.getElementById('gCat').textContent='🎓 امتحان بكالوريا — '+window.STUDY[pi].name;
+  replayStudy=()=>startExam(pi);
+  show('game');showQ();updateLL();
+}
+function finishExam(){
+  clearInterval(timer);set.timer=origTimer;saveSet();
+  const acc=questions.length?Math.round(cor/questions.length*100):0;
+  S.games++;S.correct+=cor;S.wrong+=wro;
+  if(streak>S.bestStreak)S.bestStreak=streak;
+  if(score>S.bestScore)S.bestScore=score;
+  if(cor===questions.length){S.perfect++;S.lifelines.hint++}
+  S.xp+=score;
+  let lvup=false;
+  while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;lvup=true}
+  checkAchv();save();updateHome();
+  show('result');
+  document.getElementById('rEmoji').textContent=acc>=60?'🎓':'📚';
+  document.getElementById('rTitle').textContent=acc>=60?'نجحت في الامتحان!':'الامتحان يحتاج مذاكرة';
+  document.getElementById('rScore').textContent=score;
+  document.getElementById('rCor').textContent=cor;
+  document.getElementById('rWro').textContent=wro;
+  document.getElementById('rAcc').textContent=acc+'%';
+  document.getElementById('rCoins').textContent='0';
+  document.getElementById('rXp').textContent=score;
+  const rs=document.getElementById('rStars');if(rs)rs.style.display='none'&&(rs.innerHTML='');
+  const grade=acc>=90?'A':acc>=75?'B':acc>=60?'C':acc>=45?'D':'F';
+  const part=window.STUDY&&window.STUDY[examPi]?window.STUDY[examPi]:null;
+  const strip=document.getElementById('rExamStrip');
+  if(strip){
+    strip.style.display='block';
+    strip.innerHTML='🏫 <b>'+((part?part.name:'الامتحان'))+'</b> — الدرجة: <b>'+score+'</b> / <b>'+(questions.length*10)+'</b> ('+acc+'% من 200 المجموع الوزني)<br>'+
+      'التقدير: <b>'+grade+'</b> · '+(acc>=60?'✅ نجحت':'❌ تحتاج مذاكرة أكثر')+
+      '<br>المعامل: '+questions.length+' سؤال × 10 درجات — يكمل '+S.level+'🆙 خبرتك';
+  }
+  if(acc>=60)confetti();
+  examMode=false;
+  if(lvup){sfx('lv');showLevelUp(S.level)}
+}
+function speak(text){
+  try{
+    if(!text||!('speechSynthesis' in window))return;
+    window.speechSynthesis.cancel();
+    const u=new window.SpeechSynthesisUtterance(String(text));
+    u.lang='ar-SA';u.rate=0.92;u.pitch=1;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+function speakQuestion(){
+  if(!curQ)return;
+  const q=curQ,ltrs=['أ','ب','ج','د'];
+  speak(q.q+' . الخيارات: '+q.a.map((a,i)=>ltrs[i]+'- '+a).join(' ، '));
+}
+function speakLastAi(){
+  const last=document.querySelector('#aiChats .ai-b:not(.me) .bub');
+  if(last)speak(last.textContent);
+}
+function masteryHTML(){
+  let h='',T=0,G=0;
+  if(!window.STUDY)return '<p style="color:var(--dim)">المكتبة غير متاحة</p>';
+  window.STUDY.forEach((p,pi)=>{
+    let pt=0,pg=0;
+    p.subjects.forEach((s,si)=>s.books.forEach((bk,bi)=>bk.chapters.forEach((c,ci)=>{
+      pt+=3;const st=S.study&&S.study[chKey(pi,si,bi,ci)]?S.study[chKey(pi,si,bi,ci)].stars:0;pg+=st;
+    })));
+    const pct=pt?Math.round(pg/pt*100):0;T+=pt;G+=pg;
+    h+='<div class="st-row"><span>'+p.icon+' '+p.name+'</span><span>'+pct+'% · '+pg+'/'+pt+' ⭐</span></div><div class="st-bar"><div class="st-fill" style="width:'+pct+'%"></div></div>';
+  });
+  const tot=T?Math.round(G/T*100):0;
+  h='<div class="st-row"><span>🧭 إجمالي المكتبة</span><span>'+tot+'% · '+G+'/'+T+' ⭐ (من أقصى 3 لكل فصل)</span></div><div class="st-bar"><div class="st-fill" style="width:'+tot+'%"></div></div>'+h;
+  return h;
+}
+function masteryTip(){
+  if(!window.STUDY)return '';
+  let best=null,total=0,done=0;
+  window.STUDY.forEach((p,pi)=>p.subjects.forEach((s,si)=>{
+    let t=0,g=0;
+    s.books.forEach((bk,bi)=>bk.chapters.forEach((c,ci)=>{const k=chKey(pi,si,bi,ci);t+=3;g+=(S.study&&S.study[k]?S.study[k].stars:0)}));
+    total+=t;done+=g;
+    const v=Math.round((t?g/t:0)*100);
+    if(!best||v<best.v)best={v:v,name:s.name,p:p.name,chapters:t/3};
+  }));
+  if(done===0)return '<div class="mastery-tip">🌱 لم تختبر بعد — اختر فصلًا من أي مسار واختمه بامتحان المكتبة لتظهر لوحة الإتقان.</div>';
+  if(total>0&&done/total>=1)return '<div class="mastery-tip">🏆 <b>إتقان كامل!</b> مبروك — أتقنت كل فصول المكتبة بنجوم كاملة.</div>';
+  if(!best)return '';
+  return '<div class="mastery-tip">🔎 <b>نصيحة المذاكرة:</b> ركّز على مادة <b>'+best.name+'</b> في مسار <b>'+best.p+'</b> — نسبة إتقانك فيها '+best.v+'% فقط ('+best.chapters+' فصل). أعد قراءة الفصول واختم كل فصل بإختباره.</div>';
+}
+function markSeenAbout(){
+  S.lastSeenVer=SW_BUILD;save();
+  const sh=document.getElementById('aboutSheet');if(sh)sh.style.display='none';
+  const sn=document.getElementById('aboutSeen');if(sn)sn.style.display='none';
+  const cl=document.getElementById('aboutClose');if(cl)cl.style.display='';
+}
+function maybeShowWhatsNew(){
+  if(S.lastSeenVer===SW_BUILD)return false;
+  openAbout();
+  const sn=document.getElementById('aboutSeen');if(sn)sn.style.display='block';
+  const cl=document.getElementById('aboutClose');if(cl)cl.style.display='none';
+  return true;
+}
+(function(){
+  const eb=document.getElementById('examBtn');
+  if(eb)eb.onclick=()=>{renderExamList();const es=document.getElementById('examSheet');if(es)es.style.display='flex'};
+  const ec=document.getElementById('examClose');if(ec)ec.onclick=closeExam;
+  const es2=document.getElementById('examSheet');if(es2)es2.onclick=e=>{if(e.target.id==='examSheet')closeExam()};
+  const sq=document.getElementById('speakQ');if(sq)sq.onclick=speakQuestion;
+  const ta=document.getElementById('ttsAI');if(ta)ta.onclick=speakLastAi;
+  const ssn=document.getElementById('aboutSeen');if(ssn)ssn.onclick=markSeenAbout;
+  setTimeout(()=>{
+    try{
+      if(typeof maybeShowWhatsNew==='function'&&maybeShowWhatsNew())toast('🆕 تحديثات جديدة! افتح قسم ما الجديد');
+    }catch(e){console.error(e)}
+  },2600);
+})();
 const origFinish=finish;
-finish=function(){if(studyCtx){finishStudy()}else{origFinish()}};
+finish=function(){if(studyCtx){finishStudy()}else if(examMode){finishExam()}else{origFinish()}};
 function finishStudy(){
   clearInterval(timer);set.timer=origTimer;saveSet();
   const ctx=studyCtx,acc=questions.length?Math.round(cor/questions.length*100):0;
@@ -1810,8 +1991,10 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.0',SW_BUILD='v24';
+const APP_VERSION='1.3.1',SW_BUILD='v25';
 const CHANGES=[
+  {v:'v25 — مزايا الشركة الكاملة',d:'13/9/2026',items:['الامتحان الشامل: امتحان بكالوريا وزني من مسارك (20 سؤال × 10 درجات) مع تقدير ونجاح/رسوب','استمع للسؤال ولرد المعلم الذكي بالعربية 🔊 (بدون إنترنت)','نافذة "ما الجديد" تفتح تلقائياً بعد كل إصدار','لوحة إتقان المسارات في الإحصائيات مع نصيحة لأهم مادة تركز عليها']},
+  {v:'v24 — خلاصة الشركة الإصدار',d:'13/9/2026',items:['شاشة عن التطبيق ببياناتك وسجل التحديثات الكامل','زر فحص التحديث يتحقق حيًا من أحدث إصدار على GitHub','توقيع AlfaDev والخصوصية ورابط الاقتراحات']},
   {v:'v23 — المعلم الذكي الكامل',d:'13/9/2026',items:['واجهة محادثة بفقاعات مع تنسيق كامل للردود','سياق تلقائي للسؤال الحالي أو الفصل الذي تقرأه','4 أوامر سريعة: شرح • سؤال مشابه • معلومة ذهبية • تلخيص الفصل','نموذج محلّي ذكي يعمل بدون إنترنت وبدون مفتاح','زر عائم 🤖 متاح من كل الشاشات']},
   {v:'v22 — مراجعة أخطائي',d:'12/9/2026',items:['تسجيل تلقائي لكل سؤال أخطأت فيه أو انتهى وقته','وضع تدريبي خاص يعيدك لأسئلة أخطائك','يُحذف السؤال من القائمة عند إتقانه']},
   {v:'v21 — بحث ومتابعة',d:'12/9/2026',items:['بحث فوري في كل المكتبة (567 فصلاً)','زر متابعة الدراسة يوصلك لآخر فصل']},

@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.0'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.1'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -381,6 +381,38 @@ sandbox.openAbout();
 ck('about sheet opens', byId.aboutSheet.style.display === 'flex');
 byId.aboutClose.onclick();
 ck('about sheet closes', byId.aboutSheet.style.display === 'none');
+
+/* ---- whats-new banner ---- */
+t().S().lastSeenVer='';
+ck('whats-new banner opens when new version', sandbox.maybeShowWhatsNew()===true);
+ck('banner shows confirm button', byId.aboutSeen.style.display==='block');
+sandbox.markSeenAbout();
+ck('markSeen saves version + closes', (t().S().lastSeenVer||'').startsWith('v') && byId.aboutSheet.style.display==='none');
+ck('no banner when version seen', sandbox.maybeShowWhatsNew()===false);
+byId.aboutClose.style.display='none';
+
+/* ---- exam mode ---- */
+byId.examBtn.onclick();
+ck('exam picker opens', byId.examSheet.style.display==='flex');
+ck('exam picker lists tracks', byId.examList.children.length>=6);
+byId.examClose.onclick();
+ck('exam picker closes', byId.examSheet.style.display==='none');
+sandbox.startExam(0);
+ck('exam starts with weighted questions', byId.gCat.textContent.includes('امتحان') && t().qn()===20);
+for(let g=0;g<40&&t().qi()<t().qn();g++){sandbox.answer(t().qc());pump(1600)}
+ck('exam finishes with grade strip', byId.rExamStrip.style.display==='block' && byId.rExamStrip._inner.includes('التقدير'));
+
+/* ---- voice ---- */
+ck('speak is available', typeof sandbox.speak==='function');
+let threw=false;try{sandbox.speakQuestion()}catch(e){threw=true}
+ck('speakQuestion safe (no SS in vm)', !threw);
+
+/* ---- mastery ---- */
+Object.assign(t().S(),{games:0,correct:0,wrong:0,xp:0,level:1,study:{},catStats:{},lifelines:{fifty:1,skip:0,hint:1,double:0},playedCats:[],totalCoins:0,bestStreak:0,bestScore:0,perfect:0,coins:0});
+vm.runInContext('window.__mh={h:masteryHTML(),t:masteryTip()}',sandbox);
+ck('mastery board builds', sandbox.window.__mh.h.includes('إجمالي المكتبة') && sandbox.window.__mh.h.includes('0%'));
+ck('mastery tip shows when empty', sandbox.window.__mh.t.includes('لم تختبر بعد'));
+ck('mastery tip gives focus suggestion', sandbox.window.__mh.t.length>10);
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
