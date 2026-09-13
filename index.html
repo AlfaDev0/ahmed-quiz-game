@@ -538,6 +538,12 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       <button class="sb-btn" id="pomoBtn">افتح</button>
     </div>
 
+    <div class="chal" id="weekCard">
+      <span class="chal-ico">🏆</span>
+      <div class="chal-info"><b>شطارتك الأسبوعية</b><p id="weekCardTxt"></p></div>
+      <span class="chal-ico" id="weekCardStars" style="font-size:15px"></span>
+    </div>
+
     <div class="chip-row" id="diffChips">
       <button class="chip active" data-d="">الكل</button>
       <button class="chip" data-d="easy">سهل</button>
@@ -749,7 +755,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:4px">
         <span class="set-label">📦 عن التطبيق</span>
-        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.9</span>
+        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.10</span>
       </div>
       <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
       <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
@@ -787,7 +793,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="ai-card">
       <div class="ai-head">
         <div class="ai-logo">📦</div>
-        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.9</div></div>
+        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.10</div></div>
         <button class="ai-close" id="aboutClose">✕</button>
       </div>
       <div class="ai-body" id="aboutBody"></div>
@@ -898,10 +904,10 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 <script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false};
 const SETDEF={sound:true,vib:true,dark:true,notif:false,qCount:20,timer:20,aiKey:''};
 let S,set;
-function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false}
+function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
 function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=true;if(typeof set.notif!=='boolean')set.notif=false}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
@@ -988,6 +994,7 @@ function updateHome(){
   if(typeof renderStudyFill==='function')renderStudyFill();
   if(typeof renderStudyPlan==='function')renderStudyPlan();
   if(typeof renderHomeNote==='function')renderHomeNote();
+  if(typeof renderWeekCard==='function')renderWeekCard();
 }
 function checkDaily(){
   const today=new Date().toDateString();
@@ -1070,11 +1077,12 @@ function answer(i){
     if(streak>=3)p+=5;if(streak>=5)p+=10;if(streak>=10)p+=25;
     score+=p;
     const cg=Math.floor(p/2);S.coins+=cg;S.totalCoins+=cg;
+    weekTick('cor',cg);
     toast('✅ صحيح! +'+p+' نقطة');
     if(curCat==='review'){if(S.wrongQs){delete S.wrongQs[qid(q)];save()}}
     sfx('ok');vibe(40);
   }else{
-    wro++;streak=0;
+    wro++;streak=0;weekTick('wro',0);
     btns[+i].classList.add('wrong');
     recordWrong(q);
     toast('❌ خطأ! الجواب: '+q.a[q.c]);
@@ -1085,7 +1093,7 @@ function answer(i){
 }
 function timeUp(){
   if(answered)return;
-  answered=true;wro++;streak=0;
+  answered=true;wro++;streak=0;weekTick('wro',0);
   const q=curQ,btns=document.querySelectorAll('.ans-btn');
   btns.forEach(b=>{b.classList.add('disabled');if(+b.dataset.i===q.c)b.classList.add('correct')});
   toast('⏰ انتهى الوقت! الجواب: '+q.a[q.c]);
@@ -2240,6 +2248,31 @@ function renderHomeNote(){
   }
   el.textContent='رسالة منّي اليوم: '+ROT[(new Date()).getDate()%ROT.length];
 }
+function weekTick(kind,cg){
+  if(!S.weekL||S.weekL.k!==weekKey())S.weekL={k:weekKey(),q:0,cor:0,wro:0,coins:0};
+  S.weekL.q++;
+  if(kind==='cor')S.weekL.cor++;
+  else if(kind==='wro')S.weekL.wro++;
+  if(cg)S.weekL.coins+=cg;
+  save();
+}
+function weekGrade(w){
+  if(!w||w.q===0)return {stars:0,em:'',acc:0,line:'شطارتك لسه بتتكوّن — ابدأ من أول سؤال 🚀'};
+  const acc=Math.round(w.cor/(w.q||1)*100);
+  const score=Math.min(5,Math.floor(w.cor/25)+1),big=acc>=80,mid=w.cor>=15,all=w.cor>=5;
+  const em='⭐'.repeat(score);
+  const line=big||mid||all
+    ?'جاوبت محترم — <b>'+w.cor+' صحيح</b> من '+w.q+' ('+acc+'%) · '+w.coins+' عملة 💰'
+    :'لسه بدري.. بس كل عدّادة بتبدأ من 1 — <b>'+w.cor+' صحيح</b> لحد دلوقتي';
+  return {stars:score,em,acc,line};
+}
+function renderWeekCard(){
+  const el=document.getElementById('weekCardTxt');if(!el)return;
+  if(S.weekL&&S.weekL.k!==weekKey())S.weekL=null;
+  const w=S.weekL,g=weekGrade(w),stars=document.getElementById('weekCardStars');
+  el.innerHTML=g.line;
+  if(stars)stars.innerHTML=g.em||'';
+}
 var quickMode=false;
 function quickPool(){
   const pool=[],weak=[];
@@ -2508,8 +2541,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.9',SW_BUILD='v32';
+const APP_VERSION='1.3.10',SW_BUILD='v33';
 const CHANGES=[
+  {v:'v33 — شطارتك الأسبوعية',d:'13/9/2026',items:['بطاقة «شطارتك» على الرئيسية بتلخص أسبوعك: إجاباتك ونجاحك وعملاتك','نجمات ⭐ من 1 إلى 5 وفق مجهودك — والبطاقة بتتحسب يوميًا تلقائيًا','رسالة تشجعك: «كل عدّادة بتبدأ من 1» حتى لو لسه بادئ','أعمالك بتتعد بكل الإجابات (جرعة يومية، مراجعة، دروس، امتحان)']},
   {v:'v32 — رسالة منّي + دفا المرشد',d:'13/9/2026',items:['رسالة قصيرة مني أنا كل ما تدخل على الرئيسية — تشجعك وتبعث لك همتك وبتتغير يوميًا','لو عندك خطة مذاكرة: الرسالة بتحسبلك فصول النهارده وتقولك «ابدأ بأول واحد بس»','ردود مرشدي الخاص بقت أدفى وأبسط — تشجيع في كل شرح وتلخيص ومعلومة ذهبية','نفس الشكل والتصميم — من غير أي تغيير بصري']},
   {v:'v31 — بـصوتي الشخصي',d:'13/9/2026',items:['هوية التطبيق بقت بـاسمي: «بـقلم أحمد أيمن فكري» في كل مكان بدل الهوية الوهمية','مرشدي الخاص بدل «المعلم الذكي» — كلام دافي وودود معاك','نظّفت كل المسميات التقنية اللي بتحسسك إنك بتتكلم مع آلة','نفس التصميم والشكل بالظبط — ملمسيناهوش خالص']},
   {v:'v30 — تحديث إجباري + إصلاح النشر',d:'13/9/2026',items:['زر «تحديث إجباري» في الإعدادات يمسح كل الكاش ويسجل الخروج من عامل الخدمة ويعيد التحميل — حل نهائي لأي نسخة قديمة','إصلاح جذري في عامل الخدمة: مسارات النشر الآن merge مع مسار المشروع (بدل جذر الحساب) — يصير النشر مستقرًا دائمًا','أي زائر بياخد أقصى نسخة فورًا بعد هذا التحديث']},

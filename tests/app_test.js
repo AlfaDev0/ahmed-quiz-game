@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.9'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.10'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -533,6 +533,18 @@ vm.runInContext('S.plan={days:[{d:window.__td,items:[{pi:0,si:0,bi:0,ci:0}]}],to
 ck('plan day count message', (byId.homeNote.textContent||'').includes('فصل'));
 vm.runInContext('S.plan=null;S.games=5;renderHomeNote()',sandbox);
 ck('rotation encouragement message', /فخور|همة|بعيد|شوية|أسطور/.test(byId.homeNote.textContent||''));
+
+/* ---- weekly shatartk card ---- */
+ck('week card element present', !!byId.weekCardTxt);
+vm.runInContext('S.weekL=null;weekTick("cor",5);weekTick("cor",10);weekTick("wro",0)',sandbox);
+ck('week ledger counts answers', t().S().weekL.q===3 && t().S().weekL.cor===2 && t().S().weekL.coins===15);
+sandbox.renderWeekCard();
+ck('week card shows progress line', (byId.weekCardTxt._inner||'').includes('صحيح'));
+ck('week card stars graded', (byId.weekCardStars._inner||'').includes('⭐'));
+vm.runInContext('S.weekL=null',sandbox);
+sandbox.renderWeekCard();
+ck('week card shows fresh-week state', (byId.weekCardTxt._inner||'').includes('شطارتك'));
+ck('week card stars empty for fresh week', (byId.weekCardStars._inner||'')==='');
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
