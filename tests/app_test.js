@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.3'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.4'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -392,7 +392,7 @@ ck('no banner when version seen', sandbox.maybeShowWhatsNew()===false);
 t().S().lastSeenVerNum=undefined;t().S().lastSeenVer='v26';
 ck('old string version migrates to numeric', sandbox.swSeen()===26 && t().S().lastSeenVerNum===26);
 sandbox.markSeenAbout();
-ck('markSeen persists max version (no re-banner)', t().S().lastSeenVerNum===27 && sandbox.maybeShowWhatsNew()===false);
+ck('markSeen persists max version (no re-banner)', t().S().lastSeenVerNum===sandbox.swVer() && sandbox.maybeShowWhatsNew()===false);
 vm.runInContext('window.__downgrade=maybeShowWhatsNew()',sandbox);
 ck('stale SW cannot re-open banner', sandbox.window.__downgrade===false);
 byId.aboutClose.style.display='none';
@@ -450,6 +450,38 @@ ck('catalog lists all 124 books', (cat.match(/class="dl-book"/g)||[]).length===1
 ck('catalog has part sections', (cat.match(/class="dl-part"/g)||[]).length>=6);
 ck('every catalog book has a name', !cat.includes('📕 </span>'));
 ck('catalog shows per-book exam button', cat.includes('data-t="exams"'));
+
+/* ---- daily study plan ---- */
+vm.runInContext('window.__rem=planRemaining().length',sandbox);
+ck('planRemaining counts remaining chapters', sandbox.window.__rem>=566 && sandbox.window.__rem<=567);
+vm.runInContext('document.getElementById("planExamDate").value="2099-12-31";document.getElementById("planPerDay").value="5";buildPlan()',sandbox);
+const pl=t().S().plan;
+ck('plan builds from remaining chapters', !!pl && pl.total===sandbox.window.__rem && pl.perDay===5);
+ck('plan days are evenly filled', pl.days.length===Math.ceil(pl.total/5) && pl.days.reduce((a,d)=>a+d.items.length,0)===pl.total);
+ck("today's slice exists in plan", pl.days.some(d=>d.d === sandbox.dstr(new Date())));
+sandbox.renderStudyPlan();
+ck('plan widget renders on home', (byId.planTxt._inner||'').includes('اليوم 1 من') && byId.planBanner.style.display==='block');
+ck('plan widget lists today items', (byId.planTxt._inner||'').includes('plan-item'));
+sandbox.openPlan();
+ck('plan sheet opens', byId.planSheet.style.display==='flex');
+ck('plan form has summary', (byId.planBody._inner||'').includes('الخطة الحالية'));
+byId.planClose.onclick();
+ck('plan sheet closes', byId.planSheet.style.display==='none');
+const planFirst=t().S().plan.days[0].items[0];
+vm.runInContext('window.__fk=chKey('+planFirst.pi+','+planFirst.si+','+planFirst.bi+','+planFirst.ci+')',sandbox);
+t().S().study[sandbox.window.__fk]={stars:3,done:true};
+ck('plan progress counts finished chapter', sandbox.planProgress().done>=1);
+sandbox.renderStudyPlan();
+ck('finished plan item marked done', (byId.planTxt._inner||'').includes('plan-item done'));
+vm.runInContext('(function(){S.plan.days.forEach(d=>d.items.forEach(it=>{S.study[chKey(it.pi,it.si,it.bi,it.ci)]={stars:3,done:true}}));return 1})()',sandbox);
+sandbox.renderStudyPlan();
+ck('completed plan celebrates + hides items', (byId.planTxt._inner||'').includes('اكتملت') && t().S().planCelebrated===true);
+sandbox.renderPlanForm();
+ck('plan delete button available', !!byId.planDel);
+if(byId.planDel)byId.planDel.onclick();
+ck('plan can be deleted', t().S().plan===null);
+sandbox.renderStudyPlan();
+ck('plan banner hidden after delete', byId.planBanner.style.display==='none');
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

@@ -283,6 +283,8 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .sb-info{flex:1;z-index:1}
 .sb-info b{font-size:16px}
 .sb-info p{font-size:12px;opacity:.92}
+.sb-txt{font-size:12px;display:flex;flex-direction:column;align-items:flex-start}
+.sb-txt b{font-size:14px}
 .sb-prog{height:5px;background:rgba(255,255,255,.3);border-radius:3px;margin-top:7px;overflow:hidden}
 .sb-fill{height:100%;width:0;background:#fff;border-radius:3px;transition:width .5s}
 .sb-btn{background:#fff;color:#1286FF;border:none;padding:9px 20px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer;z-index:1;flex-shrink:0}
@@ -431,6 +433,14 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .dl-bbtn{border:1px solid var(--bg3);background:none;color:var(--text);border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer}
 .dl-bbtn:hover{background:var(--bg3)}
 .dl-count{font-size:11px;color:var(--dim);text-align:center;padding:4px}
+.plan-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--bg3);border-radius:10px;margin-top:6px;cursor:pointer;text-align:right;background:var(--bg)}
+.plan-item b{flex:1;font-size:12px}
+.plan-item small{font-size:10px;color:var(--dim)}
+.plan-item.done{opacity:.5}
+.plan-item.done b{text-decoration:line-through}
+.plan-form label{font-size:12px;font-weight:700;color:var(--dim);margin-top:10px;display:block}
+.plan-form input{width:100%;box-sizing:border-box;background:var(--bg3);border:none;border-radius:10px;padding:10px 12px;color:var(--text);font-family:inherit;font-size:14px;margin-top:4px;direction:ltr;text-align:left}
+.plan-summary{background:var(--bg);border:1px solid var(--bg3);border-radius:12px;padding:10px 12px;font-size:12px;line-height:2;margin-bottom:6px}
 .about-foot a{color:var(--primary);font-weight:700;text-decoration:none}
 .about-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,201,167,.12);color:#00C9A7;font-weight:800;font-size:11px;border-radius:12px;padding:5px 12px;margin-top:10px}
 
@@ -490,6 +500,15 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         <p>امتحان بكالوريا 2027 وزني من مسارك — درجة جامعة + نجاح/رسوب</p>
       </div>
       <button class="sb-btn" id="examBtn">ابدأ</button>
+    </div>
+
+    <div class="study-banner" id="planBanner" style="display:none">
+      <span class="sb-ico">🗓️</span>
+      <div class="sb-info">
+        <div class="sb-txt" id="planTxt"></div>
+        <div class="sb-prog"><div class="sb-fill" id="planFill" style="width:0%"></div></div>
+      </div>
+      <button class="sb-btn" id="planBtn" style="align-self:flex-end">افتح الخطة</button>
     </div>
 
     <div class="chip-row" id="diffChips">
@@ -703,7 +722,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:4px">
         <span class="set-label">📦 عن التطبيق</span>
-        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.3</span>
+        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.4</span>
       </div>
       <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
       <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
@@ -740,7 +759,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="ai-card">
       <div class="ai-head">
         <div class="ai-logo">📦</div>
-        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.3</div></div>
+        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.4</div></div>
         <button class="ai-close" id="aboutClose">✕</button>
       </div>
       <div class="ai-body" id="aboutBody"></div>
@@ -757,6 +776,18 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         <button class="ai-close" id="examClose">✕</button>
       </div>
       <div class="exam-list" id="examList"></div>
+    </div>
+  </div>
+
+  <!-- PLAN SHEET -->
+  <div class="ai-sheet" id="planSheet" style="display:none">
+    <div class="ai-card">
+      <div class="ai-head">
+        <div class="ai-logo">🗓️</div>
+        <div><b>خطة المذاكرة الذكية</b><div style="font-size:11px;color:var(--dim)">قسّم كل فصول المكتبة حتى موعد الامتحان — وكل يوم يوصلك بفصول اليوم على الرئيسية</div></div>
+        <button class="ai-close" id="planClose">✕</button>
+      </div>
+      <div class="ai-body" id="planBody"></div>
     </div>
   </div>
 
@@ -818,10 +849,10 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 <script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{}};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false};
 const SETDEF={sound:true,vib:true,dark:true,notif:false,qCount:20,timer:20,aiKey:''};
 let S,set;
-function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null}
+function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
 function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=true;if(typeof set.notif!=='boolean')set.notif=false}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
@@ -906,6 +937,7 @@ function updateHome(){
   if(wb)wb.textContent=S.weekPaid?'تم ✓':(S.weekBest>0?'سجل: '+S.weekBest:'ابدأ');
   if(mb)mb.textContent=S.monthPaid?'تم ✓':(S.monthBest>0?'سجل: '+S.monthBest:'ابدأ');
   if(typeof renderStudyFill==='function')renderStudyFill();
+  if(typeof renderStudyPlan==='function')renderStudyPlan();
 }
 function checkDaily(){
   const today=new Date().toDateString();
@@ -1829,6 +1861,9 @@ function maybeShowWhatsNew(){
   const dx=document.getElementById('dlExplain');if(dx)dx.onclick=()=>{dlBook=null;downloadBook('explain')};
   const dq=document.getElementById('dlQuestions');if(dq)dq.onclick=()=>{dlBook=null;downloadBook('questions')};
   const de=document.getElementById('dlExams');if(de)de.onclick=()=>{dlBook=null;downloadBook('exams')};
+  const pc=document.getElementById('planClose');if(pc)pc.onclick=closePlan;
+  const ps=document.getElementById('planSheet');if(ps)ps.onclick=e=>{if(e.target.id==='planSheet')closePlan()};
+  const pb=document.getElementById('planBtn');if(pb)pb.onclick=openPlan;
   setTimeout(()=>{
     try{
       if(typeof maybeShowWhatsNew==='function'&&maybeShowWhatsNew())toast('🆕 تحديثات جديدة! افتح قسم ما الجديد');
@@ -2037,6 +2072,101 @@ function finishStudy(){
   if(lvup){sfx('lv');showLevelUp(S.level)}
 }
 function updateChStars(key,st){/* keep stars persisted */save();renderStudyFill()}
+
+/* ================= DAILY STUDY PLAN ================= */
+function dstr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function planDefaultDate(){const d=new Date(Date.now()+45*86400000);return dstr(d)}
+function planRemaining(){
+  const out=[];
+  if(window.STUDY)window.STUDY.forEach((p,pi)=>p.subjects.forEach((s,si)=>s.books.forEach((b,bi)=>b.chapters.forEach((ch,ci)=>{
+    const k=chKey(pi,si,bi,ci);
+    if(!(S.study&&S.study[k]&&S.study[k].done))out.push({pi,si,bi,ci,title:ch.title,sname:s.name,pname:p.name});
+  }))));
+  return out;
+}
+function planProgress(){
+  if(!S.plan||!S.plan.total)return{done:0,total:0};
+  let done=0;
+  S.plan.days.forEach(day=>day.items.forEach(it=>{
+    const k=chKey(it.pi,it.si,it.bi,it.ci);
+    if(S.study&&S.study[k]&&S.study[k].done)done++;
+  }));
+  return{done,total:S.plan.total};
+}
+function buildPlan(){
+  const examDate=document.getElementById('planExamDate').value;
+  const perDay=Math.max(1,Math.min(10,parseInt(document.getElementById('planPerDay').value,10)||3));
+  if(!examDate){toast('⚠️ اختر تاريخ الامتحان أولاً');return}
+  const rem=planRemaining(),total=rem.length;
+  if(!total){toast('🏆 لا توجد فصول متبقية — ذاكرت كل المكتبة!');return}
+  const from=new Date(),days=[];
+  for(let pos=0;pos<total;pos+=perDay){
+    days.push({d:dstr(new Date(from.getTime()+days.length*86400000)),items:rem.slice(pos,pos+perDay)});
+  }
+  S.plan={created:dstr(from),examDate,perDay,total,days};
+  S.planCelebrated=false;
+  save();
+  try{sfx('coin')}catch(e){}
+  toast('🗓️ خطة '+total+' فصل على '+days.length+' يوم — افتح أي فصل بالضغط عليه');
+  renderPlanForm();renderStudyPlan();
+}
+function renderPlanForm(){
+  const el=document.getElementById('planBody');if(!el)return;
+  let h='<div class="plan-form">';
+  if(S.plan&&S.plan.days){
+    const {done,total}=planProgress();
+    const dleft=Math.max(0,Math.ceil((new Date(S.plan.examDate)-new Date())/86400000));
+    h+='<div class="plan-summary"><b>📊 الخطة الحالية</b><br>'+
+      'موعد الامتحان: <b>'+S.plan.examDate+'</b> • فصول في اليوم: <b>'+S.plan.perDay+'</b><br>'+
+      'أنجزت <b>'+done+'</b> من <b>'+total+'</b> فصل ('+Math.round(done*100/(total||1))+'%) • متبقٍ <b>'+dleft+'</b> يوم حتى الامتحان</div>';
+  }
+  h+='<label>تاريخ الامتحان</label><input type="date" id="planExamDate" value="'+(S.plan?S.plan.examDate:planDefaultDate())+'">'+
+    '<label>فصول في اليوم (1-10)</label><input type="number" id="planPerDay" min="1" max="10" value="'+(S.plan&&S.plan.perDay?S.plan.perDay:3)+'">'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+    '<button class="btn-main" id="planGo" style="flex:1.6">'+(S.plan?'🔄 إعادة بناء الخطة':'🗓️ إنشاء الخطة')+'</button>';
+  if(S.plan)h+='<button class="danger" id="planDel" style="flex:1">🗑️ حذف</button>';
+  h+='</div><div style="font-size:11px;color:var(--dim);margin-top:8px">الخطة تُبنى من الفصول التي لم تُختبر بعد (567 فصلًا بالكل)، وتظهر لك يوميًا على الرئيسية — كل فصل يُفتح بالضغط عليه ويُحتسب مُنجزًا عند إنهاء اختباره.</div></div>';
+  el.innerHTML=h;
+  const go=document.getElementById('planGo');if(go)go.onclick=buildPlan;
+  const dl=document.getElementById('planDel');if(dl)dl.onclick=()=>{S.plan=null;S.planCelebrated=false;save();renderPlanForm();renderStudyPlan();toast('🗑️ تم حذف الخطة')};
+}
+function renderStudyPlan(){
+  const w=document.getElementById('planBanner'),txt=document.getElementById('planTxt'),fill=document.getElementById('planFill'),btn=document.getElementById('planBtn');
+  if(!w||!txt||!fill)return;
+  if(!S.plan||!S.plan.days||!S.plan.days.length){w.style.display='none';return}
+  const today=dstr(new Date());
+  const {done,total}=planProgress();
+  const idx=S.plan.days.findIndex(d=>d.d===today);
+  w.style.display='block';
+  if(fill)fill.style.width=Math.round(done*100/(total||1))+'%';
+  if(btn)btn.onclick=openPlan;
+  if(done>=total){
+    if(!S.planCelebrated){S.planCelebrated=true;save();try{confetti();sfx('win')}catch(e){}try{toast('🏆 اكتملت خطة المذاكرة!')}catch(e){}}
+    txt.innerHTML='<b>🏆 اكتملت خطة المذاكرة!</b><span style="color:var(--dim);font-size:12px">'+total+' فصل في '+S.plan.days.length+' يوم — استمر في الامتحانات الشاملة 👏</span>';
+    return;
+  }
+  if(idx<0){
+    txt.innerHTML='<b>🗓️ خطة المذاكرة</b><span style="color:var(--dim);font-size:12px">انتهت مدة الخطة أو اليوم خارجها — افتحها لبناء خطة جديدة حتى موعد الامتحان</span>';
+    return;
+  }
+  const day=S.plan.days[idx],rows=day.items.map(it=>{
+    const k=chKey(it.pi,it.si,it.bi,it.ci);
+    const dIt=!!(S.study&&S.study[k]&&S.study[k].done);
+    return '<div class="plan-item'+(dIt?' done':'')+'" data-k="'+k+'"><span>'+(dIt?'✅':'📖')+'</span><b>'+dlEsc(it.title)+'</b><small>'+dlEsc(it.sname)+' · '+dlEsc(it.pname)+'</small></div>';
+  }).join('');
+  txt.innerHTML='<span style="font-size:13px"><b>🗓️ اليوم '+(idx+1)+' من '+S.plan.days.length+'</b> — <span style="font-size:11px;color:var(--dim)">'+today+' • عند إنهاء اختبار أي فصل يظهر ✓</span></span>'+(rows||'<span style="color:var(--dim);font-size:12px">لا توجد فصول اليوم — عن يوم راحة 🌴</span>');
+  txt.onclick=e=>{
+    let t=e.target,row=null;
+    while(t){if(t.dataset&&t.dataset.k){row=t;break} t=t.parentElement||null}
+    if(!row||!row.dataset.k||!window.STUDY)return;
+    const a=row.dataset.k.split('.').map(Number);
+    const p=window.STUDY[a[0]],s=p&&p.subjects[a[1]],b=s&&s.books[a[2]],ch=b&&b.chapters[a[3]];
+    if(ch)openChapter(a[0],a[1],a[2],a[3],ch);
+  };
+}
+function openPlan(){renderPlanForm();const sh=document.getElementById('planSheet');if(sh)sh.style.display='flex'}
+function closePlan(){const sh=document.getElementById('planSheet');if(sh)sh.style.display='none'}
+renderStudyPlan();
 </script>
 <script>
 /* ================= AI TUTOR ================= */
@@ -2187,8 +2317,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.3',SW_BUILD='v27';
+const APP_VERSION='1.3.4',SW_BUILD='v28';
 const CHANGES=[
+  {v:'v28 — خطة المذاكرة الذكية',d:'13/9/2026',items:['خطة يومية تلقائية بتقسّم كل الفصول المتبقية لحد موعد امتحانك','بعدجت على الرئيسية بترشحلك فصول اليوم مع شريط تقدم عام','اضغط أي فصل في الخطة — يروّح مباشرة للمذاكرة والاختبار','احتفال ورسالة عند إكمال الخطة بالكامل','إعادة البناء أو الحذف في أي وقت — الخطة تتابع تقدمك الفعلي']},
   {v:'v27 — مركز تنزيل كل كتاب',d:'13/9/2026',items:['كتالوج ظاهر داخل الإعدادات يعرض كل كتب المكتبة مقسّمة بالمسار ثم المادة — كل كتاب بأسمه وعدد فصوله وأسئلته','تنزيل أي كتاب بمفرده: شرح / أسئلة بحلولها / امتحان ورقي مع بطاقة الإجابة','أسماء تلقائية لكل الكتب التي لم تكن مسماة','إصلاح ظهور رسالة "ما الجديد" المتكررة في كل افتتاح']},
   {v:'v26 — مركز التنزيل',d:'13/9/2026',items:['تنزيل كتاب الشرح المكتمل (كل الفصول) كملف واحد بدون إنترنت','تنزيل كتاب الأسئلة بحلولها المرتبة + التلميح والشرح التفصيلي','تنزيل كتب الامتحانات الوزنية (أوراق × 20 سؤال) مع بطاقة الإجابة','اختر النطاق: كل المكتبة أو مسار واحد محدد','كل كتاب بصفحات HTML جاهزة للطباعة والمذاكرة خارج المنصة']},
   {v:'v25 — مزايا الشركة الكاملة',d:'13/9/2026',items:['الامتحان الشامل: امتحان بكالوريا وزني من مسارك (20 سؤال × 10 درجات) مع تقدير ونجاح/رسوب','استمع للسؤال ولرد المعلم الذكي بالعربية 🔊 (بدون إنترنت)','نافذة "ما الجديد" تفتح تلقائياً بعد كل إصدار','لوحة إتقان المسارات في الإحصائيات مع نصيحة لأهم مادة تركز عليها']},
