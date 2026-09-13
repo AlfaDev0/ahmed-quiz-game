@@ -347,7 +347,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
   byId.aiClearBtn.onclick();
   pump();
   ck('ai key cleared', t().set().aiKey === '');
-  ck('badge back to offline mode', byId.aiBadge.textContent.includes('الشرح الفوري'));
+  ck('badge back to offline mode', byId.aiBadge.textContent.includes('اللمسات السريعة'));
 })();
 
 /* ---- mistake review ---- */
@@ -371,12 +371,12 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.7'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.8'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
 ck('changelog rendered (whats new + totals)', aboutHtml.includes('ما الجديد') && aboutHtml.includes('فصل') && aboutHtml.includes('سؤال'));
-ck('about has team + privacy footer', aboutHtml.includes('AlfaDev') && aboutHtml.includes('خصوصيتك'));
+ck('about has personal signature + privacy footer', aboutHtml.includes('أحمد أيمن فكري') && aboutHtml.includes('خصوصيتك'));
 sandbox.openAbout();
 ck('about sheet opens', byId.aboutSheet.style.display === 'flex');
 byId.aboutClose.onclick();

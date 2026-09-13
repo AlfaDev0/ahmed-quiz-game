@@ -595,7 +595,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       <div class="quest-text" id="qText">السؤال هنا</div>
     </div>
     <div class="ans-wrap" id="ansWrap"></div>
-    <button class="ai-btn" id="aiBtn">🤖 اسأل المعلم الذكي</button>
+    <button class="ai-btn" id="aiBtn">🤖 اسأل مرشدك</button>
     <div class="lifelines">
       <button class="ll-btn" id="ll50"><span class="li">50:50</span></button>
       <button class="ll-btn" id="llSkip"><span class="li">⏭️</span></button>
@@ -717,16 +717,16 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         </div>
       </div>
       <div class="set-item vertical">
-        <span class="set-label" id="aiLabel">🤖 المعلم الذكي (جيميني)</span>
-        <span style="font-size:12px;color:var(--dim)">أضف مفتاح جيميني المجاني ليشرح لك أي سؤال ويحله — وإلا يشتغل بالشرح الفوري بدون إنترنت</span>
-        <input type="text" id="aiKey" placeholder="مفتاح Gemini API (اختياري)" style="background:var(--bg3);border:none;border-radius:12px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:13px;direction:ltr;text-align:left" spellcheck="false">
+        <span class="set-label" id="aiLabel">🤖 مرشدك الخاص</span>
+        <span style="font-size:12px;color:var(--dim)">مفتاح اختياري لردود مرشدك مفصلة — بدونه يعمل بلمسات سريعة بدون إنترنت</span>
+        <input type="text" id="aiKey" placeholder="مفتاح اختياري (تفعيل المرشد الكامل)" style="background:var(--bg3);border:none;border-radius:12px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:13px;direction:ltr;text-align:left" spellcheck="false">
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <button class="sec-btn" id="aiSaveBtn" style="flex:1;min-width:120px">💾 حفظ المفتاح</button>
           <button class="sec-btn" id="aiClearBtn" style="flex:1;min-width:120px">🗑️ حذف المفتاح</button>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
-          <span class="ai-badge off" id="aiBadge">وضع: الشرح الفوري</span>
-          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="font-size:12px;color:var(--primary);font-weight:700">احصل على مفتاح مجاني ➜</a>
+          <span class="ai-badge off" id="aiBadge">وضع: اللمسات السريعة</span>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="font-size:12px;color:var(--primary);font-weight:700">إزاي أفعّل مرشدي الكامل؟ ↖</a>
         </div>
       </div>
       <button class="sec-btn" id="exportBtn">📤 تصدير البيانات (نسخة احتياطية)</button>
@@ -746,12 +746,12 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:4px">
         <span class="set-label">📦 عن التطبيق</span>
-        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.7</span>
+        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.8</span>
       </div>
       <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
       <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
       <button class="sec-btn" id="refreshBtn" style="background:#fff2d9;border:0">🧹 تحديث إجباري — مسح الكاش وإعادة التحميل</button>
-      <div style="font-size:11px;color:var(--dim);text-align:center;padding:6px 0 0">AlfaDev 🚀 نطوّر ونحسّن باستمرار</div>
+      <div style="font-size:11px;color:var(--dim);text-align:center;padding:6px 0 0">💛 صُنع بحب وصراحة — بـقلم أحمد أيمن فكري</div>
     </div>
   </div>
 
@@ -784,7 +784,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="ai-card">
       <div class="ai-head">
         <div class="ai-logo">📦</div>
-        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.7</div></div>
+        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.8</div></div>
         <button class="ai-close" id="aboutClose">✕</button>
       </div>
       <div class="ai-body" id="aboutBody"></div>
@@ -842,7 +842,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="ai-card">
       <div class="ai-head">
         <div class="ai-logo">🤖</div>
-        <div><b>المعلم الذكي</b><div style="font-size:11px;color:var(--dim)" id="aiModeNote">جيميني متصل — يشرح ويساعد بذكاء</div></div>
+        <div><b>مرشدك الخاص</b><div style="font-size:11px;color:var(--dim)" id="aiModeNote">يرافقك حتى امتحانك — يشرح ويشجع ويفضفض</div></div>
         <button class="speak-btn" style="position:static" id="ttsAI" title="🔊 استمع لآخر رد">🔊</button>
         <button class="ai-clear" id="aiClear" title="مسح المحادثة">🗑</button>
         <button class="ai-close" id="aiClose">✕</button>
@@ -889,7 +889,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 
 </div>
 
-<button class="ai-fab" id="aiFab" title="المعلم الذكي">🤖</button>
+<button class="ai-fab" id="aiFab" title="مرشدك الخاص">🤖</button>
 <div class="toast" id="toast"></div>
 <script src="questions.js"></script>
 <script src="study.js"></script>
@@ -1978,7 +1978,7 @@ function dlStats(){
     nd.sos.forEach(so=>so.books.forEach(b=>{chn+=b.bk.chapters.length;b.bk.chapters.forEach(c=>qn+=(c.qs||[]).length)}));
     return nd.pname;
   });
-  return '<footer class="foot">📁 النطاق: '+names.join(' + ')+' • '+'<b>'+chn+' فصل</b> • <b>'+qn+' سؤال</b> • صُنع في بكالوريا 2027 بواسطة AlfaDev 🚀</footer>';
+  return '<footer class="foot">📁 النطاق: '+names.join(' + ')+' • '+'<b>'+chn+' فصل</b> • <b>'+qn+' سؤال</b> • صُنع في بكالوريا 2027 بـقلم أحمد أيمن فكري 💛</footer>';
 }
 function dlEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function dlShell(title,body){
@@ -2339,8 +2339,8 @@ function aiKey(){return (set&&set.aiKey)||''}
 function renderAI(){
   const k=aiKey(),inp=document.getElementById('aiKey'),badge=document.getElementById('aiBadge'),note=document.getElementById('aiModeNote');
   if(inp)inp.value=k;
-  if(badge){badge.textContent=k?'وضع: جيميني متصل 🟢':'وضع: الشرح الفوري';badge.classList.toggle('off',!k)}
-  if(note)note.textContent=k?'جيميني متصل — يشرح ويساعد بذكاء':'الشرح الفوري — أضف مفتاحاً في الإعدادات لتشغيل جيميني';
+  if(badge){badge.textContent=k?'وضع: مرشدك متصل 🟢':'وضع: اللمسات السريعة';badge.classList.toggle('off',!k)}
+  if(note)note.textContent=k?'مرشدك متصل — يرد عليك بشرح كامل':'اللمسات السريعة — بدون إنترنت ولا مفتاح';
 }
 function md(t){
   let s=String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -2389,7 +2389,7 @@ function openAISheet(){
   document.getElementById('aiSheet').style.display='flex';
   document.getElementById('aiChats').innerHTML='';aiChat.hist=[];
   renderAiCtx();
-  bubbleEl(false,md('مرحباً بك 👋 أنا **معلمك الذكي**.\nأستطيع: شرح السؤال الحالي، سؤال مشابه للتدريب، معلومة ذهبية للامتحان، أو تلخيص الفصل.'));
+  bubbleEl(false,md('أهلاً بيك 👋 أنا **مرشدك الخاص** 💛\nأخوك اللي بيكرر معاك: أشرح لك أي سؤال، أجهّز لك سؤال شبهه، أديّك معلومة ذهبية للامتحان، ولما تقرا فصل ألخصهولك.'));
   document.getElementById('aiInput').value='';renderAI();
   aiAsk('');setTimeout(()=>{const i=document.getElementById('aiInput');if(i)i.focus()},250);
 }
@@ -2418,7 +2418,7 @@ function localTutor(u,cxt,sc,expl){
     }
     if(/سؤال|تمرين/.test(t)){const c=sc.ctx,q=(c.qs||[])[0];if(q)return '**جرّب هذا السؤال:**\n\n'+q.q+'\n'+q.a.map((x,i)=>'['+(i+1)+'] '+x).join('\n')+'\n**الإجابة: ['+(q.c+1)+'] '+q.a[q.c]+'**'+((q.expl&&' — '+q.expl)||'')}
   }
-  return '**اسألني بأي شيء:**\n\n• 🔍 **اشرح لي** — شرح السؤال الحالي مع الإجابة الصحيحة\n• 🧠 **سؤال مشابه** — للتدريب والمراجعة\n• 💎 **معلومة ذهبية** — للامتحان\n• 📚 **لخص الفصل** — أثناء القراءة\n\n💡 **أضف مفتاح Gemini المجاني** من الإعدادات للحصول على معلم ذكي حقيقي يجاوبك على أي سؤال.';
+  return '**اسألني بأي شيء:**\n\n• 🔍 **اشرح لي** — شرح السؤال الحالي مع الإجابة الصحيحة\n• 🧠 **سؤال مشابه** — للتدريب والمراجعة\n• 💎 **معلومة ذهبية** — للامتحان\n• 📚 **لخص الفصل** — أثناء القراءة\n\n💡 **فعّل مفتاح مرشدك** من الإعدادات ليطلع لك ردود مفصلة على أي سؤال.';
 }
 function aiAsk(userText){
   const u=String(userText||'').trim();
@@ -2438,14 +2438,14 @@ function aiAsk(userText){
       bubbleEl(false,md(txt));aiChat.hist.push({me:false,text:txt});scrollAI();
     }).catch(()=>{
       typingOff();const fb=localTutor(u,cxt,sc,expl);
-      bubbleEl(false,md(fb+(expl?'':'\n\n<button class="ai-req" onclick="openAIKey()">احصل على مفتاح جيميني المجاني ➜</button>')));
+      bubbleEl(false,md(fb+(expl?'':'\n\n<button class="ai-req" onclick="openAIKey()">فعّل مرشدك الكامل ➜</button>')));
       aiChat.hist.push({me:false,text:fb});scrollAI();
     });
   }else{
     setTimeout(()=>{
       const out=localTutor(u,cxt,sc,expl);
       bubbleEl(false,md(out));aiChat.hist.push({me:false,text:out});
-      if(!u)bubbleEl(false,md('💡 **للمعلم الذكي الكامل** أضف مفتاح Gemini المجاني من الإعدادات للحصول على إجابات حرة مفصلة.\n\n<button class="ai-req" onclick="openAIKey()">احصل على المفتاح المجاني ➜</button>'));
+      if(!u)bubbleEl(false,md('💡 **استمتع بردود أعمق** — فعّل مفتاح مرشدك من الإعدادات واحصل على إجابات مفصلة.\n\n<button class="ai-req" onclick="openAIKey()">فعّل مرشدي ➜</button>'));
       scrollAI();
     },250);
   }
@@ -2453,7 +2453,7 @@ function aiAsk(userText){
 function openAIKey(){
   closeAISheet();show('settings');applySettings();
   document.getElementById('aiKey').focus();
-  toast('⚡ أدخل مفتاحك في إعدادات المعلم الذكي');
+  toast('⚡ فعّل مرشدك من الإعدادات أولًا');
 }
 /* wire AI tutor ui */
 (function(){
@@ -2469,27 +2469,28 @@ function openAIKey(){
   document.getElementById('aiSaveBtn').onclick=()=>{
     const v=document.getElementById('aiKey').value.trim();
     set.aiKey=v.slice(0,200);saveSet();renderAI();
-    toast(v?'✅ تم ربط المعلم بجيميني — اسألني الآن!':'🔸 أُزيل المفتاح — العمل بالشرح الفوري');
+    toast(v?'✅ تم تفعيل مرشدك — اسألني الآن!':'🔸 أُزيل المفتاح — نرجع للّمسات السريعة');
   };
   document.getElementById('aiClearBtn').onclick=()=>{
     set.aiKey='';document.getElementById('aiKey').value='';saveSet();renderAI();
-    toast('🗑️ تم حذف المفتاح — العمل بالشرح الفوري');
+    toast('🗑️ تم حذف المفتاح — نرجع للّمسات السريعة');
   };
   renderAI();
 })();
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.7',SW_BUILD='v30';
+const APP_VERSION='1.3.8',SW_BUILD='v31';
 const CHANGES=[
+  {v:'v31 — بـصوتي الشخصي',d:'13/9/2026',items:['هوية التطبيق بقت بـاسمي: «بـقلم أحمد أيمن فكري» في كل مكان بدل الهوية الوهمية','مرشدي الخاص بدل «المعلم الذكي» — كلام دافي وودود معاك','نظّفت كل المسميات التقنية اللي بتحسسك إنك بتتكلم مع آلة','نفس التصميم والشكل بالظبط — ملمسيناهوش خالص']},
   {v:'v30 — تحديث إجباري + إصلاح النشر',d:'13/9/2026',items:['زر «تحديث إجباري» في الإعدادات يمسح كل الكاش ويسجل الخروج من عامل الخدمة ويعيد التحميل — حل نهائي لأي نسخة قديمة','إصلاح جذري في عامل الخدمة: مسارات النشر الآن merge مع مسار المشروع (بدل جذر الحساب) — يصير النشر مستقرًا دائمًا','أي زائر بياخد أقصى نسخة فورًا بعد هذا التحديث']},
   {v:'v29 — الجرعة اليومية + منبه المذاكرة',d:'13/9/2026',items:['⚡ جرعة يومية: 10 أسئلة من أضعف فصولك (اللي لسه متتقنتش + أخطاء سابقة)','🍅 منبه بومودورو: مذاكرة 25 دقيقة / راحة 5 دقائق يتناوبون تلقائيًا مع منبه صوتي','يعتمد التقدم في الخطة الذكية على حتى أدق مستوى فصلي لتكوين الجرعة']},
   {v:'v28 — خطة المذاكرة الذكية',d:'13/9/2026',items:['خطة يومية تلقائية بتقسّم كل الفصول المتبقية لحد موعد امتحانك','بعدجت على الرئيسية بترشحلك فصول اليوم مع شريط تقدم عام','اضغط أي فصل في الخطة — يروّح مباشرة للمذاكرة والاختبار','احتفال ورسالة عند إكمال الخطة بالكامل','إعادة البناء أو الحذف في أي وقت — الخطة تتابع تقدمك الفعلي']},
   {v:'v27 — مركز تنزيل كل كتاب',d:'13/9/2026',items:['كتالوج ظاهر داخل الإعدادات يعرض كل كتب المكتبة مقسّمة بالمسار ثم المادة — كل كتاب بأسمه وعدد فصوله وأسئلته','تنزيل أي كتاب بمفرده: شرح / أسئلة بحلولها / امتحان ورقي مع بطاقة الإجابة','أسماء تلقائية لكل الكتب التي لم تكن مسماة','إصلاح ظهور رسالة "ما الجديد" المتكررة في كل افتتاح']},
   {v:'v26 — مركز التنزيل',d:'13/9/2026',items:['تنزيل كتاب الشرح المكتمل (كل الفصول) كملف واحد بدون إنترنت','تنزيل كتاب الأسئلة بحلولها المرتبة + التلميح والشرح التفصيلي','تنزيل كتب الامتحانات الوزنية (أوراق × 20 سؤال) مع بطاقة الإجابة','اختر النطاق: كل المكتبة أو مسار واحد محدد','كل كتاب بصفحات HTML جاهزة للطباعة والمذاكرة خارج المنصة']},
-  {v:'v25 — مزايا الشركة الكاملة',d:'13/9/2026',items:['الامتحان الشامل: امتحان بكالوريا وزني من مسارك (20 سؤال × 10 درجات) مع تقدير ونجاح/رسوب','استمع للسؤال ولرد المعلم الذكي بالعربية 🔊 (بدون إنترنت)','نافذة "ما الجديد" تفتح تلقائياً بعد كل إصدار','لوحة إتقان المسارات في الإحصائيات مع نصيحة لأهم مادة تركز عليها']},
-  {v:'v24 — خلاصة الشركة الإصدار',d:'13/9/2026',items:['شاشة عن التطبيق ببياناتك وسجل التحديثات الكامل','زر فحص التحديث يتحقق حيًا من أحدث إصدار على GitHub','توقيع AlfaDev والخصوصية ورابط الاقتراحات']},
-  {v:'v23 — المعلم الذكي الكامل',d:'13/9/2026',items:['واجهة محادثة بفقاعات مع تنسيق كامل للردود','سياق تلقائي للسؤال الحالي أو الفصل الذي تقرأه','4 أوامر سريعة: شرح • سؤال مشابه • معلومة ذهبية • تلخيص الفصل','نموذج محلّي ذكي يعمل بدون إنترنت وبدون مفتاح','زر عائم 🤖 متاح من كل الشاشات']},
+  {v:'v25 — مزايا الشركة الكاملة',d:'13/9/2026',items:['الامتحان الشامل: امتحان بكالوريا وزني من مسارك (20 سؤال × 10 درجات) مع تقدير ونجاح/رسوب','استمع للسؤال ولرد مرشدك بالعربية 🔊 (بدون إنترنت)','نافذة "ما الجديد" تفتح تلقائياً بعد كل إصدار','لوحة إتقان المسارات في الإحصائيات مع نصيحة لأهم مادة تركز عليها']},
+  {v:'v24 — خلاصة الشركة الإصدار',d:'13/9/2026',items:['شاشة عن التطبيق ببياناتك وسجل التحديثات الكامل','زر فحص التحديث يتحقق حيًا من أحدث إصدار على GitHub','الخصوصية ورابط الاقتراحات']},
+  {v:'v23 — مرشدك الخاص الكامل',d:'13/9/2026',items:['واجهة محادثة بفقاعات مع تنسيق كامل للردود','سياق تلقائي للسؤال الحالي أو الفصل الذي تقرأه','4 أوامر سريعة: شرح • سؤال مشابه • معلومة ذهبية • تلخيص الفصل','نموذج محلّي يعمل بدون إنترنت وبدون مفتاح','زر عائم 🤖 متاح من كل الشاشات']},
   {v:'v22 — مراجعة أخطائي',d:'12/9/2026',items:['تسجيل تلقائي لكل سؤال أخطأت فيه أو انتهى وقته','وضع تدريبي خاص يعيدك لأسئلة أخطائك','يُحذف السؤال من القائمة عند إتقانه']},
   {v:'v21 — بحث ومتابعة',d:'12/9/2026',items:['بحث فوري في كل المكتبة (567 فصلاً)','زر متابعة الدراسة يوصلك لآخر فصل']},
   {v:'v20 — كتب التخصص',d:'11/9/2026',items:['رياضيات وفيزياء متقدمة لمسار الهندسة','أحياء وكيمياء متقدمة لمسار الطب والعلوم']},
@@ -2505,9 +2506,9 @@ function renderAbout(){
   const brand='<div class="about-brand"><span class="ab-ico">🎓</span><b>بكالوريا 2027</b>'+
     '<span>منصة المراجعة الشاملة للمسارات الجديدة</span>'+
     '<span class="about-badge">🟢 تصلح وتتحسّن باستمرار</span>'+
-    '<div style="font-size:12px;color:var(--dim);margin-top:10px">📚 '+total+' فصل • ❓ '+qq+' سؤال • 🧠 معلم ذكي</div></div>';
+    '<div style="font-size:12px;color:var(--dim);margin-top:10px">📚 '+total+' فصل • ❓ '+qq+' سؤال • 🧠 مرشدك الخاص</div></div>';
   const list=CHANGES.map(c=>'<div class="cl-item"><div class="cl-head"><span class="cl-v">'+c.v+'</span><span class="cl-d">'+c.d+'</span></div><ul>'+c.items.map(i=>'<li>'+i+'</li>').join('')+'</ul></div>').join('');
-  const foot='<div class="about-foot"><b>🏢 AlfaDev</b><br>نطوّر هذه المنصة ونتابع مناهج الثانوية أولاً بأول — مفتوحة للجميع.<br>🔒 خصوصيتك محفوظة: كل بياناتك تُخزّن على جهازك فقط.<br>💬 مقترحاتك وتقرير الأخطاء: <a href="https://github.com/AlfaDev0/ahmed-quiz-game/issues" target="_blank" rel="noopener">GitHub Issues</a></div>';
+  const foot='<div class="about-foot"><b>💛 بـقلم أحمد أيمن فكري</b><br>بنيتُ هذا التطبيق بنفسي — خطوة بخطوة — عشان أذاكر بيه بكل حب، وبفوتله على مذاكرتي كلها.<br>🔒 خصوصيتك أمانة: كل بياناتك على جهازك فقط، ولا حتة منها تطلع لأي حد.<br>💬 لو لقيت حاجة تروقنيها أو مشكلة عانقتك: <a href="https://github.com/AlfaDev0/ahmed-quiz-game/issues" target="_blank" rel="noopener">اقترح لي هنا</a></div>';
   body.innerHTML=brand+'<b>🆕 ما الجديد؟</b>'+list+foot;
 }
 function openAbout(){renderAbout();document.getElementById('aboutSheet').style.display='flex'}
