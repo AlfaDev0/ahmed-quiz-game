@@ -320,7 +320,15 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
   sandbox.openAISheet();
   pump();
   ck('ai sheet shown', byId.aiSheet.style.display === 'flex');
-  ck('offline explanation rendered (no key)', byId.aiBody._inner.includes('الإجابة الصحيحة'));
+  ck('chat built (greeting + user + ai)', byId.aiChats.children.length >= 3);
+  ck('offline explanation rendered (no key)', byId.aiChats.children.some(c => (c._inner || '').includes('الإجابة الصحيحة')));
+  ck('aiCtx bar labeled', byId.aiCtxBar._inner.includes('الآن عن'));
+
+  // chat intents (offline)
+  byId.aiInput.value = 'معلومة ذهبية';
+  sandbox.aiAsk('معلومة ذهبية'); pump();
+  const gold = byId.aiChats.children[byId.aiChats.children.length-1];
+  ck('gold tip intent works', !!gold && gold._inner.includes('ذهبية'));
 
   // md rendering
   ck('md bold works', sandbox.md('**قوي**').includes('<b>'));

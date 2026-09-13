@@ -367,6 +367,30 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .ai-send{border:none;background:linear-gradient(135deg,#00C9A7,#1286FF);color:#fff;width:44px;height:44px;border-radius:12px;font-size:18px;cursor:pointer}
 .ai-req{border:none;border-radius:13px;padding:13px;background:rgba(128,90,213,.12);border:1px dashed #806BD5;color:#806BD5;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;margin-top:8px;text-align:center;width:100%}.ai-req:hover{background:rgba(128,90,213,.22)}
 
+/* ---- AI CHAT ---- */
+.ai-ctx{display:flex;align-items:center;gap:8px;background:rgba(18,134,255,.1);border:1px dashed rgba(18,134,255,.45);border-radius:12px;padding:8px 12px;font-size:11.5px;margin-bottom:12px}
+.ai-ctx .ctx-tag{flex-shrink:0;font-weight:900;color:#1286FF}
+.ai-ctx .ctx-txt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--dim)}
+.ai-chats{display:flex;flex-direction:column;gap:12px}
+.ai-b{display:flex;gap:10px;align-items:flex-start;animation:slideUp .25s}
+.ai-b .av{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;background:linear-gradient(135deg,#00C9A7,#1286FF)}
+.ai-b.me{flex-direction:row-reverse}
+.ai-b.me .av{background:var(--bg3)}
+.ai-b .bub{padding:11px 14px;border-radius:14px;font-size:13px;line-height:2;max-width:84%;color:var(--text);background:var(--bg2);border:1px solid var(--bg3);border-top-right-radius:4px}
+.ai-b.me .bub{background:linear-gradient(135deg,#1286FF,#6C63FF);border:none;color:#fff;border-top-right-radius:14px;border-top-left-radius:4px}
+.ai-b .bub b{color:var(--gold)}
+.ai-b.me .bub b{color:#fff;opacity:.95}
+.ai-typing{display:flex;gap:5px;padding:4px 2px}
+.ai-typing i{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:cf 1s infinite}
+.ai-typing i:nth-child(2){animation-delay:.18s}.ai-typing i:nth-child(3){animation-delay:.36s}
+.ai-chips{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 0;margin-top:6px;scrollbar-width:none}
+.ai-chips::-webkit-scrollbar{display:none}
+.ai-chip{flex-shrink:0;border:1px solid var(--bg3);background:var(--bg2);color:var(--text);border-radius:20px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.ai-chip:active{transform:scale(.95)}
+.ai-clear{width:34px;height:34px;border-radius:12px;background:var(--bg3);border:none;color:var(--dim);font-size:15px;cursor:pointer;font-family:inherit;margin-left:8px}
+.ai-fab{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#00C9A7,#1286FF);color:#fff;font-size:24px;z-index:498;box-shadow:0 8px 26px rgba(18,134,255,.45);cursor:pointer;align-items:center;justify-content:center;display:flex;animation:fabPulse 2.6s infinite;line-height:1}
+@keyframes fabPulse{0%,100%{box-shadow:0 8px 26px rgba(18,134,255,.4)}50%{box-shadow:0 10px 34px rgba(0,201,167,.65)}}
+
 @media(min-width:481px){#app{border-left:1px solid var(--bg3);border-right:1px solid var(--bg3)}}
 </style>
 </head>
@@ -645,11 +669,21 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       <div class="ai-head">
         <div class="ai-logo">🤖</div>
         <div><b>المعلم الذكي</b><div style="font-size:11px;color:var(--dim)" id="aiModeNote">جيميني متصل — يشرح ويساعد بذكاء</div></div>
+        <button class="ai-clear" id="aiClear" title="مسح المحادثة">🗑</button>
         <button class="ai-close" id="aiClose">✕</button>
       </div>
-      <div class="ai-body" id="aiBody"><span style="color:var(--dim)">اسأل عن أي سؤال...</span></div>
+      <div class="ai-body" id="aiBody">
+        <div id="aiCtxBar" class="ai-ctx" style="display:none"></div>
+        <div id="aiChats" class="ai-chats"></div>
+        <div class="ai-chips" id="aiChips">
+          <button class="ai-chip" data-t="💡 اشرح لي الإجابة">💡 اشرح لي الإجابة</button>
+          <button class="ai-chip" data-t="🧠 سؤال مشابه">🧠 سؤال مشابه</button>
+          <button class="ai-chip" data-t="💎 معلومة ذهبية">💎 معلومة ذهبية</button>
+          <button class="ai-chip" data-t="📚 لخص الفصل">📚 لخص الفصل</button>
+        </div>
+      </div>
       <div class="ai-foot">
-        <input type="text" id="aiInput" placeholder="اكتب سؤالك... أو اتركه فارغاً لشرح السؤال الحالي" maxlength="500">
+        <input type="text" id="aiInput" placeholder="اسألني أي سؤال... أو اتركه فارغاً لشرح السؤال الحالي" maxlength="500" autocomplete="off">
         <button class="ai-send" id="aiSend">➤</button>
       </div>
     </div>
@@ -679,6 +713,8 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
   </div>
 
 </div>
+
+<button class="ai-fab" id="aiFab" title="المعلم الذكي">🤖</button>
 <div class="toast" id="toast"></div>
 <script src="questions.js"></script>
 <script src="study.js"></script>
@@ -1520,7 +1556,7 @@ function openStudySubject(pi,si){
   show('studyBook');
 }
 function openChapter(pi,si,bi,ci,ch){
-  _studyPi=pi;_studySi=si;
+  _studyPi=pi;_studySi=si;_aiChapter=ch;
   S.studyLast={key:chKey(pi,si,bi,ci),pi:pi,si:si,bi:bi,ci:ci,title:ch&&ch.title||''};save();
   document.getElementById('srTitle').textContent='الفصل '+(ci+1)+' — '+ch.title;
   const el=document.getElementById('studyReadBody');el.innerHTML='';
@@ -1594,6 +1630,7 @@ function updateChStars(key,st){/* keep stars persisted */save();renderStudyFill(
 <script>
 /* ================= AI TUTOR ================= */
 const AI_MODEL='gemini-2.0-flash';
+var _aiChapter=null,aiChat={hist:[]};
 function aiKey(){return (set&&set.aiKey)||''}
 function renderAI(){
   const k=aiKey(),inp=document.getElementById('aiKey'),badge=document.getElementById('aiBadge'),note=document.getElementById('aiModeNote');
@@ -1612,10 +1649,21 @@ function md(t){
   s=s.replace(/\n/g,'<br>');
   return s;
 }
+function aiScope(){
+  if(aiCtx&&aiCtx.q)return {type:'q',ctx:aiCtx,label:aiCtx.q.slice(0,78)};
+  if(_aiChapter){const r=document.getElementById('studyRead');if(r&&r.classList.contains('active'))return {type:'ch',ctx:_aiChapter,label:'الفصل — '+_aiChapter.title}}
+  return null;
+}
 function ctxText(){
-  if(!aiCtx)return null;
+  const sc=aiScope();
+  if(!sc)return null;
+  if(sc.type==='ch'&&!aiCtx){
+    const c=sc.ctx;
+    const readText=(c.read||[]).map(sec=>'• '+sec.h+': '+(sec.t||'')).join('\n').slice(0,2000);
+    return 'الفصل: '+c.title+'\nفصول/أسئلة: '+((c.qs||[]).length)+' سؤال\n\nمحتوى الفصل:\n'+readText;
+  }
   const q=aiCtx,qo=q.a,qc=q.c;
-  return 'السؤال: '+q.q+'\nالخيارات:\n'+qo.map((x,i)=>'['+(i+1)+'] '+x).join('\n')+'\nالإجابة الصحيحة: ['+(qc+1)+'] '+qo[qc]+(q.hint?'\nلمحة: '+q.hint:'' );
+  return 'السؤال: '+q.q+'\nالخيارات:\n'+qo.map((x,i)=>'['+(i+1)+'] '+x).join('\n')+'\nالإجابة الصحيحة: ['+(qc+1)+'] '+qo[qc]+(q.hint?'\nلمحة: '+q.hint:'');
 }
 function offlineExplain(q){
   if(!q)return 'اضغط على أي إجابة أو انتقل لسؤال ثم اسألني من هنا.';
@@ -1628,44 +1676,74 @@ function offlineExplain(q){
   parts.push('🔑 نصيحة: «'+q.q+'» — أبقِ هذه المعلومة في ذهنك لسؤال مشابه.');
   return parts.join('\n');
 }
+function scrollAI(){const b=document.getElementById('aiBody');if(b)b.scrollTop=b.scrollHeight}
+function renderAiCtx(){const sc=aiScope(),bar=document.getElementById('aiCtxBar');if(!bar)return;if(!sc){bar.innerHTML='';bar.style.display='none';return}bar.style.display='flex';bar.innerHTML='<span class="ctx-tag">الآن عن:</span><span class="ctx-txt">'+sc.label+'</span>'}
+function bubbleEl(me,html){const w=document.createElement('div');w.className='ai-b'+(me?' me':'');w.innerHTML='<div class="av">'+(me?'🧑':'🤖')+'</div><div class="bub">'+html+'</div>';document.getElementById('aiChats').appendChild(w);scrollAI();return w}
+function typingOn(){bubbleEl(false,'<div class="ai-typing"><i></i><i></i><i></i></div>').id='aiTyping'}
+function typingOff(){const w=document.getElementById('aiTyping');if(w)w.remove()}
 function openAISheet(){
-  const b=document.getElementById('aiSheet');b.style.display='flex';
-  const body=document.getElementById('aiBody'),inp=document.getElementById('aiInput');
-  body.innerHTML='<span style="color:var(--dim)">أجهّز الشرح لك الآن...</span>';inp.value='';renderAI();
-  aiAsk('');
+  document.getElementById('aiSheet').style.display='flex';
+  document.getElementById('aiChats').innerHTML='';aiChat.hist=[];
+  renderAiCtx();
+  bubbleEl(false,md('مرحباً بك 👋 أنا **معلمك الذكي**.\nأستطيع: شرح السؤال الحالي، سؤال مشابه للتدريب، معلومة ذهبية للامتحان، أو تلخيص الفصل.'));
+  document.getElementById('aiInput').value='';renderAI();
+  aiAsk('');setTimeout(()=>{const i=document.getElementById('aiInput');if(i)i.focus()},250);
 }
 function closeAISheet(){document.getElementById('aiSheet').style.display='none'}
-function aiAsk(userText){
-  const body=document.getElementById('aiBody'),inp=document.getElementById('aiInput');
-  const cxt=ctxText();
-  const isExplain=!userText.trim();
-  body.innerHTML='<div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>يدرس السؤال...</span></div>';
-  if(isExplain){
-    body.innerHTML=md(offlineExplain(aiCtx));
+function localTutor(u,cxt,sc,expl){
+  if(expl)return offlineExplain(aiCtx);
+  const t=String(u||'').trim();
+  if(sc&&sc.type==='q'){
+    const q=sc.ctx;
+    if(/اشرح|الإجابة|فسر|ما هي الإجابة|حل/.test(t))return offlineExplain(q);
+    if(/مثال|مشابه|تدريب|أخير|آخر/.test(t)){
+      const a=q.a.slice();shuffle(a);const c=a.indexOf(q.a[q.c]);
+      const core='**سؤال مشابه للتدريب:**\n\n'+q.q+'\n'+a.map((x,i)=>'['+(i+1)+'] '+x).join('\n')+'\n**الإجابة الصحيحة: ['+(c+1)+'] '+a[c]+'**';
+      const extra=(q.expl||q.hint)?'\n\n💡 '+((q.expl||q.hint).slice(0,180)):'';
+      return core+extra+'\n\n> راجعها في «مراجعة أخطائي» لو أخطأت فيها.';
+    }
+    if(/ذهبي|للامتحان|تلخيص/.test(t)){
+      return '**💎 معلومة ذهبية للامتحان:**\n\n• الإجابة: **'+q.a[q.c]+'**\n'+((q.expl||q.hint)?'• '+((q.expl||q.hint))+'\n':'')+'\n> نصيحة: أعد هذا السؤال في «مراجعة أخطائي» لتثبيته.';
+    }
   }
-  if(!isExplain)setTimeout(()=>{body.innerHTML=md(isExplain?'':userText);body.innerHTML+='<br>...'},0);
-  if(aiKey()){
-    fetch('https://generativelanguage.googleapis.com/v1beta/models/'+AI_MODEL+':generateContent?key='+encodeURIComponent(aiKey()),{
+  if(sc&&sc.type==='ch'){
+    if(/لخص|ملخص|زميل/.test(t)){
+      const c=sc.ctx;
+      const lines=(c.read||[]).map(sec=>{const b=(sec.t||'').split(/[.؟！]/).slice(0,2).join('. ').slice(0,130);return '• **'+sec.h+'**: '+b});
+      return '**خلاصة «'+c.title+'»:**\n\n'+lines.join('\n')+'\n\n> اضغط 🎯 اختبر نفسك لتطبّق المعلومة.';
+    }
+    if(/سؤال|تمرين/.test(t)){const c=sc.ctx,q=(c.qs||[])[0];if(q)return '**جرّب هذا السؤال:**\n\n'+q.q+'\n'+q.a.map((x,i)=>'['+(i+1)+'] '+x).join('\n')+'\n**الإجابة: ['+(q.c+1)+'] '+q.a[q.c]+'**'+((q.expl&&' — '+q.expl)||'')}
+  }
+  return '**اسألني بأي شيء:**\n\n• 🔍 **اشرح لي** — شرح السؤال الحالي مع الإجابة الصحيحة\n• 🧠 **سؤال مشابه** — للتدريب والمراجعة\n• 💎 **معلومة ذهبية** — للامتحان\n• 📚 **لخص الفصل** — أثناء القراءة\n\n💡 **أضف مفتاح Gemini المجاني** من الإعدادات للحصول على معلم ذكي حقيقي يجاوبك على أي سؤال.';
+}
+function aiAsk(userText){
+  const u=String(userText||'').trim();
+  const cxt=ctxText(),sc=aiScope(),expl=!u;
+  if(u)aiChat.hist.push({me:true,text:u});
+  renderAiCtx();bubbleEl(true,u?md(u):'🪄 اشرح لي هذا السؤال');
+  const key=aiKey();
+  if(key){
+    typingOn();
+    const hist=aiChat.hist.slice(-8).map(m=>({role:m.me?'user':'model',parts:[{text:m.text}]}));
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/'+AI_MODEL+':generateContent?key='+encodeURIComponent(key),{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:isExplain?
-        'أنت معلم مصري متخصص في مناهج الثانوية. اشرح للطالب هذا السؤال ببساطة ووضوح بالعربية الفصحى، ثم حدد الإجابة الصحيحة وأعلل لها، واذكر لماذا كل خيار من الخيارات الباقية خاطئ، واكتب في الأخير معلومة ذهبية صغيرة للامتحان.\n\n'+cxt:
-        'أنت معلم مصري متخصص في مناهج الثانوية. أجب على سؤال الطالب بلغة عربية بسيطة، مع إضافة المعرفة الصحيحة من المقرر، وإذا سأل عن حل سؤال فاربطه بما يلي:\n'+cxt+'\n\nسؤال الطالب: '+userText}]}]})
+      body:JSON.stringify({contents:[...hist,{parts:[{text:('أنت معلم مصري متخصص في مناهج الثانوية والبكالوريا 2027. أجب بالعربية البسيطة والودودة.\n\n'+(expl?'اشرح السؤال التالي ببساطة، حدد الإجابة الصحيحة وأعلل لها، واذكر لماذا الخيارات الباقية خاطئة، ثم أضف معلومة ذهبية للامتحان:\n\n'+cxt:cxt+'\n\nسؤال الطالب: '+u))}]}]})
     }).then(r=>r.json()).then(d=>{
       const txt=d&&d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0].text;
-      if(!txt)throw 0;
-      body.innerHTML=md(txt);
+      typingOff();if(!txt)throw 0;
+      bubbleEl(false,md(txt));aiChat.hist.push({me:false,text:txt});scrollAI();
     }).catch(()=>{
-      body.innerHTML=md(isExplain?offlineExplain(aiCtx):'للأسف لم أستطع الاتصال بجيميني الآن (تحقق من المفتاح أو من الإنترنت).\n\n'+(cxt?'إليك سياق السؤال:\n'+cxt:''));
+      typingOff();const fb=localTutor(u,cxt,sc,expl);
+      bubbleEl(false,md(fb+(expl?'':'\n\n<button class="ai-req" onclick="openAIKey()">احصل على مفتاح جيميني المجاني ➜</button>')));
+      aiChat.hist.push({me:false,text:fb});scrollAI();
     });
   }else{
     setTimeout(()=>{
-      if(isExplain){/*offline already shown*/}
-      else{
-        body.innerHTML=md('💡 أنا أعمل حالياً بالشرح الفوري بدون إنترنت لإجابة أسرع.\n\n');
-        if(cxt)body.innerHTML+=md(offlineExplain(aiCtx));
-        body.innerHTML+='<button class="ai-req" onclick="openAIKey()">احصل على مفتاح جيميني المجاني لتشغيل المعلم الكامل ➜</button>';
-      }
-    },150);
+      const out=localTutor(u,cxt,sc,expl);
+      bubbleEl(false,md(out));aiChat.hist.push({me:false,text:out});
+      if(!u)bubbleEl(false,md('💡 **للمعلم الذكي الكامل** أضف مفتاح Gemini المجاني من الإعدادات للحصول على إجابات حرة مفصلة.\n\n<button class="ai-req" onclick="openAIKey()">احصل على المفتاح المجاني ➜</button>'));
+      scrollAI();
+    },250);
   }
 }
 function openAIKey(){
@@ -1673,13 +1751,17 @@ function openAIKey(){
   document.getElementById('aiKey').focus();
   toast('⚡ أدخل مفتاحك في إعدادات المعلم الذكي');
 }
-/* wire AI tutor ui (elements exist by now) */
+/* wire AI tutor ui */
 (function(){
+  const snd=()=>{const i=document.getElementById('aiInput');aiAsk(i.value);i.value=''};
+  const fab=document.getElementById('aiFab');if(fab)fab.onclick=openAISheet;
   document.getElementById('aiBtn').onclick=openAISheet;
   document.getElementById('aiClose').onclick=closeAISheet;
   document.getElementById('aiSheet').onclick=e=>{if(e.target.id==='aiSheet')closeAISheet()};
-  document.getElementById('aiSend').onclick=()=>aiAsk(document.getElementById('aiInput').value);
-  document.getElementById('aiInput').onkeydown=e=>{if(e.key==='Enter')aiAsk(e.target.value)};
+  document.getElementById('aiSend').onclick=snd;
+  document.getElementById('aiInput').onkeydown=e=>{if(e.key==='Enter')snd()};
+  document.getElementById('aiClear').onclick=openAISheet;
+  document.querySelectorAll('.ai-chip').forEach(c=>c.onclick=()=>aiAsk(c.dataset.t));
   document.getElementById('aiSaveBtn').onclick=()=>{
     const v=document.getElementById('aiKey').value.trim();
     set.aiKey=v.slice(0,200);saveSet();renderAI();
