@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.2'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.3'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -387,8 +387,14 @@ t().S().lastSeenVer='';
 ck('whats-new banner opens when new version', sandbox.maybeShowWhatsNew()===true);
 ck('banner shows confirm button', byId.aboutSeen.style.display==='block');
 sandbox.markSeenAbout();
-ck('markSeen saves version + closes', (t().S().lastSeenVer||'').startsWith('v') && byId.aboutSheet.style.display==='none');
+ck('markSeen saves version + closes', (t().S().lastSeenVer||'').startsWith('v') && (t().S().lastSeenVerNum||0)>=27 && byId.aboutSheet.style.display==='none');
 ck('no banner when version seen', sandbox.maybeShowWhatsNew()===false);
+t().S().lastSeenVerNum=undefined;t().S().lastSeenVer='v26';
+ck('old string version migrates to numeric', sandbox.swSeen()===26 && t().S().lastSeenVerNum===26);
+sandbox.markSeenAbout();
+ck('markSeen persists max version (no re-banner)', t().S().lastSeenVerNum===27 && sandbox.maybeShowWhatsNew()===false);
+vm.runInContext('window.__downgrade=maybeShowWhatsNew()',sandbox);
+ck('stale SW cannot re-open banner', sandbox.window.__downgrade===false);
 byId.aboutClose.style.display='none';
 
 /* ---- exam mode ---- */
@@ -424,6 +430,26 @@ ck('questions book built', dlt.q.includes('كتاب الأسئلة بحلوله�
 ck('exams book built', dlt.x.includes('الورقة الأولى') && dlt.x.includes('بطاقة الإجابة'));
 let dlb=false;try{dlleft=sandbox.downloadBook('explain');dlb=typeof dlleft==='string'&&dlleft.length>1000}catch(e){}
 ck('downloadBook safe fallback without Blob', dlb);
+
+/* per-book download + labels */
+ck('unnamed books get a label from first chapter', String(sandbox.bookLabel(0,0,0)||'').length>0);
+vm.runInContext('window.__bk=bookLabel(0,0,0)',sandbox);
+ck('bookLabel label is meaningful', (sandbox.window.__bk||'').length>3);
+vm.runInContext('dlBook={pi:0,si:0,bi:1};window.__pb=downloadBook("questions")',sandbox);
+ck('per-book questions built with its content', (sandbox.window.__pb||'').length>2000);
+ck('per-book excludes other tracks', !(sandbox.window.__pb||'').includes('الهندسة'));
+vm.runInContext('window.__rst=dlBook===null',sandbox);
+ck('dlBook reset after download', sandbox.window.__rst===true);
+vm.runInContext('dlBook={pi:0,si:0,bi:0};window.__dn=dlFileName("explain");dlBook=null',sandbox);
+ck('single-book filename carries track + book', (sandbox.window.__dn||'').startsWith('بكالوريا2027-كتاب-الشرح-') && (sandbox.window.__dn||'').includes('الآداب') && (sandbox.window.__dn||'').endsWith('.html'));
+
+/* visible catalog of all books */
+vm.runInContext('dlScope=-1;window.__cat=document.getElementById("dlBooks").innerHTML',sandbox);
+const cat=sandbox.window.__cat||'';
+ck('catalog lists all 124 books', (cat.match(/class="dl-book"/g)||[]).length===124);
+ck('catalog has part sections', (cat.match(/class="dl-part"/g)||[]).length>=6);
+ck('every catalog book has a name', !cat.includes('📕 </span>'));
+ck('catalog shows per-book exam button', cat.includes('data-t="exams"'));
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

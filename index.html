@@ -420,6 +420,17 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .dl-chip{border:1px solid var(--bg3);background:var(--bg);color:var(--dim);border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer}
 .dl-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .dl-note{font-size:11px;color:var(--dim);line-height:1.8}
+.dl-actions{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+.dl-actions .sec-btn{flex:1;min-width:150px}
+.dl-booklist{width:100%;max-height:340px;overflow:auto;border:1px solid var(--bg3);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:6px;box-sizing:border-box}
+.dl-part{font-size:13px;font-weight:800;color:var(--primary);padding:8px 4px 2px}
+.dl-book{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border:1px solid var(--bg3);border-radius:12px;padding:8px 10px;flex-wrap:wrap}
+.dl-bookinfo{display:flex;flex-direction:column;gap:1px;font-size:12px;flex:1;min-width:160px}
+.dl-bookinfo small{color:var(--dim);font-size:11px}
+.dl-bookbtns{display:flex;gap:5px;flex-wrap:wrap}
+.dl-bbtn{border:1px solid var(--bg3);background:none;color:var(--text);border-radius:8px;padding:5px 9px;font-size:11px;cursor:pointer}
+.dl-bbtn:hover{background:var(--bg3)}
+.dl-count{font-size:11px;color:var(--dim);text-align:center;padding:4px}
 .about-foot a{color:var(--primary);font-weight:700;text-decoration:none}
 .about-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,201,167,.12);color:#00C9A7;font-weight:800;font-size:11px;border-radius:12px;padding:5px 12px;margin-top:10px}
 
@@ -680,16 +691,19 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       <input type="file" id="importFile" accept=".json" style="display:none">
       <button class="danger" id="resetBtn">🗑️ مسح جميع البيانات</button>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:6px">
-        <span class="set-label">📤 مركز التنزيل — كتب كاملة للطباعة أو المذاكرة خارج المنصة</span>
+        <span class="set-label">📤 مركز التنزيل — كل الكتب أمامك، نزّل أي كتاب لوحده</span>
         <div class="dl-chips" id="dlChips"></div>
-        <button class="sec-btn" id="dlExplain">📖 تنزيل كتاب الشرح المكتمل</button>
-        <button class="sec-btn" id="dlQuestions">❓ تنزيل كتاب الأسئلة بحلولها</button>
-        <button class="sec-btn" id="dlExams">📝 تنزيل كتب الامتحانات الوزنية</button>
-        <span class="dl-note">كل «كتاب» ملف HTML واحد يعمل بدون إنترنت — اختر النطاق (كل المكتبة أو مسارًا معينًا) ثم دقق التنزيل.</span>
+        <div class="dl-actions">
+          <button class="sec-btn" id="dlExplain">📖 كتاب الشرح الكامل</button>
+          <button class="sec-btn" id="dlQuestions">❓ كتاب الأسئلة بحلولها</button>
+          <button class="sec-btn" id="dlExams">📝 كتب الامتحانات الوزنية</button>
+        </div>
+        <div class="dl-booklist" id="dlBooks"></div>
+        <span class="dl-note">الأزرار أعلى: تنزيل النطاق كاملًا (كل المكتبة أو المسار المختار). بالأسفل: كل كتاب بمفرده — شرح / أسئلة بحلولها / امتحان ورقي مع بطاقة الإجابة. كل ملف HTML يعمل بدون إنترنت وجاهز للطباعة.</span>
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:4px">
         <span class="set-label">📦 عن التطبيق</span>
-        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.0</span>
+        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.3</span>
       </div>
       <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
       <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
@@ -726,7 +740,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="ai-card">
       <div class="ai-head">
         <div class="ai-logo">📦</div>
-        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.0</div></div>
+        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.3</div></div>
         <button class="ai-close" id="aboutClose">✕</button>
       </div>
       <div class="ai-body" id="aboutBody"></div>
@@ -1670,7 +1684,7 @@ function startStudyQuiz(pi,si,bi,ci,ch){
   show('game');showQ();updateLL();
 }
 /* ================= FEATURES: EXAM + VOICE + MASTERY + WHATS-NEW ================= */
-let examMode=false,examPi=null,dlScope=-1;
+let examMode=false,examPi=null,dlScope=-1,dlBook=null;
 function closeExam(){const es=document.getElementById('examSheet');if(es)es.style.display='none'}
 function renderExamList(){
   const list=document.getElementById('examList');if(!list)return;
@@ -1784,14 +1798,20 @@ function masteryTip(){
   if(!best)return '';
   return '<div class="mastery-tip">🔎 <b>نصيحة المذاكرة:</b> ركّز على مادة <b>'+best.name+'</b> في مسار <b>'+best.p+'</b> — نسبة إتقانك فيها '+best.v+'% فقط ('+best.chapters+' فصل). أعد قراءة الفصول واختم كل فصل بإختباره.</div>';
 }
+function swVer(){const m=String((typeof SW_BUILD!=='undefined'&&SW_BUILD)||'v0').match(/\d+/);return m?+m[0]:0}
+function swSeen(){
+  if(typeof S.lastSeenVerNum==='number'&&S.lastSeenVerNum>=0)return S.lastSeenVerNum;
+  const m=String(S.lastSeenVer||'').match(/\d+/);const v=m?+m[0]:0;
+  S.lastSeenVerNum=v;save();return v;
+}
 function markSeenAbout(){
-  S.lastSeenVer=SW_BUILD;save();
+  S.lastSeenVerNum=Math.max(swSeen(),swVer());S.lastSeenVer=SW_BUILD;save();
   const sh=document.getElementById('aboutSheet');if(sh)sh.style.display='none';
   const sn=document.getElementById('aboutSeen');if(sn)sn.style.display='none';
   const cl=document.getElementById('aboutClose');if(cl)cl.style.display='';
 }
 function maybeShowWhatsNew(){
-  if(S.lastSeenVer===SW_BUILD)return false;
+  if(swSeen()>=swVer())return false;
   openAbout();
   const sn=document.getElementById('aboutSeen');if(sn)sn.style.display='block';
   const cl=document.getElementById('aboutClose');if(cl)cl.style.display='none';
@@ -1805,10 +1825,10 @@ function maybeShowWhatsNew(){
   const sq=document.getElementById('speakQ');if(sq)sq.onclick=speakQuestion;
   const ta=document.getElementById('ttsAI');if(ta)ta.onclick=speakLastAi;
   const ssn=document.getElementById('aboutSeen');if(ssn)ssn.onclick=markSeenAbout;
-  renderDlChips();
-  const dx=document.getElementById('dlExplain');if(dx)dx.onclick=()=>downloadBook('explain');
-  const dq=document.getElementById('dlQuestions');if(dq)dq.onclick=()=>downloadBook('questions');
-  const de=document.getElementById('dlExams');if(de)de.onclick=()=>downloadBook('exams');
+  renderDlChips();renderDlBooks();
+  const dx=document.getElementById('dlExplain');if(dx)dx.onclick=()=>{dlBook=null;downloadBook('explain')};
+  const dq=document.getElementById('dlQuestions');if(dq)dq.onclick=()=>{dlBook=null;downloadBook('questions')};
+  const de=document.getElementById('dlExams');if(de)de.onclick=()=>{dlBook=null;downloadBook('exams')};
   setTimeout(()=>{
     try{
       if(typeof maybeShowWhatsNew==='function'&&maybeShowWhatsNew())toast('🆕 تحديثات جديدة! افتح قسم ما الجديد');
@@ -1816,18 +1836,68 @@ function maybeShowWhatsNew(){
   },2600);
 })();
 /* ================= DOWNLOAD CENTER ================= */
+function bookLabel(pi,si,bi){
+  const p=window.STUDY&&window.STUDY[pi],s=p&&p.subjects[si],bk=s&&s.books[bi];
+  if(!bk)return '';
+  if(bk.name&&String(bk.name).trim())return String(bk.name).trim();
+  const f=(bk.chapters||[])[0];
+  const src=(f&&f.title)||(f&&f.read&&f.read[0]&&f.read[0].h)||'';
+  const lb=String(src).trim().split(' — ')[0];
+  return lb.slice(0,48)||('كتاب '+(bi+1));
+}
+function dlSlug(s){return String(s||'').replace(/[^\u0600-\u06FFa-zA-Z0-9-]/g,'').slice(0,60)}
 function renderDlChips(){
   const w=document.getElementById('dlChips');if(!w)return;
   w.innerHTML='';
-  const mk=(label,v)=>{const c=document.createElement('button');c.className='dl-chip'+(dlScope===v?' active':'');c.textContent=label;c.onclick=()=>{dlScope=v;renderDlChips()};return c};
+  const mk=(label,v)=>{const c=document.createElement('button');c.className='dl-chip'+(dlScope===v?' active':'');c.textContent=label;c.onclick=()=>{dlScope=v;dlBook=null;renderDlChips();renderDlBooks()};return c};
   w.appendChild(mk('🗂️ كل المكتبة',-1));
   if(window.STUDY)window.STUDY.forEach((p,pi)=>w.appendChild(mk(p.icon+' '+p.name,pi)));
 }
-function dlParts(){return(!window.STUDY||dlScope<0||dlScope>=window.STUDY.length)?(window.STUDY||[]):[window.STUDY[dlScope]]}
+function dlNodes(){
+  const out=[];
+  if(dlBook&&window.STUDY){
+    const p=window.STUDY[dlBook.pi];if(!p)return out;
+    const s=p.subjects[dlBook.si];const bk=s&&s.books[dlBook.bi];
+    if(!bk)return out;
+    out.push({pi:dlBook.pi,pname:p.name,sos:[{si:dlBook.si,sname:s.name,books:[{bi:dlBook.bi,bk}]}]});
+  }else if(window.STUDY){
+    window.STUDY.forEach((p,pi)=>{
+      if(dlScope>=0&&dlScope!==pi)return;
+      out.push({pi,p,pname:p.name,sos:p.subjects.map((s,si)=>({si,s,sname:s.name,books:s.books.map((bk,bi)=>({bi,bk}))}))});
+    });
+  }
+  return out;
+}
+function renderDlBooks(){
+  const w=document.getElementById('dlBooks');if(!w)return;
+  let b='',total=0,chn=0,qn=0,lastPi=-1;
+  window.STUDY&&window.STUDY.forEach((p,pi)=>{
+    if(dlScope>=0&&dlScope!==pi)return;
+    if(pi!==lastPi){b+='<div class="dl-part">🎓 '+dlEsc(p.icon+' '+p.name)+'</div>';lastPi=pi}
+    p.subjects.forEach((s,si)=>s.books.forEach((bk,bi)=>{
+      total++;chn+=bk.chapters.length;
+      const bq=bk.chapters.reduce((a,c)=>a+(c.qs||[]).length,0);qn+=bq;
+      b+='<div class="dl-book"><div class="dl-bookinfo"><b style="color:var(--dim)">'+dlEsc(s.name)+'</b>'+
+        '<span>📕 '+dlEsc(bookLabel(pi,si,bi))+'</span><small>'+bk.chapters.length+' فصل • '+bq+' سؤال</small></div>'+
+        '<div class="dl-bookbtns">'+
+        '<button class="dl-bbtn" data-i="'+pi+','+si+','+bi+'" data-t="explain">📖 شرح</button>'+
+        '<button class="dl-bbtn" data-i="'+pi+','+si+','+bi+'" data-t="questions">❓ أسئلة</button>'+
+        '<button class="dl-bbtn" data-i="'+pi+','+si+','+bi+'" data-t="exams">📝 امتحان</button>'+
+        '</div></div>';
+    }));
+  });
+  w.innerHTML=b+'<div class="dl-count">📊 '+total+' كتاب • '+chn+' فصل • '+qn+' سؤال في النطاق الحالي</div>';
+  Array.prototype.forEach.call(w.querySelectorAll('.dl-bbtn'),btn=>{
+    btn.onclick=()=>{const a=btn.dataset.i.split(',');dlBook={pi:+a[0],si:+a[1],bi:+a[2]};downloadBook(btn.dataset.t)};
+  });
+}
 function dlStats(){
   let chn=0,qn=0;
-  dlParts().forEach(p=>p.subjects.forEach(s=>s.books.forEach(bk=>{chn+=bk.chapters.length;bk.chapters.forEach(c=>qn+=(c.qs||[]).length)})));
-  return '<footer class="foot">📁 النطاق: '+dlParts().map(p=>p.name).join(' + ')+' • '+'<b>'+chn+' فصل</b> • <b>'+qn+' سؤال</b> • صُنع في بكالوريا 2027 بواسطة AlfaDev 🚀</footer>';
+  const names=dlNodes().map(nd=>{
+    nd.sos.forEach(so=>so.books.forEach(b=>{chn+=b.bk.chapters.length;b.bk.chapters.forEach(c=>qn+=(c.qs||[]).length)}));
+    return nd.pname;
+  });
+  return '<footer class="foot">📁 النطاق: '+names.join(' + ')+' • '+'<b>'+chn+' فصل</b> • <b>'+qn+' سؤال</b> • صُنع في بكالوريا 2027 بواسطة AlfaDev 🚀</footer>';
 }
 function dlEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function dlShell(title,body){
@@ -1837,6 +1907,7 @@ function dlShell(title,body){
     'header h1{font-size:20px;margin:0}header p{font-size:13px;color:#c9d6dd;margin:6px 0 0}'+
     '.part-title{font-size:18px;font-weight:800;color:#1565c0;margin:24px 0 6px}'+
     '.book-title{font-size:15px;font-weight:700;color:#0f9d76;margin:16px 0 4px}'+
+    '.book-title .minor{color:#78909c;font-size:11px;font-weight:400}'+
     '.ch{background:#fff;border-radius:12px;padding:12px 14px;margin:8px 0;box-shadow:0 1px 3px rgba(0,0,0,.07);page-break-inside:avoid}'+
     '.ch h3{margin:0 0 8px;font-size:14px;color:#37474f}.ch .tr p{margin:6px 0}'+
     '.qr{padding:5px 0;border-bottom:1px dashed #e3e6ee;font-size:13px}'+
@@ -1848,12 +1919,12 @@ function dlShell(title,body){
     '</style></head><body>'+body+dlStats()+'</body></html>';
 }
 function buildExplainHTML(){
-  const ps=dlParts(),title='بكالوريا 2027 — كتاب الشرح الكامل';let b='';
+  const title='بكالوريا 2027 — كتاب الشرح الكامل';let b='';
   b+='<header><h1>🕋 '+title+'</h1><p>شرح كامل لفصول جميع المواد والمسارات — محتوى بيداغوجي مُبسّط بأمثلة وقواعد وحيل الامتحان</p></header>';
-  ps.forEach(p=>{
-    b+='<h2 class="part-title">🎓 '+dlEsc(p.name)+'</h2>';
-    p.subjects.forEach(s=>s.books.forEach(bk=>{
-      b+='<div class="book-title">📚 '+dlEsc(bk.name)+'</div>';
+  dlNodes().forEach(nd=>{
+    b+='<h2 class="part-title">🎓 '+dlEsc(nd.pname)+'</h2>';
+    nd.sos.forEach(so=>so.books.forEach(({bi,bk})=>{
+      b+='<div class="book-title">📚 '+dlEsc(bookLabel(nd.pi,so.si,bi))+' <span class="minor">('+dlEsc(so.sname)+')</span></div>';
       bk.chapters.forEach(ch=>{
         b+='<div class="ch"><h3>📘 '+dlEsc(ch.title)+'</h3><div class="tr">';
         (ch.read||[]).forEach(r=>{if(r&&(r.h||r.t))b+='<p><b>'+dlEsc(r.h)+'</b><br>'+dlEsc(r.t)+'</p>'});
@@ -1864,12 +1935,12 @@ function buildExplainHTML(){
   return dlShell(title,b);
 }
 function buildQuestionsHTML(){
-  const ps=dlParts(),title='بكالوريا 2027 — كتاب الأسئلة بحلولها';let b='';
+  const title='بكالوريا 2027 — كتاب الأسئلة بحلولها';let b='';
   b+='<header><h1>❓ '+title+'</h1><p>بنك الأسئلة الكامل لكل مسار: السؤال، الخيارات، الإجابة الصحيحة، التلميح، والشرح التفصيلي</p></header>';
-  ps.forEach(p=>{
-    b+='<h2 class="part-title">🎓 '+dlEsc(p.name)+'</h2>';
-    p.subjects.forEach(s=>s.books.forEach(bk=>{
-      b+='<div class="book-title">📚 '+dlEsc(bk.name)+'</div>';
+  dlNodes().forEach(nd=>{
+    b+='<h2 class="part-title">🎓 '+dlEsc(nd.pname)+'</h2>';
+    nd.sos.forEach(so=>so.books.forEach(({bi,bk})=>{
+      b+='<div class="book-title">📚 '+dlEsc(bookLabel(nd.pi,so.si,bi))+' <span class="minor">('+dlEsc(so.sname)+')</span></div>';
       bk.chapters.forEach(ch=>{
         b+='<div class="ch"><h3>📘 '+dlEsc(ch.title)+'</h3>';
         (ch.qs||[]).forEach((q,i)=>{
@@ -1886,12 +1957,12 @@ function buildQuestionsHTML(){
   return dlShell(title,b);
 }
 function buildExamsHTML(){
-  const ps=dlParts(),title='بكالوريا 2027 — كتب الامتحانات الوزنية';let b='';
+  const title='بكالوريا 2027 — كتب الامتحانات الوزنية';let b='';
   b+='<header><h1>📝 '+title+'</h1><p>أوراق امتحانات وزنية على نمط بكالوريا 2027 (20 سؤال × 10 درجات) لكل مسار مع بطاقة الإجابة</p></header>';
-  ps.forEach(p=>{
-    b+='<h2 class="part-title">🎓 '+dlEsc(p.name)+'</h2>';
+  dlNodes().forEach(nd=>{
+    b+='<h2 class="part-title">🎓 '+dlEsc(nd.pname)+'</h2>';
     const pool=[];
-    p.subjects.forEach(s=>s.books.forEach(bk=>bk.chapters.forEach(ch=>(ch.qs||[]).forEach(q=>pool.push(q)))));
+    nd.sos.forEach(so=>so.books.forEach(({bk})=>bk.chapters.forEach(ch=>(ch.qs||[]).forEach(q=>pool.push(q)))));
     ['الورقة الأولى','الورقة الثانية','الورقة الثالثة'].forEach((nm)=>{
       const qs=pool.slice().sort(()=>Math.random()-0.5).slice(0,20);
       b+='<div class="ch"><h3>📝 '+nm+' — الامتحان الوزني ('+qs.length+' سؤال × 10 = <b>'+qs.length*10+'</b> درجة)</h3>';
@@ -1903,15 +1974,17 @@ function buildExamsHTML(){
   });
   return dlShell(title,b);
 }
-function dlFileName(type,extra){
+function dlFileName(type){
   let n='بكالوريا2027-'+(type==='explain'?'كتاب-الشرح':type==='questions'?'كتاب-الأسئلة-بحلولها':'كتب-الامتحانات');
-  if(dlScope>=0&&window.STUDY&&window.STUDY[dlScope])n+='-'+window.STUDY[dlScope].name.replace(/[^\u0600-\u06FFa-zA-Z0-9-]/g,'');
+  if(dlBook&&window.STUDY&&window.STUDY[dlBook.pi])n+='-'+dlSlug(window.STUDY[dlBook.pi].name)+'-'+dlSlug(bookLabel(dlBook.pi,dlBook.si,dlBook.bi));
+  else if(dlScope>=0&&window.STUDY&&window.STUDY[dlScope])n+='-'+dlSlug(window.STUDY[dlScope].name);
   else n+='-كل-المسارات';
   return n+'.html';
 }
 function downloadBook(type){
   const html=type==='explain'?buildExplainHTML():type==='questions'?buildQuestionsHTML():buildExamsHTML();
   const name=dlFileName(type);
+  dlBook=null;
   try{
     if(typeof Blob==='undefined'){toast('⚠️ التحميل غير مدعوم هنا — استخدم نسخة المتصفح الكامل');return html}
     const blob=new Blob([html],{type:'text/html;charset=utf-8'});
@@ -2114,8 +2187,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.2',SW_BUILD='v26';
+const APP_VERSION='1.3.3',SW_BUILD='v27';
 const CHANGES=[
+  {v:'v27 — مركز تنزيل كل كتاب',d:'13/9/2026',items:['كتالوج ظاهر داخل الإعدادات يعرض كل كتب المكتبة مقسّمة بالمسار ثم المادة — كل كتاب بأسمه وعدد فصوله وأسئلته','تنزيل أي كتاب بمفرده: شرح / أسئلة بحلولها / امتحان ورقي مع بطاقة الإجابة','أسماء تلقائية لكل الكتب التي لم تكن مسماة','إصلاح ظهور رسالة "ما الجديد" المتكررة في كل افتتاح']},
   {v:'v26 — مركز التنزيل',d:'13/9/2026',items:['تنزيل كتاب الشرح المكتمل (كل الفصول) كملف واحد بدون إنترنت','تنزيل كتاب الأسئلة بحلولها المرتبة + التلميح والشرح التفصيلي','تنزيل كتب الامتحانات الوزنية (أوراق × 20 سؤال) مع بطاقة الإجابة','اختر النطاق: كل المكتبة أو مسار واحد محدد','كل كتاب بصفحات HTML جاهزة للطباعة والمذاكرة خارج المنصة']},
   {v:'v25 — مزايا الشركة الكاملة',d:'13/9/2026',items:['الامتحان الشامل: امتحان بكالوريا وزني من مسارك (20 سؤال × 10 درجات) مع تقدير ونجاح/رسوب','استمع للسؤال ولرد المعلم الذكي بالعربية 🔊 (بدون إنترنت)','نافذة "ما الجديد" تفتح تلقائياً بعد كل إصدار','لوحة إتقان المسارات في الإحصائيات مع نصيحة لأهم مادة تركز عليها']},
   {v:'v24 — خلاصة الشركة الإصدار',d:'13/9/2026',items:['شاشة عن التطبيق ببياناتك وسجل التحديثات الكامل','زر فحص التحديث يتحقق حيًا من أحدث إصدار على GitHub','توقيع AlfaDev والخصوصية ورابط الاقتراحات']},
