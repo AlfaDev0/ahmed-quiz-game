@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.6'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.7'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -519,6 +519,10 @@ sandbox.pomoReset();
 ck('pomodoro reset to 25min stopped', sandbox.pomo.phase===0 && sandbox.pomo.left===1500 && sandbox.pomo.run===false);
 byId.pomoClose.onclick();
 ck('pomodoro sheet closes', byId.pomoSheet.style.display==='none');
+
+/* ---- hard refresh button ---- */
+ck('refresh button present', !!byId.refreshBtn && typeof byId.refreshBtn.onclick==='function');
+ck('refresh invoke is safe in no-cache env', (function(){try{byId.refreshBtn.onclick();return true}catch(e){return false}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

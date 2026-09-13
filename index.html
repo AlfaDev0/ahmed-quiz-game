@@ -746,10 +746,11 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:4px">
         <span class="set-label">📦 عن التطبيق</span>
-        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.6</span>
+        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.7</span>
       </div>
       <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
       <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
+      <button class="sec-btn" id="refreshBtn" style="background:#fff2d9;border:0">🧹 تحديث إجباري — مسح الكاش وإعادة التحميل</button>
       <div style="font-size:11px;color:var(--dim);text-align:center;padding:6px 0 0">AlfaDev 🚀 نطوّر ونحسّن باستمرار</div>
     </div>
   </div>
@@ -783,7 +784,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="ai-card">
       <div class="ai-head">
         <div class="ai-logo">📦</div>
-        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.6</div></div>
+        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.7</div></div>
         <button class="ai-close" id="aboutClose">✕</button>
       </div>
       <div class="ai-body" id="aboutBody"></div>
@@ -2479,8 +2480,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.6',SW_BUILD='v29';
+const APP_VERSION='1.3.7',SW_BUILD='v30';
 const CHANGES=[
+  {v:'v30 — تحديث إجباري + إصلاح النشر',d:'13/9/2026',items:['زر «تحديث إجباري» في الإعدادات يمسح كل الكاش ويسجل الخروج من عامل الخدمة ويعيد التحميل — حل نهائي لأي نسخة قديمة','إصلاح جذري في عامل الخدمة: مسارات النشر الآن merge مع مسار المشروع (بدل جذر الحساب) — يصير النشر مستقرًا دائمًا','أي زائر بياخد أقصى نسخة فورًا بعد هذا التحديث']},
   {v:'v29 — الجرعة اليومية + منبه المذاكرة',d:'13/9/2026',items:['⚡ جرعة يومية: 10 أسئلة من أضعف فصولك (اللي لسه متتقنتش + أخطاء سابقة)','🍅 منبه بومودورو: مذاكرة 25 دقيقة / راحة 5 دقائق يتناوبون تلقائيًا مع منبه صوتي','يعتمد التقدم في الخطة الذكية على حتى أدق مستوى فصلي لتكوين الجرعة']},
   {v:'v28 — خطة المذاكرة الذكية',d:'13/9/2026',items:['خطة يومية تلقائية بتقسّم كل الفصول المتبقية لحد موعد امتحانك','بعدجت على الرئيسية بترشحلك فصول اليوم مع شريط تقدم عام','اضغط أي فصل في الخطة — يروّح مباشرة للمذاكرة والاختبار','احتفال ورسالة عند إكمال الخطة بالكامل','إعادة البناء أو الحذف في أي وقت — الخطة تتابع تقدمك الفعلي']},
   {v:'v27 — مركز تنزيل كل كتاب',d:'13/9/2026',items:['كتالوج ظاهر داخل الإعدادات يعرض كل كتب المكتبة مقسّمة بالمسار ثم المادة — كل كتاب بأسمه وعدد فصوله وأسئلته','تنزيل أي كتاب بمفرده: شرح / أسئلة بحلولها / امتحان ورقي مع بطاقة الإجابة','أسماء تلقائية لكل الكتب التي لم تكن مسماة','إصلاح ظهور رسالة "ما الجديد" المتكررة في كل افتتاح']},
@@ -2521,10 +2523,27 @@ function checkUpdates(){
     })
     .catch(()=>{if(b)b.textContent='🔄 فحص التحديث';toast('⚠️ تعذّر فحص التحديث الآن — تأكد من اتصالك')});
 }
+function hardRefresh(){
+  try{
+    if('caches' in window){
+      const doReload=()=>{try{if(window.location&&window.location.reload)window.location.reload()}catch(e){}};
+      window.caches.keys().then(ks=>Promise.all(ks.map(k=>window.caches.delete(k)))).then(()=>{
+        if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){
+          navigator.serviceWorker.getRegistrations()
+            .then(rs=>Promise.all(rs.map(x=>x.unregister())))
+            .then(doReload);
+        }else doReload();
+      }).catch(doReload);
+      return;
+    }
+  }catch(e){}
+  try{if(window.location&&window.location.reload)window.location.reload()}catch(e){}
+}
 (function(){
   renderAbout();
   const w=document.getElementById('whatsNewBtn');if(w)w.onclick=openAbout;
   const c=document.getElementById('chkUpdBtn');if(c)c.onclick=checkUpdates;
+  const r=document.getElementById('refreshBtn');if(r)r.onclick=hardRefresh;
   const cl=document.getElementById('aboutClose');if(cl)cl.onclick=()=>{document.getElementById('aboutSheet').style.display='none'};
   const as=document.getElementById('aboutSheet');if(as)as.onclick=e=>{if(e.target.id==='aboutSheet')as.style.display='none'};
   const vl=document.getElementById('appVersionLine');if(vl)vl.textContent='الإصدار '+APP_VERSION+' • البناء '+SW_BUILD;

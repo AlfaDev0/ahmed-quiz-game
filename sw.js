@@ -1,21 +1,24 @@
-const CACHE_NAME = 'ahmed-quiz-v29';
-const urlsToCache = [
-    '/',
-    '/index.html',
-    '/questions.js',
-    '/study.js',
-    '/icons/avatar.jpg',
-    '/icons/icon-192.png',
-    '/icons/icon-512.png',
-    '/manifest.json'
-];
+const BASE = self.location.pathname.replace(/\/?sw\.js$/, '');
+const CACHE_NAME = 'ahmed-quiz-v30';
+
+const REL = {
+    '/': '',
+    '/index.html': '/index.html',
+    '/questions.js': '/questions.js',
+    '/study.js': '/study.js',
+    '/icons/avatar.jpg': '/icons/avatar.jpg',
+    '/icons/icon-192.png': '/icons/icon-192.png',
+    '/icons/icon-512.png': '/icons/icon-512.png',
+    '/manifest.json': '/manifest.json'
+};
+const urlsToCache = Object.values(REL).map(p => BASE + p);
 
 const BIG_FILES = {
-    '/study.js': { marker: '"books"', minSize: 1000000 },
-    '/questions.js': { marker: 'window.QUESTIONS', minSize: 10000 }
+    [BASE + '/study.js']: { marker: '"books"', minSize: 1000000 },
+    [BASE + '/questions.js']: { marker: 'window.QUESTIONS', minSize: 10000 }
 };
 
-function matchesRule(rule, text) {
+function matchRule(rule, text) {
     if (!rule) return true;
     return text.length >= rule.minSize && text.indexOf(rule.marker) !== -1;
 }
@@ -26,7 +29,7 @@ function putValidated(cache, url) {
         const rule = BIG_FILES[url];
         if (!rule) return cache.put(url, r).then(() => true);
         return r.text().then(text => {
-            if (!matchesRule(rule, text)) return false;
+            if (!matchRule(rule, text)) return false;
             return cache.put(url, new Response(text, {
                 headers: { 'Content-Type': 'text/javascript; charset=utf-8' }
             })).then(() => true);
@@ -35,9 +38,9 @@ function putValidated(cache, url) {
 }
 
 function cachedStudyOK() {
-    return caches.open(CACHE_NAME).then(c => c.match('/study.js')).then(res => {
+    return caches.open(CACHE_NAME).then(c => c.match(BASE + '/study.js')).then(res => {
         if (!res) return false;
-        return res.text().then(t => matchesRule(BIG_FILES['/study.js'], t)).catch(() => false);
+        return res.text().then(t => matchRule(BIG_FILES[BASE + '/study.js'], t)).catch(() => false);
     }).catch(() => false);
 }
 
@@ -67,13 +70,13 @@ self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
     if (event.request.method !== 'GET' || url.origin !== location.origin) return;
 
-    if (url.pathname === '/' || url.pathname.endsWith('index.html')) {
+    if (url.pathname === BASE + '/' || url.pathname.endsWith('index.html')) {
         event.respondWith(
-            caches.match('/index.html').then(cached => {
+            caches.match(BASE + '/index.html').then(cached => {
                 const network = fetch(event.request).then(res => {
                     if (res.ok) {
                         const copy = res.clone();
-                        caches.open(CACHE_NAME).then(c => c.put('/index.html', copy));
+                        caches.open(CACHE_NAME).then(c => c.put(BASE + '/index.html', copy));
                     }
                     return res;
                 }).catch(() => cached);
