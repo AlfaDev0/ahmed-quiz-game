@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ahmed-quiz-v20';
+const CACHE_NAME = 'ahmed-quiz-v21';
 const urlsToCache = [
     '/',
     '/index.html',

@@ -205,7 +205,8 @@ vm.runInContext(`
     S: () => S, set: () => set, qn: () => questions.length, qi: () => qi,
     qc: () => curQ ? curQ.c : -1, active: () => { for (const s of ${JSON.stringify(screenIds)}) if (document.getElementById(s).classList.contains('active')) return s; return '?'; },
     stars: (k) => (S.study[k] || {}).stars || 0, done: (k) => !!(S.study[k] || {}).done,
-    coins: () => S.coins, aictx: () => aiCtx, offline: () => offlineExplain(aiCtx)
+    coins: () => S.coins, aictx: () => aiCtx, offline: () => offlineExplain(aiCtx),
+    last: () => (S.studyLast || null)
   };
 `, sandbox);
 const t = () => sandbox.window.__dbg;
@@ -236,7 +237,7 @@ const t = () => sandbox.window.__dbg;
   ck('study exactly 567 chapters', ch === 567);
   ck('study exactly 3853 questions', qs === 3853);
   ck('every chapter has title+read+valid qs', bad === 0);
-  ck('most questions have expl (' + expl + '/3713)', expl >= 3500);
+  ck('most questions have expl (' + expl + '/3853)', expl >= 3500);
 
   // all normal questions valid
   let nbad = 0, nq = 0;
@@ -283,6 +284,12 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
   ck('subject opened → chapters', t().active() === 'studyBook' && byId.studyChapters.children.length === s0.books.length);
   sandbox.openChapter(0, 0, 0, 0, ch0);
   ck('reading screen with sections', t().active() === 'studyRead' && byId.studyReadBody.children.length >= ch0.read.length + 1);
+  const lastCh = t().last();
+  ck('continue marker saved after open', !!lastCh && lastCh.key === '0.0.0.0' && !!lastCh.title);
+  ck('search finds chapters by title', sandbox.searchChapters('النحو').length > 0);
+  ck('search finds advanced-subject chapters', sandbox.searchChapters('الرياضيات المتقدمة').length > 0);
+  ck('search empty query → []', sandbox.searchChapters('').length === 0);
+  ck('search miss → []', sandbox.searchChapters('zzzzzznotfound').length === 0);
 
   sandbox.startStudyQuiz(0, 0, 0, 0, ch0);
   ck('study quiz started', t().active() === 'game' && t().qn() === ch0.qs.length);

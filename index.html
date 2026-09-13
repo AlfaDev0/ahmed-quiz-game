@@ -330,6 +330,17 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .r-stars{font-size:26px;letter-spacing:6px;margin:6px 0 12px;text-align:center}
 .r-stars .off{opacity:.2}
 .study-hidden{display:none}
+
+/* ==== STUDY TOOLS (search + continue) ==== */
+.study-tools{padding:12px 16px 0;display:flex;flex-direction:column;gap:10px}
+.study-search{width:100%;padding:13px 16px;border-radius:14px;border:1.5px solid var(--bg3);background:var(--bg2);color:var(--text);font-family:inherit;font-size:14px;outline:none;-webkit-appearance:none}
+.study-search:focus{border-color:var(--primary)}
+.study-continue{display:none;align-items:center;gap:10px;background:linear-gradient(135deg,#1286FF,#6C63FF);border:none;color:#fff;padding:12px 16px;border-radius:14px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;text-align:right}
+.study-continue .sci{font-size:18px;flex-shrink:0}
+.study-continue span:last-child{display:block;font-size:11.5px;opacity:.85;font-weight:500;margin-top:2px}
+.study-none{padding:18px;text-align:center;color:var(--dim);font-size:13px}
+.sr-row{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1.5px solid var(--bg3);border-radius:14px;padding:13px;margin:0 16px 9px;cursor:pointer;transition:.15s}
+.sr-row:active{transform:scale(.98)}
 /* ==== AI TUTOR ==== */
 .ai-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px 16px 2px;padding:12px;border:none;border-radius:14px;background:linear-gradient(135deg,#00C9A7,#1286FF);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(18,134,255,.35)}
 .ai-btn:disabled{opacity:.5;cursor:default}
@@ -604,6 +615,11 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
   <!-- STUDY -->
   <div id="study" class="screen">
     <div class="page-head"><button class="icon-btn" id="studyBackHome">→</button><h2>📚 المكتبة التعليمية</h2></div>
+    <div class="study-tools">
+      <input type="search" class="study-search" id="studySearch" placeholder="🔍 ابحث عن درس أو كتاب أو فصل..." autocomplete="off">
+      <button class="study-continue" id="studyContinue"><span class="sci">⏪</span><span>متابعة الدراسة<span id="studyContinueTxt"></span></span></button>
+    </div>
+    <div id="studySearchRes" class="study-hidden"></div>
     <div id="studyParts" class="parts"></div>
   </div>
   <div id="studyBooks" class="screen">
@@ -664,7 +680,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 <script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{}};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null};
 const SETDEF={sound:true,vib:true,dark:true,notif:false,qCount:20,timer:20,aiKey:''};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null}
@@ -1298,6 +1314,8 @@ function bindEvents(){
   // STUDY NAV
   if(window.STUDY){
     document.getElementById('studyBanner').onclick=()=>{renderStudyParts();show('study')};
+    const ss=document.getElementById('studySearch');
+    if(ss)ss.oninput=()=>runStudySearch(ss.value);
     document.getElementById('studyBackHome').onclick=()=>{show('home');updateHome()};
     document.getElementById('studyBackParts').onclick=()=>{renderStudyParts();show('study')};
     document.getElementById('studyBackBooks').onclick=()=>{openStudyPart(window._studyPi);show('studyBooks')};
@@ -1352,6 +1370,7 @@ function renderStudyFill(){
   if(el)el.style.width=(t?Math.round(d/t*100):0)+'%';
 }
 function renderStudyParts(){
+  renderStudyTools();
   const el=document.getElementById('studyParts');el.innerHTML='';
   if(!window.STUDY)return;
   window.STUDY.forEach((p,pi)=>{
@@ -1361,6 +1380,62 @@ function renderStudyParts(){
     const d=document.createElement('div');d.className='part-card';d.style.background=p.grad;
     d.innerHTML='<span class="pi">'+p.icon+'</span><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-prog-row"><div class="part-prog-bar"><div class="part-prog-fill" style="width:'+pct+'%"></div></div><span class="part-prog-txt">'+done+' ⭐</span></div>';
     d.onclick=()=>openStudyPart(pi);el.appendChild(d);
+  });
+}
+function studyLastResolve(){
+  if(!S||!S.studyLast||!window.STUDY)return null;
+  const l=S.studyLast;
+  try{
+    const p=window.STUDY[l.pi],s=p.subjects[l.si],b=s.books[l.bi],c=b.chapters[l.ci];
+    if(!c)return null;
+    return {pi:l.pi,si:l.si,bi:l.bi,ci:l.ci,ch:c,label:c.title,sub:s.name+' · '+b.title};
+  }catch(e){return null}
+}
+function renderStudyTools(){
+  const r=studyLastResolve();
+  const btn=document.getElementById('studyContinue');
+  if(btn){
+    if(r){btn.style.display='flex';document.getElementById('studyContinueTxt').textContent=r.label+' — '+r.sub;btn.onclick=()=>openChapter(r.pi,r.si,r.bi,r.ci,r.ch)}
+    else{btn.style.display='none';btn.onclick=null}
+  }
+  const inp=document.getElementById('studySearch');
+  if(inp)inp.value='';
+  const res=document.getElementById('studySearchRes');
+  if(res){res.innerHTML='';res.classList.add('study-hidden')}
+  const parts=document.getElementById('studyParts');
+  if(parts)parts.style.display='';
+}
+function searchChapters(q){
+  q=String(q||'').trim().toLowerCase();
+  if(!q||!window.STUDY)return [];
+  const out=[];
+  window.STUDY.forEach((p,pi)=>p.subjects.forEach((s,si)=>{
+    const hitPart=p.name.toLowerCase().includes(q),hitSubj=s.name.toLowerCase().includes(q);
+    s.books.forEach((b,bi)=>{
+      const hitBook=b.title.toLowerCase().includes(q);
+      b.chapters.forEach((c,ci)=>{
+        if(hitPart||hitSubj||hitBook||(c.title&&c.title.toLowerCase().includes(q)))
+          out.push({pi:pi,si:si,bi:bi,ci:ci,ch:c,label:c.title,sub:s.name+' · '+b.title,part:p.name});
+      });
+    });
+  }));
+  return out;
+}
+function runStudySearch(q){
+  const res=document.getElementById('studySearchRes'),parts=document.getElementById('studyParts');
+  if(!res)return;
+  if(!String(q||'').trim()){res.classList.add('study-hidden');if(parts)parts.style.display='';return}
+  const list=searchChapters(q);
+  res.classList.remove('study-hidden');if(parts)parts.style.display='none';
+  res.innerHTML='';
+  const head=document.createElement('div');head.className='study-none';
+  head.textContent=list.length?('نتائج البحث: '+list.length+' فصل'):'لا توجد نتائج مطابقة';
+  res.appendChild(head);
+  list.slice(0,80).forEach(it=>{
+    const d=document.createElement('div');d.className='sr-row';
+    d.innerHTML='<div class="ch-info"><b>'+it.label+'</b><span>'+it.sub+' · '+it.part+'</span></div><span class="ch-arrow">▶</span>';
+    d.onclick=()=>openChapter(it.pi,it.si,it.bi,it.ci,it.ch);
+    res.appendChild(d);
   });
 }
 function totalChaptersOfPart(pi){let n=0;window.STUDY[pi].subjects.forEach(s=>s.books.forEach(b=>n+=b.chapters.length));return n}
@@ -1402,6 +1477,7 @@ function openStudySubject(pi,si){
 }
 function openChapter(pi,si,bi,ci,ch){
   _studyPi=pi;_studySi=si;
+  S.studyLast={key:chKey(pi,si,bi,ci),pi:pi,si:si,bi:bi,ci:ci,title:ch&&ch.title||''};save();
   document.getElementById('srTitle').textContent='الفصل '+(ci+1)+' — '+ch.title;
   const el=document.getElementById('studyReadBody');el.innerHTML='';
   const head=document.createElement('div');head.className='read-chapter';head.textContent=ch.title;el.appendChild(head);
