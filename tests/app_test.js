@@ -370,6 +370,18 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
   ck('mastered mistakes cleared', sandbox.wrongQuestions().length === 0);
 })();
 
+/* ---- about / changelog ---- */
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.0'));
+sandbox.renderAbout();
+const aboutHtml = byId.aboutBody._inner || '';
+ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
+ck('changelog rendered (whats new + totals)', aboutHtml.includes('ما الجديد') && aboutHtml.includes('فصل') && aboutHtml.includes('سؤال'));
+ck('about has team + privacy footer', aboutHtml.includes('AlfaDev') && aboutHtml.includes('خصوصيتك'));
+sandbox.openAbout();
+ck('about sheet opens', byId.aboutSheet.style.display === 'flex');
+byId.aboutClose.onclick();
+ck('about sheet closes', byId.aboutSheet.style.display === 'none');
+
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
   ck('settings persisted', localStorage._d.iq_set && JSON.parse(localStorage._d.iq_set).aiKey === '');

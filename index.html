@@ -391,6 +391,21 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .ai-fab{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#00C9A7,#1286FF);color:#fff;font-size:24px;z-index:498;box-shadow:0 8px 26px rgba(18,134,255,.45);cursor:pointer;align-items:center;justify-content:center;display:flex;animation:fabPulse 2.6s infinite;line-height:1}
 @keyframes fabPulse{0%,100%{box-shadow:0 8px 26px rgba(18,134,255,.4)}50%{box-shadow:0 10px 34px rgba(0,201,167,.65)}}
 
+/* ---- ABOUT / CHANGELOG ---- */
+.about-brand{text-align:center;padding:2px 0 14px}
+.about-brand .ab-ico{font-size:42px}
+.about-brand b{font-size:17px;display:block;margin-top:4px}
+.about-brand span{font-size:12px;color:var(--dim)}
+.cl-item{border:1px solid var(--bg3);background:var(--bg2);border-radius:14px;padding:12px 14px;margin:10px 0}
+.cl-item .cl-head{display:flex;align-items:center;justify-content:space-between}
+.cl-item .cl-v{font-weight:900;color:var(--gold);font-size:13px}
+.cl-item .cl-d{font-size:11px;color:var(--dim)}
+.cl-item ul{margin:8px 0 0;padding:0;padding-right:18px;font-size:12.5px;line-height:1.9}
+.cl-item li{margin:2px 0}
+.about-foot{border-top:1px solid var(--bg3);margin-top:14px;padding-top:12px;font-size:12px;color:var(--dim);line-height:2}
+.about-foot a{color:var(--primary);font-weight:700;text-decoration:none}
+.about-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,201,167,.12);color:#00C9A7;font-weight:800;font-size:11px;border-radius:12px;padding:5px 12px;margin-top:10px}
+
 @media(min-width:481px){#app{border-left:1px solid var(--bg3);border-right:1px solid var(--bg3)}}
 </style>
 </head>
@@ -636,6 +651,13 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       <label class="sec-btn" for="importFile">📥 استيراد البيانات</label>
       <input type="file" id="importFile" accept=".json" style="display:none">
       <button class="danger" id="resetBtn">🗑️ مسح جميع البيانات</button>
+      <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <span class="set-label">📦 عن التطبيق</span>
+        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.0</span>
+      </div>
+      <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
+      <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
+      <div style="font-size:11px;color:var(--dim);text-align:center;padding:6px 0 0">AlfaDev 🚀 نطوّر ونحسّن باستمرار</div>
     </div>
   </div>
 
@@ -661,6 +683,18 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
   <div id="studyRead" class="screen">
     <div class="page-head"><button class="icon-btn" id="studyBackBook">→</button><h2 id="srTitle">القراءة</h2></div>
     <div id="studyReadBody"></div>
+  </div>
+
+  <!-- ABOUT SHEET -->
+  <div class="ai-sheet" id="aboutSheet" style="display:none">
+    <div class="ai-card">
+      <div class="ai-head">
+        <div class="ai-logo">📦</div>
+        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.0</div></div>
+        <button class="ai-close" id="aboutClose">✕</button>
+      </div>
+      <div class="ai-body" id="aboutBody"></div>
+    </div>
   </div>
 
   <!-- AI TUTOR SHEET -->
@@ -1772,6 +1806,53 @@ function openAIKey(){
     toast('🗑️ تم حذف المفتاح — العمل بالشرح الفوري');
   };
   renderAI();
+})();
+</script>
+<script>
+/* ================= ABOUT / WHAT'S NEW ================= */
+const APP_VERSION='1.3.0',SW_BUILD='v24';
+const CHANGES=[
+  {v:'v23 — المعلم الذكي الكامل',d:'13/9/2026',items:['واجهة محادثة بفقاعات مع تنسيق كامل للردود','سياق تلقائي للسؤال الحالي أو الفصل الذي تقرأه','4 أوامر سريعة: شرح • سؤال مشابه • معلومة ذهبية • تلخيص الفصل','نموذج محلّي ذكي يعمل بدون إنترنت وبدون مفتاح','زر عائم 🤖 متاح من كل الشاشات']},
+  {v:'v22 — مراجعة أخطائي',d:'12/9/2026',items:['تسجيل تلقائي لكل سؤال أخطأت فيه أو انتهى وقته','وضع تدريبي خاص يعيدك لأسئلة أخطائك','يُحذف السؤال من القائمة عند إتقانه']},
+  {v:'v21 — بحث ومتابعة',d:'12/9/2026',items:['بحث فوري في كل المكتبة (567 فصلاً)','زر متابعة الدراسة يوصلك لآخر فصل']},
+  {v:'v20 — كتب التخصص',d:'11/9/2026',items:['رياضيات وفيزياء متقدمة لمسار الهندسة','أحياء وكيمياء متقدمة لمسار الطب والعلوم']},
+  {v:'v19 — إصلاح رصيد العملات',d:'11/9/2026',items:['إصلاح تكرار منح العملات في كويز الدراسة','شاشة نتيجة تعرض الربح الحقيقي']},
+  {v:'v18 — إطلاق بكالوريا 2027',d:'10/9/2026',items:['إعادة بناء المكتبة على نظام المسارات الجديد','بنك أسئلة يصنّف حسب المسار ومستوى التخصص','إضافة مسار الأعمال Modules اقتصاد ورياضيات']}
+];
+function renderAbout(){
+  const body=document.getElementById('aboutBody');if(!body)return;
+  const sub=document.getElementById('aboutSub');if(sub)sub.textContent='الإصدار '+APP_VERSION+' • البناء '+SW_BUILD;
+  const vl=document.getElementById('appVersionLine');if(vl)vl.textContent='الإصدار '+APP_VERSION+' • البناء '+SW_BUILD;
+  let total=0,qq=0;
+  if(window.STUDY)window.STUDY.forEach(p=>p.subjects.forEach(s=>s.books.forEach(b=>{total+=b.chapters.length;b.chapters.forEach(c=>qq+=c.qs.length)})));
+  const brand='<div class="about-brand"><span class="ab-ico">🎓</span><b>بكالوريا 2027</b>'+
+    '<span>منصة المراجعة الشاملة للمسارات الجديدة</span>'+
+    '<span class="about-badge">🟢 تصلح وتتحسّن باستمرار</span>'+
+    '<div style="font-size:12px;color:var(--dim);margin-top:10px">📚 '+total+' فصل • ❓ '+qq+' سؤال • 🧠 معلم ذكي</div></div>';
+  const list=CHANGES.map(c=>'<div class="cl-item"><div class="cl-head"><span class="cl-v">'+c.v+'</span><span class="cl-d">'+c.d+'</span></div><ul>'+c.items.map(i=>'<li>'+i+'</li>').join('')+'</ul></div>').join('');
+  const foot='<div class="about-foot"><b>🏢 AlfaDev</b><br>نطوّر هذه المنصة ونتابع مناهج الثانوية أولاً بأول — مفتوحة للجميع.<br>🔒 خصوصيتك محفوظة: كل بياناتك تُخزّن على جهازك فقط.<br>💬 مقترحاتك وتقرير الأخطاء: <a href="https://github.com/AlfaDev0/ahmed-quiz-game/issues" target="_blank" rel="noopener">GitHub Issues</a></div>';
+  body.innerHTML=brand+'<b>🆕 ما الجديد؟</b>'+list+foot;
+}
+function openAbout(){renderAbout();document.getElementById('aboutSheet').style.display='flex'}
+function checkUpdates(){
+  const b=document.getElementById('chkUpdBtn');if(b)b.textContent='⏳ جارٍ التحقق من النشر...';
+  fetch('https://api.github.com/repos/AlfaDev0/ahmed-quiz-game/commits/main?per_page=1',{headers:{Accept:'application/vnd.github+json'}})
+    .then(r=>{if(!r.ok)throw 0;return r.json()})
+    .then(c=>{
+      const msg=((c.commit&&c.commit.message)||'').split('\n')[0];
+      const d=((c.commit&&c.commit.committer&&c.commit.committer.date)||'').slice(0,10);
+      if(b)b.textContent='🔄 فحص التحديث';
+      toast('✅ أنت على أحدث نسخة — آخر نشر '+d+' («'+msg.slice(0,44)+'»)');
+    })
+    .catch(()=>{if(b)b.textContent='🔄 فحص التحديث';toast('⚠️ تعذّر فحص التحديث الآن — تأكد من اتصالك')});
+}
+(function(){
+  renderAbout();
+  const w=document.getElementById('whatsNewBtn');if(w)w.onclick=openAbout;
+  const c=document.getElementById('chkUpdBtn');if(c)c.onclick=checkUpdates;
+  const cl=document.getElementById('aboutClose');if(cl)cl.onclick=()=>{document.getElementById('aboutSheet').style.display='none'};
+  const as=document.getElementById('aboutSheet');if(as)as.onclick=e=>{if(e.target.id==='aboutSheet')as.style.display='none'};
+  const vl=document.getElementById('appVersionLine');if(vl)vl.textContent='الإصدار '+APP_VERSION+' • البناء '+SW_BUILD;
 })();
 </script>
 <script>
