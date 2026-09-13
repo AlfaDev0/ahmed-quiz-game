@@ -291,6 +291,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .pomo-chip.on{border-color:#6C63FF;background:#6C63FF;color:#fff}
 .pomo-go{width:100%;margin-top:12px;padding:14px;border:none;border-radius:14px;background:#6C63FF;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
 .pomo-go.ghost{background:#f1f1f6;color:#555;font-weight:600}
+.home-note{margin:2px 0 12px;padding:11px 14px;border-radius:14px;background:linear-gradient(120deg,#fff3d6,#fff);border:1px solid #ffe4ad;color:#6b5218;font-size:13px;line-height:1.7;font-weight:600}
 .sb-prog{height:5px;background:rgba(255,255,255,.3);border-radius:3px;margin-top:7px;overflow:hidden}
 .sb-fill{height:100%;width:0;background:#fff;border-radius:3px;transition:width .5s}
 .sb-btn{background:#fff;color:#1286FF;border:none;padding:9px 20px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer;z-index:1;flex-shrink:0}
@@ -479,6 +480,8 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         </div>
       </div>
     </div>
+
+    <div class="home-note" id="homeNote"></div>
 
     <div class="daily">
       <span class="daily-ico">📅</span>
@@ -746,7 +749,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:4px">
         <span class="set-label">📦 عن التطبيق</span>
-        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.8</span>
+        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.9</span>
       </div>
       <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
       <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
@@ -784,7 +787,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="ai-card">
       <div class="ai-head">
         <div class="ai-logo">📦</div>
-        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.8</div></div>
+        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.9</div></div>
         <button class="ai-close" id="aboutClose">✕</button>
       </div>
       <div class="ai-body" id="aboutBody"></div>
@@ -984,6 +987,7 @@ function updateHome(){
   if(mb)mb.textContent=S.monthPaid?'تم ✓':(S.monthBest>0?'سجل: '+S.monthBest:'ابدأ');
   if(typeof renderStudyFill==='function')renderStudyFill();
   if(typeof renderStudyPlan==='function')renderStudyPlan();
+  if(typeof renderHomeNote==='function')renderHomeNote();
 }
 function checkDaily(){
   const today=new Date().toDateString();
@@ -2213,7 +2217,29 @@ function renderStudyPlan(){
 function openPlan(){renderPlanForm();const sh=document.getElementById('planSheet');if(sh)sh.style.display='flex'}
 function closePlan(){const sh=document.getElementById('planSheet');if(sh)sh.style.display='none'}
 
-/* ================= DAILY QUICK REVIEW ================= */
+function renderHomeNote(){
+  const el=document.getElementById('homeNote');if(!el)return;
+  const today=dstr(new Date());
+  const ROT=[
+    'فخور بيك إنك واقف هنا 💛 — لو ذاكرت النهارده 30 دقيقة بس، هتبقى قدام نفسك أسطوري.',
+    'ما تخافش من الصعوبة — خليك مبسوط وذاكر شوية شوية، وأنا وياك 🫶',
+    'النجاح مش ليلة واحدة — كل سؤال جاوبته صح هو خطوة من الحقيقة اللي بنتمناها يارب 🙏',
+    'اتفقنا؟ النهارده تشوف نفسك أول ما تذاكر — وحط موبايلك بعيد شوية 😁'
+  ];
+  if(S.plan&&S.plan.days){
+    const idx=S.plan.days.findIndex(d=>d.d===today);
+    const n=idx>=0?(S.plan.days[idx].items||[]).length:0;
+    el.textContent=n>0
+      ?'🗓️ رسالة منّي: خطتك جاهزة — النهارده '+n+' '+ (n===1?'فصل':'فصول')+' سهلين. ابدأ بأول واحد بس 🤝'
+      :'🗓️ رسالة منّي: خطتك شايلة كل فصولك.. يوم راحة اليوم، بس كمّل غدًا 💛';
+    return;
+  }
+  if(S.games===0){
+    el.textContent='رسالة منّي 💛 ابدأ النهارده بجرعة اليوم أو تحدي اليوم — أول خطوة هي أصعبك.. وأنا واثق فيك.';
+    return;
+  }
+  el.textContent='رسالة منّي اليوم: '+ROT[(new Date()).getDate()%ROT.length];
+}
 var quickMode=false;
 function quickPool(){
   const pool=[],weak=[];
@@ -2372,12 +2398,14 @@ function ctxText(){
 function offlineExplain(q){
   if(!q)return 'اضغط على أي إجابة أو انتقل لسؤال ثم اسألني من هنا.';
   const i=q.c,parts=[];
+  parts.push('هيّا بنا 💪');
   parts.push('**الإجابة الصحيحة:** '+q.a[i]);
   if(q.expl)parts.push('📘 '+q.expl);
   else if(q.hint)parts.push('💡 **الدليل:** '+q.hint);
   parts.push('**لماذا الخيارات الأخرى خاطئة؟**');
   q.a.forEach((x,j)=>{if(j!==i)parts.push('✕ '+x)});
   parts.push('🔑 نصيحة: «'+q.q+'» — أبقِ هذه المعلومة في ذهنك لسؤال مشابه.');
+  parts.push('إنت كده متظبط.. شدّ حيلك بقى 💛');
   return parts.join('\n');
 }
 function scrollAI(){const b=document.getElementById('aiBody');if(b)b.scrollTop=b.scrollHeight}
@@ -2404,17 +2432,17 @@ function localTutor(u,cxt,sc,expl){
       const a=q.a.slice();shuffle(a);const c=a.indexOf(q.a[q.c]);
       const core='**سؤال مشابه للتدريب:**\n\n'+q.q+'\n'+a.map((x,i)=>'['+(i+1)+'] '+x).join('\n')+'\n**الإجابة الصحيحة: ['+(c+1)+'] '+a[c]+'**';
       const extra=(q.expl||q.hint)?'\n\n💡 '+((q.expl||q.hint).slice(0,180)):'';
-      return core+extra+'\n\n> راجعها في «مراجعة أخطائي» لو أخطأت فيها.';
+      return core+extra+'\n\n> راجعها في «مراجعة أخطائي» لو أخطأت فيها. وإنت شكلك جايبها 🤝';
     }
     if(/ذهبي|للامتحان|تلخيص/.test(t)){
-      return '**💎 معلومة ذهبية للامتحان:**\n\n• الإجابة: **'+q.a[q.c]+'**\n'+((q.expl||q.hint)?'• '+((q.expl||q.hint))+'\n':'')+'\n> نصيحة: أعد هذا السؤال في «مراجعة أخطائي» لتثبيته.';
+      return '**💎 معلومة ذهبية للامتحان:**\n\n• الإجابة: **'+q.a[q.c]+'**\n'+((q.expl||q.hint)?'• '+((q.expl||q.hint))+'\n':'')+'\n> نصيحة: أعد هذا السؤال في «مراجعة أخطائي» لتثبيته.\n\n> خليها في بالك.. بتفرق معاك وقت الامتحان 💛';
     }
   }
   if(sc&&sc.type==='ch'){
     if(/لخص|ملخص|زميل/.test(t)){
       const c=sc.ctx;
       const lines=(c.read||[]).map(sec=>{const b=(sec.t||'').split(/[.؟！]/).slice(0,2).join('. ').slice(0,130);return '• **'+sec.h+'**: '+b});
-      return '**خلاصة «'+c.title+'»:**\n\n'+lines.join('\n')+'\n\n> اضغط 🎯 اختبر نفسك لتطبّق المعلومة.';
+      return '**خلاصة «'+c.title+'»:**\n\n'+lines.join('\n')+'\n\n> اضغط 🎯 اختبر نفسك لتطبّق المعلومة.\n\n> ذاكر كده بتركيز.. أنا فخور بيك 💛';
     }
     if(/سؤال|تمرين/.test(t)){const c=sc.ctx,q=(c.qs||[])[0];if(q)return '**جرّب هذا السؤال:**\n\n'+q.q+'\n'+q.a.map((x,i)=>'['+(i+1)+'] '+x).join('\n')+'\n**الإجابة: ['+(q.c+1)+'] '+q.a[q.c]+'**'+((q.expl&&' — '+q.expl)||'')}
   }
@@ -2480,8 +2508,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.8',SW_BUILD='v31';
+const APP_VERSION='1.3.9',SW_BUILD='v32';
 const CHANGES=[
+  {v:'v32 — رسالة منّي + دفا المرشد',d:'13/9/2026',items:['رسالة قصيرة مني أنا كل ما تدخل على الرئيسية — تشجعك وتبعث لك همتك وبتتغير يوميًا','لو عندك خطة مذاكرة: الرسالة بتحسبلك فصول النهارده وتقولك «ابدأ بأول واحد بس»','ردود مرشدي الخاص بقت أدفى وأبسط — تشجيع في كل شرح وتلخيص ومعلومة ذهبية','نفس الشكل والتصميم — من غير أي تغيير بصري']},
   {v:'v31 — بـصوتي الشخصي',d:'13/9/2026',items:['هوية التطبيق بقت بـاسمي: «بـقلم أحمد أيمن فكري» في كل مكان بدل الهوية الوهمية','مرشدي الخاص بدل «المعلم الذكي» — كلام دافي وودود معاك','نظّفت كل المسميات التقنية اللي بتحسسك إنك بتتكلم مع آلة','نفس التصميم والشكل بالظبط — ملمسيناهوش خالص']},
   {v:'v30 — تحديث إجباري + إصلاح النشر',d:'13/9/2026',items:['زر «تحديث إجباري» في الإعدادات يمسح كل الكاش ويسجل الخروج من عامل الخدمة ويعيد التحميل — حل نهائي لأي نسخة قديمة','إصلاح جذري في عامل الخدمة: مسارات النشر الآن merge مع مسار المشروع (بدل جذر الحساب) — يصير النشر مستقرًا دائمًا','أي زائر بياخد أقصى نسخة فورًا بعد هذا التحديث']},
   {v:'v29 — الجرعة اليومية + منبه المذاكرة',d:'13/9/2026',items:['⚡ جرعة يومية: 10 أسئلة من أضعف فصولك (اللي لسه متتقنتش + أخطاء سابقة)','🍅 منبه بومودورو: مذاكرة 25 دقيقة / راحة 5 دقائق يتناوبون تلقائيًا مع منبه صوتي','يعتمد التقدم في الخطة الذكية على حتى أدق مستوى فصلي لتكوين الجرعة']},

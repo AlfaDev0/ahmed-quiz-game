@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.8'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.9'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -523,6 +523,16 @@ ck('pomodoro sheet closes', byId.pomoSheet.style.display==='none');
 /* ---- hard refresh button ---- */
 ck('refresh button present', !!byId.refreshBtn && typeof byId.refreshBtn.onclick==='function');
 ck('refresh invoke is safe in no-cache env', (function(){try{byId.refreshBtn.onclick();return true}catch(e){return false}})());
+
+/* ---- home personal note ---- */
+ck('home note element present', !!byId.homeNote);
+vm.runInContext('S.plan=null;S.games=0;renderHomeNote()',sandbox);
+ck('fresh app shows start message', (byId.homeNote.textContent||'').includes('رسالة منّي'));
+vm.runInContext('window.__td=dstr(new Date())',sandbox);
+vm.runInContext('S.plan={days:[{d:window.__td,items:[{pi:0,si:0,bi:0,ci:0}]}],total:1,perDay:1,examDate:"x",created:1};renderHomeNote()',sandbox);
+ck('plan day count message', (byId.homeNote.textContent||'').includes('فصل'));
+vm.runInContext('S.plan=null;S.games=5;renderHomeNote()',sandbox);
+ck('rotation encouragement message', /فخور|همة|بعيد|شوية|أسطور/.test(byId.homeNote.textContent||''));
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
