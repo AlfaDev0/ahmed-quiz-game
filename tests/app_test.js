@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.4'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.6'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -482,6 +482,43 @@ if(byId.planDel)byId.planDel.onclick();
 ck('plan can be deleted', t().S().plan===null);
 sandbox.renderStudyPlan();
 ck('plan banner hidden after delete', byId.planBanner.style.display==='none');
+
+/* ---- daily quick review ---- */
+vm.runInContext('window.__pool=quickPool()',sandbox);
+ck('quick pool covers library questions', sandbox.window.__pool.pool.length>=1000);
+ck('quick pool weak list empty initially', sandbox.window.__pool.weak.length===0);
+vm.runInContext('window.__wq=window.STUDY[0].subjects[0].books[0].chapters[0].qs[0]',sandbox);
+vm.runInContext('S.wrongQs=S.wrongQs||{};S.wrongQs[qid(window.__wq)]={w:1,t:Date.now(),d:"medium"}',sandbox);
+vm.runInContext('window.__pool2=quickPool()',sandbox);
+ck('logged wrong question becomes weak', sandbox.window.__pool2.weak.some(it=>it.q===sandbox.window.__wq.q));
+sandbox.startQuickReview();
+vm.runInContext('window.__qr=({n:questions.length,qm:quickMode})',sandbox);
+ck('quick review loads 10 mixed questions', sandbox.window.__qr.n===10 && sandbox.window.__qr.qm===true);
+ck('quick review sets game title', (byId.gCat.textContent||'').includes('الجرعة'));
+vm.runInContext('qi=questions.length+1;finishQuick();window.__qf=quickMode',sandbox);
+ck('quick review finishes into result', (byId.rExamStrip._inner||'').includes('الجرعة اليومية') && sandbox.window.__qf===false);
+ck('quick review shows accuracy coins', byId.rCoins.textContent==='0');
+
+/* ---- pomodoro ---- */
+ck('pomodoro formats time', sandbox.pomoFmt(90)==='01:30' && sandbox.pomoFmt(0)==='00:00');
+ck('pomodoro defaults to 25min study', sandbox.pomo.left===1500 && sandbox.pomo.phase===0 && sandbox.pomo.run===false);
+vm.runInContext('pomo.left=1;pomoStep()',sandbox);
+ck('pomodoro decrements each step', sandbox.pomo.left===0 && sandbox.pomo.phase===0);
+vm.runInContext('pomoStep();window.__pc=({p:pomo.phase,l:pomo.left})',sandbox);
+ck('pomodoro auto-switches to 5min break', sandbox.window.__pc.p===1 && sandbox.window.__pc.l===300);
+vm.runInContext('pomoSetPhase(0);window.__sc=({p:pomo.phase,l:pomo.left})',sandbox);
+ck('pomodoro manual phase switch', sandbox.window.__sc.p===0 && sandbox.window.__sc.l===1500);
+byId.pomoBtn.onclick();
+ck('pomodoro sheet opens', byId.pomoSheet.style.display==='flex');
+ck('pomodoro shows 25:00', (byId.pomoTime.textContent||'')==='25:00');
+byId.pomoRest.onclick();
+ck('pomodoro rest chip selected', sandbox.pomo.phase===1 && (byId.pomoRest.className||'').includes('on'));
+sandbox.pomoStart();
+ck('pomodoro starts running', sandbox.pomo.run===true);
+sandbox.pomoReset();
+ck('pomodoro reset to 25min stopped', sandbox.pomo.phase===0 && sandbox.pomo.left===1500 && sandbox.pomo.run===false);
+byId.pomoClose.onclick();
+ck('pomodoro sheet closes', byId.pomoSheet.style.display==='none');
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

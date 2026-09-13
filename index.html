@@ -285,6 +285,12 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .sb-info p{font-size:12px;opacity:.92}
 .sb-txt{font-size:12px;display:flex;flex-direction:column;align-items:flex-start}
 .sb-txt b{font-size:14px}
+.pomo-time{font-size:54px;font-weight:800;text-align:center;letter-spacing:1px;font-variant-numeric:tabular-nums;margin:6px 0 14px}
+.pomo-phases{display:flex;gap:8px;margin-top:16px}
+.pomo-chip{flex:1;padding:11px;border-radius:12px;border:1.5px solid #e2e2ea;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#555;transition:.2s}
+.pomo-chip.on{border-color:#6C63FF;background:#6C63FF;color:#fff}
+.pomo-go{width:100%;margin-top:12px;padding:14px;border:none;border-radius:14px;background:#6C63FF;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.pomo-go.ghost{background:#f1f1f6;color:#555;font-weight:600}
 .sb-prog{height:5px;background:rgba(255,255,255,.3);border-radius:3px;margin-top:7px;overflow:hidden}
 .sb-fill{height:100%;width:0;background:#fff;border-radius:3px;transition:width .5s}
 .sb-btn{background:#fff;color:#1286FF;border:none;padding:9px 20px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer;z-index:1;flex-shrink:0}
@@ -511,6 +517,24 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       <button class="sb-btn" id="planBtn" style="align-self:flex-end">افتح الخطة</button>
     </div>
 
+    <div class="study-banner" id="quickBanner">
+      <span class="sb-ico">⚡</span>
+      <div class="sb-info">
+        <b>الجرعة اليومية</b>
+        <p>10 أسئلة من أضعف فصولك — راجع أخطاءك كل يوم</p>
+      </div>
+      <button class="sb-btn" id="quickBtn">ابدأ</button>
+    </div>
+
+    <div class="study-banner" id="pomoBanner">
+      <span class="sb-ico">🍅</span>
+      <div class="sb-info">
+        <b>منبّه المذاكرة</b>
+        <p>25 دقيقة تركيز + 5 دقائق راحة — يتناوبون تلقائيًا</p>
+      </div>
+      <button class="sb-btn" id="pomoBtn">افتح</button>
+    </div>
+
     <div class="chip-row" id="diffChips">
       <button class="chip active" data-d="">الكل</button>
       <button class="chip" data-d="easy">سهل</button>
@@ -722,7 +746,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:4px">
         <span class="set-label">📦 عن التطبيق</span>
-        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.4</span>
+        <span style="font-size:12px;color:var(--dim)" id="appVersionLine">الإصدار 1.3.6</span>
       </div>
       <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
       <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
@@ -759,7 +783,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="ai-card">
       <div class="ai-head">
         <div class="ai-logo">📦</div>
-        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.4</div></div>
+        <div><b>عن التطبيق</b><div style="font-size:11px;color:var(--dim)" id="aboutSub">الإصدار 1.3.6</div></div>
         <button class="ai-close" id="aboutClose">✕</button>
       </div>
       <div class="ai-body" id="aboutBody"></div>
@@ -788,6 +812,27 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         <button class="ai-close" id="planClose">✕</button>
       </div>
       <div class="ai-body" id="planBody"></div>
+    </div>
+  </div>
+
+  <!-- POMODORO SHEET -->
+  <div class="ai-sheet" id="pomoSheet" style="display:none">
+    <div class="ai-card">
+      <div class="ai-head">
+        <div class="ai-logo" id="pomoLogo">🍅</div>
+        <div><b id="pomoTitle">منبّه المذاكرة</b><div style="font-size:11px;color:var(--dim)" id="pomoTag">مذاكرة 25 دقيقة · راحة 5 دقائق</div></div>
+        <button class="ai-close" id="pomoClose">✕</button>
+      </div>
+      <div class="ai-body">
+        <div class="pomo-time" id="pomoTime">25:00</div>
+        <div class="sb-prog"><div class="sb-fill" id="pomoFill" style="width:0%"></div></div>
+        <div class="pomo-phases">
+          <button class="pomo-chip" id="pomoStudy">📖 مذاكرة 25</button>
+          <button class="pomo-chip" id="pomoRest">☕ راحة 5</button>
+        </div>
+        <button class="pomo-go" id="pomoGo">▶ ابدأ</button>
+        <button class="pomo-go ghost" id="pomoReset">↺ إعادة ضبط</button>
+      </div>
     </div>
   </div>
 
@@ -2031,7 +2076,7 @@ function downloadBook(type){
   return html;
 }
 const origFinish=finish;
-finish=function(){if(studyCtx){finishStudy()}else if(examMode){finishExam()}else{origFinish()}};
+finish=function(){if(studyCtx){finishStudy()}else if(examMode){finishExam()}else if(quickMode){finishQuick()}else{origFinish()}};
 function finishStudy(){
   clearInterval(timer);set.timer=origTimer;saveSet();
   const ctx=studyCtx,acc=questions.length?Math.round(cor/questions.length*100):0;
@@ -2166,6 +2211,123 @@ function renderStudyPlan(){
 }
 function openPlan(){renderPlanForm();const sh=document.getElementById('planSheet');if(sh)sh.style.display='flex'}
 function closePlan(){const sh=document.getElementById('planSheet');if(sh)sh.style.display='none'}
+
+/* ================= DAILY QUICK REVIEW ================= */
+var quickMode=false;
+function quickPool(){
+  const pool=[],weak=[];
+  if(!window.STUDY)return{pool,weak};
+  window.STUDY.forEach((p,pi)=>p.subjects.forEach((s,si)=>s.books.forEach((b,bi)=>b.chapters.forEach((c,ci)=>{
+    const st=getChStars(chKey(pi,si,bi,ci));
+    c.qs.forEach(q=>{
+      const it={q:q.q,a:q.a,c:q.c,d:q.d||'medium',hint:q.hint||('تأمل في الفصل وانتبه للتفاصيل'),expl:q.expl};
+      pool.push(it);
+      if(st<3||(S.wrongQs&&S.wrongQs[qid(it)]))weak.push(it);
+    });
+  }))));
+  return{pool,weak};
+}
+function startQuickReview(){
+  if(!window.STUDY||!window.STUDY.length){toast('⚠️ المكتبة غير متاحة بعد');return}
+  const{pool,weak}=quickPool();
+  shuffle(weak);shuffle(pool);
+  const pick=[...weak.slice(0,7),...pool],qs=[],seen={};
+  for(let i=0;i<pick.length&&qs.length<10;i++){const k=qid(pick[i]);if(seen[k])continue;seen[k]=1;qs.push(pick[i])}
+  if(!qs.length){toast('⚠️ لا توجد أسئلة بعد');return}
+  curCat='review';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;quickMode=true;
+  startCoins=S.coins;
+  usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
+  questions=qs;origTimer=set.timer;
+  document.getElementById('gCat').textContent='⚡ الجرعة اليومية — '+qs.length+' أسئلة من أضعف فصولك';
+  replayStudy=startQuickReview;
+  show('game');showQ();updateLL();
+}
+function finishQuick(){
+  clearInterval(timer);set.timer=origTimer;saveSet();
+  const acc=questions.length?Math.round(cor/questions.length*100):0;
+  S.games++;S.correct+=cor;S.wrong+=wro;
+  if(streak>S.bestStreak)S.bestStreak=streak;
+  if(score>S.bestScore)S.bestScore=score;
+  if(cor===questions.length){S.perfect++;S.lifelines.hint++}
+  const cb=Math.round(acc/10);S.coins+=cb;S.totalCoins+=cb;
+  S.xp+=score;
+  let lvup=false;while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;lvup=true}
+  checkAchv();save();updateHome();
+  show('result');
+  document.getElementById('rEmoji').textContent=acc>=80?'⚡':acc>=50?'👍':'📚';
+  document.getElementById('rTitle').textContent=acc>=80?'جرعة رائعة!':acc>=50?'تدريب جيد':'غدًا أفضل بإذن الله';
+  document.getElementById('rScore').textContent=score;
+  document.getElementById('rCor').textContent=cor;
+  document.getElementById('rWro').textContent=wro;
+  document.getElementById('rAcc').textContent=acc+'%';
+  document.getElementById('rCoins').textContent=S.coins-startCoins;
+  document.getElementById('rXp').textContent=score;
+  const rs=document.getElementById('rStars');if(rs)rs.style.display='none'&&(rs.innerHTML='');
+  const strip=document.getElementById('rExamStrip');
+  if(strip){
+    strip.style.display='block';
+    strip.innerHTML='⚡ <b>الجرعة اليومية</b> — أصبت <b>'+cor+'</b> من <b>'+questions.length+'</b> ('+acc+'%)<br>الأخطاء اتسجلت تلقائيًا في "مراجعة أخطائي" — الجرعة الجاية هتركّز عليها أكثر';
+  }
+  if(acc>=80)confetti();
+  quickMode=false;
+  if(lvup){sfx('lv');showLevelUp(S.level)}
+}
+
+/* ================= POMODORO TIMER ================= */
+var pomo={phase:0,left:25*60,run:false,tick:null};
+function pomoFmt(s){s=Math.max(0,Number(s)|0);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function pomoRender(){
+  const t=document.getElementById('pomoTime');if(t)t.textContent=pomoFmt(pomo.left);
+  const tag=document.getElementById('pomoTag');if(tag)tag.textContent=(pomo.phase===0?'📖 مذاكرة':'☕ راحة')+(pomo.run?' — يعمل الآن':' — متوقف');
+  const logo=document.getElementById('pomoLogo');if(logo)logo.textContent=pomo.phase===0?'🍅':'☕';
+  const go=document.getElementById('pomoGo');if(go)go.textContent=pomo.run?'⏸ إيقاف مؤقت':(pomo.left>=POMO_SECS[pomo.phase]?'▶ ابدأ':'▶ متابعة');
+  const st=document.getElementById('pomoStudy'),rs=document.getElementById('pomoRest');
+  if(st)st.className='pomo-chip'+(pomo.phase===0?' on':'');
+  if(rs)rs.className='pomo-chip'+(pomo.phase===1?' on':'');
+  const pr=document.getElementById('pomoFill');
+  if(pr){const tot=POMO_SECS[pomo.phase]||1;pr.style.width=Math.round((1-pomo.left/tot)*100)+'%'}
+}
+const POMO_SECS=[25*60,5*60];
+function pomoSetPhase(p){
+  pomo.phase=p;pomo.left=POMO_SECS[p];pomoRender();
+}
+function pomoStart(){
+  if(pomo.run){pomo.run=false;if(pomo.tick){clearInterval(pomo.tick);pomo.tick=null}pomoRender();return}
+  if(pomo.left<=0)pomo.left=POMO_SECS[pomo.phase];
+  pomo.run=true;
+  pomo.tick=setInterval(()=>{if(!pomo.run)return;pomoStep()},1000);
+  try{if(typeof vibe==='function')vibe(15)}catch(e){}
+  pomoRender();
+}
+function pomoStep(){
+  if(pomo.left>0){pomo.left--;pomoRender();return}
+  pomo.phase=1-pomo.phase;pomo.left=POMO_SECS[pomo.phase];
+  try{if(typeof sfx==='function')sfx(pomo.phase===1?'win':'ok')}catch(e){}
+  toast('🍅 '+(pomo.phase===1?'انتهت المذاكرة! خذ راحة 5 دقائق':(pomo.left/60)+' دقيقة من الراحة — رجوع للمذاكرة 💪'));
+  pomoRender();
+}
+function pomoReset(){
+  pomo.run=false;if(pomo.tick){clearInterval(pomo.tick);pomo.tick=null}
+  pomo.phase=0;pomo.left=POMO_SECS[0];pomoRender();
+}
+(function(){
+  const qb=document.getElementById('quickBtn');
+  if(qb)qb.onclick=()=>{startQuickReview()};
+  const pb=document.getElementById('pomoBtn');
+  if(pb)pb.onclick=()=>{pomoSetPhase(pomo.phase);const s=document.getElementById('pomoSheet');if(s)s.style.display='flex'};
+  const pc=document.getElementById('pomoClose');
+  if(pc)pc.onclick=()=>{pomo.run=false;if(pomo.tick){clearInterval(pomo.tick);pomo.tick=null}const s=document.getElementById('pomoSheet');if(s)s.style.display='none'};
+  const ps=document.getElementById('pomoSheet');
+  if(ps)ps.onclick=e=>{if(e.target.id==='pomoSheet'){pomo.run=false;if(pomo.tick){clearInterval(pomo.tick);pomo.tick=null}ps.style.display='none'}};
+  const go=document.getElementById('pomoGo');
+  if(go)go.onclick=pomoStart;
+  const rs=document.getElementById('pomoReset');
+  if(rs)rs.onclick=pomoReset;
+  const st=document.getElementById('pomoStudy');
+  if(st)st.onclick=()=>pomoSetPhase(0);
+  const rr=document.getElementById('pomoRest');
+  if(rr)rr.onclick=()=>pomoSetPhase(1);
+})();
 renderStudyPlan();
 </script>
 <script>
@@ -2317,8 +2479,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.4',SW_BUILD='v28';
+const APP_VERSION='1.3.6',SW_BUILD='v29';
 const CHANGES=[
+  {v:'v29 — الجرعة اليومية + منبه المذاكرة',d:'13/9/2026',items:['⚡ جرعة يومية: 10 أسئلة من أضعف فصولك (اللي لسه متتقنتش + أخطاء سابقة)','🍅 منبه بومودورو: مذاكرة 25 دقيقة / راحة 5 دقائق يتناوبون تلقائيًا مع منبه صوتي','يعتمد التقدم في الخطة الذكية على حتى أدق مستوى فصلي لتكوين الجرعة']},
   {v:'v28 — خطة المذاكرة الذكية',d:'13/9/2026',items:['خطة يومية تلقائية بتقسّم كل الفصول المتبقية لحد موعد امتحانك','بعدجت على الرئيسية بترشحلك فصول اليوم مع شريط تقدم عام','اضغط أي فصل في الخطة — يروّح مباشرة للمذاكرة والاختبار','احتفال ورسالة عند إكمال الخطة بالكامل','إعادة البناء أو الحذف في أي وقت — الخطة تتابع تقدمك الفعلي']},
   {v:'v27 — مركز تنزيل كل كتاب',d:'13/9/2026',items:['كتالوج ظاهر داخل الإعدادات يعرض كل كتب المكتبة مقسّمة بالمسار ثم المادة — كل كتاب بأسمه وعدد فصوله وأسئلته','تنزيل أي كتاب بمفرده: شرح / أسئلة بحلولها / امتحان ورقي مع بطاقة الإجابة','أسماء تلقائية لكل الكتب التي لم تكن مسماة','إصلاح ظهور رسالة "ما الجديد" المتكررة في كل افتتاح']},
   {v:'v26 — مركز التنزيل',d:'13/9/2026',items:['تنزيل كتاب الشرح المكتمل (كل الفصول) كملف واحد بدون إنترنت','تنزيل كتاب الأسئلة بحلولها المرتبة + التلميح والشرح التفصيلي','تنزيل كتب الامتحانات الوزنية (أوراق × 20 سؤال) مع بطاقة الإجابة','اختر النطاق: كل المكتبة أو مسار واحد محدد','كل كتاب بصفحات HTML جاهزة للطباعة والمذاكرة خارج المنصة']},
