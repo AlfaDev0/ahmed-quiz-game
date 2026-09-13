@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.1'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.2'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -413,6 +413,17 @@ vm.runInContext('window.__mh={h:masteryHTML(),t:masteryTip()}',sandbox);
 ck('mastery board builds', sandbox.window.__mh.h.includes('إجمالي المكتبة') && sandbox.window.__mh.h.includes('0%'));
 ck('mastery tip shows when empty', sandbox.window.__mh.t.includes('لم تختبر بعد'));
 ck('mastery tip gives focus suggestion', sandbox.window.__mh.t.length>10);
+
+/* ---- download center ---- */
+vm.runInContext('window.__dlx=document.getElementById("dlChips").children.length',sandbox);
+ck('dl chips render (all + 6 tracks)', sandbox.window.__dlx===7);
+vm.runInContext('dlScope=0;window.__dlt={e:buildExplainHTML(),q:buildQuestionsHTML(),x:buildExamsHTML()}',sandbox);
+const dlt=sandbox.window.__dlt;
+ck('explain book built', dlt.e.includes('كتاب الشرح الكامل') && dlt.e.includes(sandbox.window.STUDY[0].subjects[0].books[0].chapters[0].title) && dlt.e.includes('</html>'));
+ck('questions book built', dlt.q.includes('كتاب الأسئلة بحلولها') && dlt.q.includes('الإجابة') && dlt.q.includes('تلميح'));
+ck('exams book built', dlt.x.includes('الورقة الأولى') && dlt.x.includes('بطاقة الإجابة'));
+let dlb=false;try{dlleft=sandbox.downloadBook('explain');dlb=typeof dlleft==='string'&&dlleft.length>1000}catch(e){}
+ck('downloadBook safe fallback without Blob', dlb);
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
