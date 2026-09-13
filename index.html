@@ -338,6 +338,9 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .study-continue{display:none;align-items:center;gap:10px;background:linear-gradient(135deg,#1286FF,#6C63FF);border:none;color:#fff;padding:12px 16px;border-radius:14px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;text-align:right}
 .study-continue .sci{font-size:18px;flex-shrink:0}
 .study-continue span:last-child{display:block;font-size:11.5px;opacity:.85;font-weight:500;margin-top:2px}
+.study-review{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg2);border:1.5px solid var(--gold);color:var(--text);padding:12px 16px;border-radius:14px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer}
+.study-review:disabled{opacity:.5}
+.study-review .rc{background:var(--gold);color:#111;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:900}
 .study-none{padding:18px;text-align:center;color:var(--dim);font-size:13px}
 .sr-row{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1.5px solid var(--bg3);border-radius:14px;padding:13px;margin:0 16px 9px;cursor:pointer;transition:.15s}
 .sr-row:active{transform:scale(.98)}
@@ -618,6 +621,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div class="study-tools">
       <input type="search" class="study-search" id="studySearch" placeholder="🔍 ابحث عن درس أو كتاب أو فصل..." autocomplete="off">
       <button class="study-continue" id="studyContinue"><span class="sci">⏪</span><span>متابعة الدراسة<span id="studyContinueTxt"></span></span></button>
+      <button class="study-review" id="studyReview">🎯 مراجعة أخطائي<span class="rc" id="studyReviewCnt">0</span></button>
     </div>
     <div id="studySearchRes" class="study-hidden"></div>
     <div id="studyParts" class="parts"></div>
@@ -680,7 +684,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 <script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{}};
 const SETDEF={sound:true,vib:true,dark:true,notif:false,qCount:20,timer:20,aiKey:''};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null}
@@ -779,6 +783,7 @@ function checkDaily(){
 /* ================= GAME ================= */
 function startGame(cat,daily){
   curCat=cat;dailyMode=!!daily;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  replayStudy=null;studyCtx=null;
   startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
   let pool=[...(QUESTIONS[cat]||[])];
@@ -850,10 +855,12 @@ function answer(i){
     score+=p;
     const cg=Math.floor(p/2);S.coins+=cg;S.totalCoins+=cg;
     toast('✅ صحيح! +'+p+' نقطة');
+    if(curCat==='review'){if(S.wrongQs){delete S.wrongQs[qid(q)];save()}}
     sfx('ok');vibe(40);
   }else{
     wro++;streak=0;
     btns[+i].classList.add('wrong');
+    recordWrong(q);
     toast('❌ خطأ! الجواب: '+q.a[q.c]);
     sfx('no');vibe([60,30,60]);
   }
@@ -866,6 +873,7 @@ function timeUp(){
   const q=curQ,btns=document.querySelectorAll('.ans-btn');
   btns.forEach(b=>{b.classList.add('disabled');if(+b.dataset.i===q.c)b.classList.add('correct')});
   toast('⏰ انتهى الوقت! الجواب: '+q.a[q.c]);
+  recordWrong(q);
   sfx('no');vibe([100,50,100]);
   setTimeout(nextQ,1500);
 }
@@ -1400,6 +1408,8 @@ function renderStudyTools(){
   }
   const inp=document.getElementById('studySearch');
   if(inp)inp.value='';
+  const rb=document.getElementById('studyReview');
+  if(rb){const n=Object.keys(S.wrongQs||{}).length;document.getElementById('studyReviewCnt').textContent=n;rb.disabled=n===0;rb.onclick=startReviewQuiz}
   const res=document.getElementById('studySearchRes');
   if(res){res.innerHTML='';res.classList.add('study-hidden')}
   const parts=document.getElementById('studyParts');
@@ -1439,6 +1449,40 @@ function runStudySearch(q){
   });
 }
 function totalChaptersOfPart(pi){let n=0;window.STUDY[pi].subjects.forEach(s=>s.books.forEach(b=>n+=b.chapters.length));return n}
+
+/* ================= MY MISTAKES REVIEW ================= */
+function qid(q){return String((q&&q.q)||'').slice(0,140)}
+function recordWrong(q){
+  if(!q||!q.q)return;
+  S.wrongQs=S.wrongQs||{};
+  const k=qid(q),e=S.wrongQs[k]||{w:0,t:0};
+  e.w++;e.t=Date.now();e.d=q.d||'medium';
+  S.wrongQs[k]=e;save();
+}
+function wrongQuestions(){
+  if(!S.wrongQs||!Object.keys(S.wrongQs).length)return[];
+  const seen={},out=[];
+  const add=q=>{if(!q||!q.q)return;const k=qid(q);if(seen[k])return;seen[k]=1;
+    if(S.wrongQs[k])out.push(Object.assign({},q,{_w:S.wrongQs[k].w||1}))};
+  if(window.STUDY)window.STUDY.forEach(p=>p.subjects.forEach(s=>s.books.forEach(b=>b.chapters.forEach(c=>c.qs.forEach(q=>add(q))))));
+  Object.keys(QUESTIONS||{}).forEach(k=>QUESTIONS[k].forEach(q=>add(q)));
+  return out;
+}
+function startReviewQuiz(){
+  if(studyCtx){studyCtx=null}
+  const list=wrongQuestions();
+  if(!list.length){S.wrongQs={};save();toast('لا توجد أخطاء — عمل رائع! 🎉');return}
+  curCat='review';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  startCoins=S.coins;
+  usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
+  shuffle(list);
+  const qn=Math.min(set.qCount,list.length);
+  questions=list.slice(0,qn);
+  origTimer=set.timer;
+  document.getElementById('gCat').textContent='🎯 مراجعة أخطائي ('+list.length+' سؤال)';
+  replayStudy=startReviewQuiz;
+  show('game');showQ();updateLL();
+}
 function openStudyPart(pi){
   _studyPi=pi;const p=window.STUDY[pi];
   document.getElementById('sbTitle').textContent=p.name;

@@ -342,6 +342,26 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
   ck('badge back to offline mode', byId.aiBadge.textContent.includes('الشرح الفوري'));
 })();
 
+/* ---- mistake review ---- */
+(function review() {
+  sandbox.startGame('science', false);
+  pump();
+  ck('normal game started', t().active() === 'game' && t().qn() > 0);
+  const wrongIdx = (t().qc() + 1) % 4;   // force a wrong answer
+  sandbox.answer(wrongIdx); pump(1600);
+  ck('wrong answer recorded', Object.keys(t().S().wrongQs || {}).length > 0);
+  ck('wrongQuestions resolves it', sandbox.wrongQuestions().length > 0);
+  // answer the rest correctly so the game ends
+  for (let g = 0; g < 60 && t().qi() < t().qn(); g++) { sandbox.answer(t().qc()); pump(1600); }
+  ck('game finished', t().active() === 'result');
+
+  sandbox.startReviewQuiz(); pump();
+  ck('review quiz started', t().active() === 'game' && t().qn() > 0);
+  for (let g = 0; g < 60 && t().qi() < t().qn(); g++) { sandbox.answer(t().qc()); pump(1600); }
+  ck('review → result', t().active() === 'result');
+  ck('mastered mistakes cleared', sandbox.wrongQuestions().length === 0);
+})();
+
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
   ck('settings persisted', localStorage._d.iq_set && JSON.parse(localStorage._d.iq_set).aiKey === '');
