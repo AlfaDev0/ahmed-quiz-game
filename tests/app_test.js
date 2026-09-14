@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.16'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.17'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -616,6 +616,23 @@ ck('listenChapter exists', typeof sandbox.listenChapter==='function');
 ck('listenChapter safe without speechSynthesis', (()=>{try{sandbox.listenChapter({read:[{h:'العنوان',t:'النص'}]},'فصل أول');return true}catch(e){return false}})());
 ck('listening stays off in env', vm.runInContext('window.__lst=listening',sandbox)===false);
 ck('no listen button when TTS unsupported', !('listenBtn' in byId));
+
+/* ---- v40 rebirth: olive light theme ---- */
+ck('default theme is light (no dark class)', (()=>{try{return vm.runInContext(`!document.documentElement.classList.contains('dark')`,sandbox)===true}catch(e){return false}})());
+ck('setting dark applies html.dark', (()=>{try{vm.runInContext(`set.dark=true;applySettings();window.__d=document.documentElement.classList.contains('dark')`,sandbox);return vm.runInContext('__d',sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('setting dark back to light', (()=>{try{vm.runInContext(`set.dark=false;applySettings();window.__d2=document.documentElement.classList.contains('dark')`,sandbox);return vm.runInContext('__d2',sandbox)===false}catch(e){return 'ERR:'+e.message}})());
+ck('palette uses olive primary', (()=>{try{const t=vm.runInContext(`document.getElementById('hmLv')`,sandbox);return !!t}catch(e){return false}})());
+
+/* ---- v40 resume card + course hero on home ---- */
+ck('resume card exists on home', !!vm.runInContext(`document.getElementById('resumeCard')`,sandbox));
+ck('course hero on home shows progress text', (()=>{try{vm.runInContext(`updateHome()`,sandbox);const t=vm.runInContext(`document.getElementById('courseHero')._inner`,sandbox);return t&&t.indexOf('كورسات الشرح')>=0}catch(e){return false}})());
+
+/* ---- v40 podcast player ---- */
+ck('pod controls exist', !!vm.runInContext(`document.getElementById('podPlay')&&document.getElementById('podSpeed')&&document.getElementById('podTitle')`,sandbox));
+ck('podShow shows dock and title', (()=>{try{vm.runInContext(`podShow()`,sandbox);return vm.runInContext(`document.getElementById('pod').style.display===''`,sandbox)}catch(e){return false}})());
+ck('podStop hides dock', (()=>{try{vm.runInContext(`podStop()`,sandbox);return vm.runInContext(`document.getElementById('pod').style.display==='none'`,sandbox)}catch(e){return false}})());
+ck('podSpeed cycles rate 1->1.15', (()=>{try{vm.runInContext(`podS.rate=1;podSpeed();window.__r=podS.rate`,sandbox);return vm.runInContext('__r',sandbox)===1.15}catch(e){return 'ERR:'+e.message}})());
+ck('listenChapter safe without speechSynthesis', (()=>{try{vm.runInContext(`podStop();listenChapter({read:[{h:'العنوان',t:'نص الشرح'}]},'فصل أول');window.__lst=listening`,sandbox);return vm.runInContext('__lst',sandbox)===false}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
