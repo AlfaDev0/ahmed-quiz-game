@@ -1,5 +1,5 @@
 const BASE = self.location.pathname.replace(/\/?sw\.js$/, '');
-const CACHE_NAME = 'ahmed-quiz-v44';
+const CACHE_NAME = 'ahmed-quiz-v45';
 
 const REL = {
     '/': '',
@@ -72,16 +72,13 @@ self.addEventListener('fetch', event => {
 
     if (url.pathname === BASE + '/' || url.pathname.endsWith('index.html')) {
         event.respondWith(
-            caches.match(BASE + '/index.html').then(cached => {
-                const network = fetch(event.request).then(res => {
-                    if (res.ok) {
-                        const copy = res.clone();
-                        caches.open(CACHE_NAME).then(c => c.put(BASE + '/index.html', copy));
-                    }
-                    return res;
-                }).catch(() => cached);
-                return cached || network;
-            })
+            fetch(event.request).then(res => {
+                if (res.ok) {
+                    const copy = res.clone();
+                    caches.open(CACHE_NAME).then(c => c.put(BASE + '/index.html', copy));
+                }
+                return res;
+            }).catch(() => caches.match(BASE + '/index.html'))
         );
         return;
     }

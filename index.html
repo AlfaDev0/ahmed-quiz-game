@@ -2289,23 +2289,33 @@ function speakLastAi(){
   if(last)speak(last.textContent);
 }
 var podS={list:[],i:0,playing:false,rate:0.9,title:'',stop:false};
+var bestVoice=null;
 function pickVoice(){
   try{
+    if(bestVoice)return bestVoice;
     if(!('speechSynthesis' in window))return null;
     const vs=window.speechSynthesis.getVoices&&window.speechSynthesis.getVoices()||[];
     if(!vs||!vs.length)return null;
     const ar=vs.filter(v=>/^ar/i.test(String(v.lang||'')));
-    if(!ar.length)return null;
-    const pref=['ar-SA','ar-EG','ar-AE','ar-IQ','ar-SY','ar-MA','ar-TN','ar'];
-    for(const l of pref){
-      const lower=l.toLowerCase();
-      const m=ar.find(v=>String(v.lang||'').toLowerCase()===lower);
-      if(m)return m;
+    let chosen=null;
+    if(ar.length){
+      const pref=['ar-SA','ar-EG','ar-AE','ar-IQ','ar-SY','ar-MA','ar-TN','ar'];
+      for(const l of pref){
+        const lower=l.toLowerCase();
+        const m=ar.find(v=>String(v.lang||'').toLowerCase()===lower);
+        if(m){chosen=m;break}
+      }
+      if(!chosen){
+        const generic=ar.find(v=>String(v.lang||'').toLowerCase()==='ar');
+        if(generic)chosen=generic;
+      }
+      if(!chosen){
+        const good=ar.find(v=>/google|microsoft|azure|xiao|samsung|nuance|maged|salma|tarek|tarik/i.test(String(v.name||'')));
+        chosen=good||ar[0];
+      }
     }
-    const generic=ar.find(v=>String(v.lang||'').toLowerCase()==='ar');
-    if(generic)return generic;
-    const good=ar.find(v=>/google|microsoft|azure|xiao|samsung|nuance|maged|salma|tarek|tarik/i.test(String(v.name||'')));
-    return good||ar[0];
+    bestVoice=chosen;
+    return chosen;
   }catch(e){return null}
 }
 function toChunks(t){
@@ -2321,6 +2331,11 @@ function toChunks(t){
   }
   return out;
 }
+(function(){
+  if(typeof window!=='undefined'&&window.speechSynthesis&&window.speechSynthesis.addEventListener){
+    try{window.speechSynthesis.addEventListener('voiceschanged',()=>{bestVoice=null;pickVoice()})}catch(e){}
+  }
+})();
 function podKick(){
   podS.kick=setInterval(()=>{try{
     if(podS.stop||!podS.playing)return;
@@ -3153,8 +3168,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.21',SW_BUILD='v44';
+const APP_VERSION='1.3.22',SW_BUILD='v45';
 const CHANGES=[
+  {v:'v45 — تحديثات فورية بلا كباش 🚀',d:'15/9/2026',items:['المشكلة اللي كنت شايفها: المتصفح كان بيتمسك بكل نسخة قديمة. دلوقتي الصفحة بفحص وتبعت التحديث تلقائيًا كل مرة تفتحها — التحديثات كلها هتوصل فعلاً','السويف وركر اتظبط: الشبكة أولًا للصفحة المش عكس — يعني أي تحديث جديد يظهر فورًا على جهازك من أول فتحة','الصوت: الأداء بقى يعمل نفسه تلقائيًا لما الأصوات تبقى جاهزة على الجهاز']},
   {v:'v44 — اللوحة الحقيقية شغالة تلقائيًا ⚡',d:'15/9/2026',items:['المفتاح اتربط من الشركة مباشرة — افتح اللوحة تلاقيها حقيقية على طول من غير أي إعداد','السلة السحابية جاهزة: أي لعبة بتخلص تتبعت فيها وعليها في لوحتك','نفس اللوحة لأي حد بيفتح التطبيق — تصنيف مباشر مش أسماء وهمية']},
   {v:"v43 — لوحة متصدرين حقيقية 🌐",d:'15/9/2026',items:['اللوحة بقت حقيقية على مخزن JSONBin سحابي — نقاطك وكل اللاعبين في جدول مباشر مش أسماء وهمية','ربط واحد من الإعدادات: الصق مفتاح JSONBin المجاني وهيشتغل لحظيًا (ويتعمل سلة تلقائيًا)','نقاطك بتتحدث بعد كل لعبة، والشاشة تظهر ترتيبك الحقيقي وتحدثه من النت — وتشتغل حتى لو النت قطع بتخزين محلي']},
   {v:'v42 — قراءة سلسة بدون تقطيع 🔊',d:'15/9/2026',items:['بدّلنا طريقة القراءة: الجمل بتتكلم ورا بعض بقوائم المرور التلقائي من غير إلغاء متكرر — بيقرا كل الكلام كامل من غير ما يقص','اضفنا حارس بيظبط الصوت لو وقف من غير سبب (عطل معروف في أندرويد) ويكمّل لوحده','تقسيم الكلام اتحسّن: الجمل الصغيرة بتندمج في اللي قبلها — مفيش قفزات ومخنوقات']},
@@ -3237,7 +3253,7 @@ function hardRefresh(){
 })();
 </script>
 <script>
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{})}
 </script>
 </body>
 </html>
