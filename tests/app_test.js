@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.18'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.19'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -638,6 +638,11 @@ ck('listenChapter safe without speechSynthesis', (()=>{try{vm.runInContext(`podS
 ck('pickVoice safe without speechSynthesis', (()=>{try{return sandbox.pickVoice()===null}catch(e){return 'ERR:'+e.message}})());
 ck('pod default rate is calm 0.9', (()=>{try{vm.runInContext(`window.__r0=podS.rate`,sandbox);return vm.runInContext('__r0',sandbox)===0.9}catch(e){return 'ERR:'+e.message}})());
 ck('podSpeed 1->1.15 still works', (()=>{try{vm.runInContext(`podS.rate=1;podSpeed();window.__r1=podS.rate`,sandbox);return vm.runInContext('__r1',sandbox)===1.15}catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v42 smooth reading ---- */
+ck('toChunks merges tiny fragments', (()=>{try{const c=vm.runInContext(`toChunks('الجملة الطويلة الأولى هنا وتكمّل فيها. أ. أحمد. جملة ثانية كبيرة تكمل النص طبيعي')`,sandbox);return Array.isArray(c)&&c.length>=2&&c.every(x=>x.length>=14)}catch(e){return 'ERR:'+e.message}})());
+ck('toChunks keeps single sentence', (()=>{try{const c=vm.runInContext(`toChunks('جملة قصيرة بدون نقطة كاملة')`,sandbox);return Array.isArray(c)&&c[0].indexOf('جملة')>=0}catch(e){return 'ERR:'+e.message}})());
+ck('podKick defined', typeof sandbox.podKick==='function');
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

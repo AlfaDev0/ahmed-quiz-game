@@ -2214,19 +2214,39 @@ function pickVoice(){
     return good||ar[0];
   }catch(e){return null}
 }
+function toChunks(t){
+  const out=[];
+  const clean=String(t||'').replace(/\s+/g,' ').trim();
+  if(!clean)return out;
+  const parts=String(clean).split(/(?<=[.!؟?!])\s+/);
+  for(const raw of parts){
+    const p=raw.trim();
+    if(!p)continue;
+    if(out.length&&p.length<14){out[out.length-1]+=' '+p;continue}
+    out.push(p);
+  }
+  return out;
+}
+function podKick(){
+  podS.kick=setInterval(()=>{try{
+    if(podS.stop||!podS.playing)return;
+    const ss=window.speechSynthesis;
+    if(ss&&!ss.speaking&&!ss.pending&&podS.list.length){ss.cancel()}
+  }catch(e){}},6000);
+}
 function listenChapter(ch,label){
   try{
     if(!ch){return}
     if(podS.playing&&podS.list.length>0){podStop();return}
     if(!('speechSynthesis' in window)){toast('🔇 جهازك مش بيدعم القراءة الصوتية');return}
-    const ss=window.speechSynthesis;try{ss.cancel()}catch(e){}
+    try{window.speechSynthesis.cancel()}catch(e){}
     const parts=[label||'شرح الفصل'];
     (ch.read||[]).forEach((r,i)=>{if(r&&(r.h||r.t))parts.push('المقطع '+(i+1)+'. '+r.h+' . '+r.t)});
     parts.push('انتهى شرح الفصل. شدّ حيلك!');
     const flat=[];
-    parts.forEach(p=>{const q=p.match(/[^.!؟?؛،]+[.!؟?؛،]*/g)||[p];q.forEach(x=>{const t=x.trim();if(t)flat.push(t)})});
-    podS={list:flat,i:0,playing:true,rate:podS.rate||1,title:(label||'شرح الفصل'),stop:false};
-    podShow();podSpeak();
+    parts.forEach(p=>flat.push(...toChunks(p)));
+    podS={list:flat,i:0,playing:true,rate:podS.rate||0.9,title:(label||'شرح الفصل'),stop:false,cancelNext:false};
+    podShow();podSpeak();podKick();
   }catch(e){podStop()}
 }
 function podShow(){
@@ -2244,16 +2264,23 @@ function podPaint(){
   const lr=document.getElementById('listenBtn');if(lr){if(podS.playing||podS.list.length)lr.innerHTML='🔊 اسمع شرح الفصل كامل';}
 }
 function podSpeak(){
-  const lr=document.getElementById('listenBtn');if(lr&&podS.playing)lr.innerHTML='⏸ وقّف القراءة';
   if(!podS.list.length||podS.i>=podS.list.length||podS.stop){podStop();return}
   if(!('speechSynthesis' in window)){podStop();return}
+  const lr=document.getElementById('listenBtn');if(lr)lr.innerHTML='⏸ وقّف القراءة';
   try{
-    const ss=window.speechSynthesis;try{ss.cancel()}catch(e){}
-    const u=new window.SpeechSynthesisUtterance(podS.list[podS.i]);
+    const ss=window.speechSynthesis;
+    if(podS.cancelNext){try{ss.cancel()}catch(e){};podS.cancelNext=false}
+    const idx=podS.i,self=podS;
+    let fired=false;
+    const fin=()=>{
+      if(fired)return;fired=true;
+      if(self.playing&&!self.stop&&self.i===idx){self.i=idx+1}
+      setTimeout(()=>{podSpeak()},90);
+    };
+    const u=new window.SpeechSynthesisUtterance(podS.list[idx]);
     u.lang='ar-SA';u.rate=podS.rate;u.pitch=0.9;u.volume=1;
     const pv=pickVoice();if(pv)u.voice=pv;
-    u.onend=()=>{if(podS.playing&&!podS.stop){podS.i++;podSpeak()}};
-    u.onerror=()=>{if(podS.playing&&!podS.stop){podS.i++;podSpeak()}};
+    u.onend=fin;u.onerror=fin;
     ss.speak(u);podPaint();
   }catch(e){podStop()}
 }
@@ -2269,16 +2296,18 @@ function podPlayToggle(){
 function podSkip(n){
   if(!podS.list.length)return;
   podS.i=Math.max(0,Math.min(podS.list.length-1,podS.i+n));
-  podSpeak();
+  try{window.speechSynthesis&&window.speechSynthesis.cancel()}catch(e){}
+  podS.cancelNext=true;podSpeak();
 }
 function podSpeed(){
   const rates=[0.8,0.9,1,1.15,1.3];
-  const idx=rates.indexOf(podS.rate);podS.rate=rates[(idx+1)%rates.length]||1;
-  if(typeof window.speechSynthesis!=='undefined'&&'speechSynthesis' in window&&podS.playing){try{window.speechSynthesis.cancel()}catch(e){};podSpeak()}
+  const idx=rates.indexOf(podS.rate);podS.rate=rates[(idx+1)%rates.length]||0.9;
+  if(typeof window.speechSynthesis!=='undefined'&&'speechSynthesis' in window&&podS.playing){try{window.speechSynthesis.cancel()}catch(e){};podS.cancelNext=true;podSpeak()}
   podPaint();
 }
 function podStop(){
   podS.stop=true;podS.playing=false;
+  if(podS.kick){try{clearInterval(podS.kick)}catch(e){}podS.kick=null}
   try{window.speechSynthesis&&window.speechSynthesis.cancel()}catch(e){}
   const p=document.getElementById('pod');if(p)p.style.display='none';
   const lr=document.getElementById('listenBtn');if(lr)lr.innerHTML='🔊 اسمع شرح الفصل كامل';
@@ -3024,8 +3053,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.18',SW_BUILD='v41';
+const APP_VERSION='1.3.19',SW_BUILD='v42';
 const CHANGES=[
+  {v:'v42 — قراءة سلسة بدون تقطيع 🔊',d:'15/9/2026',items:['بدّلنا طريقة القراءة: الجمل بتتكلم ورا بعض بقوائم المرور التلقائي من غير إلغاء متكرر — بيقرا كل الكلام كامل من غير ما يقص','اضفنا حارس بيظبط الصوت لو وقف من غير سبب (عطل معروف في أندرويد) ويكمّل لوحده','تقسيم الكلام اتحسّن: الجمل الصغيرة بتندمج في اللي قبلها — مفيش قفزات ومخنوقات']},
   {v:'v41 — صوت أوضح وأخشنّ 🎙️',d:'14/9/2026',items:['بختار تلقائيًا أفضل صوت عربي موجود على جهازك (مش أي صوت يقع الأول)','النطق بقي أهدى وأبطأ: سرعة افتراضية ×0.9 ونبرة أقل — إحساس شرح مريح','لو جهازك فيه أكتر من صوت عربي، هدور على الأجود منهم تلقائيًا']},
   {v:'v40 — النهضة 🫒',d:'14/9/2026',items:['هوية كاملة جديدة: ألوان الأخضر الزيتي والكهرماني — إحساس مذاكرة هادي وأنيق، فاتح افتراضي + نسخة ليلية داكنة','الرئيسية بقت متوازنة: بطاقة «كمّل من حيث وقفت» أول ما تفتح (اسمع/اقرأ/اختبر بضغطة) + شريط تقدم كورسات الشرح قدامك','مشغل بودكاست كامل: تشغيل/إيقاف/تقديم/إرجاع وتغيير السرعة ×0.8 ×1 ×1.15 ×1.3 — ثابت فوق الشريط ومن أي شاشة']},
   {v:'v39 — اسمع الشرح 🔊',d:'14/9/2026',items:['زرار «🔊 اسمع شرح الفصل كامل» في كل درس — بيقرالك الشرح كله بصوت الجهاز','يتوقف لو ضغط «وقّف»، وبيتوقف لوحده لما تتنقل لشاشة تانية','شغال مع كورسات الشرح والمكتبة وكل المواد، وبيشتغل بدون إنترنت (صوت الجهاز)']},
