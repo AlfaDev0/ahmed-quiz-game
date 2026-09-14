@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.11'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.12'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -532,7 +532,7 @@ vm.runInContext('window.__td=dstr(new Date())',sandbox);
 vm.runInContext('S.plan={days:[{d:window.__td,items:[{pi:0,si:0,bi:0,ci:0}]}],total:1,perDay:1,examDate:"x",created:1};renderHomeNote()',sandbox);
 ck('plan day count message', (byId.homeNote.textContent||'').includes('فصل'));
 vm.runInContext('S.plan=null;S.games=5;renderHomeNote()',sandbox);
-ck('rotation encouragement message', /فخور|همة|بعيد|شوية|أسطور/.test(byId.homeNote.textContent||''));
+ck('rotation encouragement message', /فخور|همة|بعيد|شوية|أسطور|حقيقة/.test(byId.homeNote.textContent||''));
 
 /* ---- weekly shatartk card ---- */
 ck('week card element present', !!byId.weekCardTxt);
@@ -545,6 +545,9 @@ vm.runInContext('S.weekL=null',sandbox);
 sandbox.renderWeekCard();
 ck('week card shows fresh-week state', (byId.weekCardTxt._inner||'').includes('شطارتك'));
 ck('week card stars empty for fresh week', (byId.weekCardStars._inner||'')==='');
+
+/* ---- sound kit ---- */
+ck('sfx all types safe (no AudioContext in test env)', (()=>{try{['ok','no','tick','warn','coin','streak','win','perfect','lv'].forEach(t=>vm.runInContext('sfx("'+t+'")',sandbox));return true}catch(e){return false}})());
 
 /* ---- study report export ---- */
 ck('report button wired', !!byId.reportBtn && typeof byId.reportBtn.onclick==='function');

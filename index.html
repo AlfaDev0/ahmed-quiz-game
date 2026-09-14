@@ -925,6 +925,7 @@ function sfx(type){
   if(!set.sound)return;
   try{
     actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    try{if(actx.state==='suspended')actx.resume()}catch(e){}
     const play=(freq,delay,dur,type='sine',vol=.1)=>{
       const o=actx.createOscillator(),g=actx.createGain();
       o.connect(g);g.connect(actx.destination);
@@ -933,12 +934,15 @@ function sfx(type){
       g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
       o.start(t);o.stop(t+dur+.02);
     };
-    if(type==='ok'){play(523,0,.12);play(784,.1,.2)}
-    else if(type==='no'){play(220,0,.12,'sawtooth');play(160,.12,.2,'sawtooth')}
-    else if(type==='tick'){play(880,0,.06,'square',.05)}
-    else if(type==='coin'){play(988,0,.08,'sine',.09);play(1319,.08,.18,'sine',.09)}
-    else if(type==='win'){play(523,0,.15);play(659,.15,.15);play(784,.3,.15);play(1047,.45,.5)}
-    else if(type==='lv'){play(523,0,.1);play(659,.1,.1);play(784,.2,.1);play(1047,.3,.4)}
+    if(type==='ok'){play(659,0,.12,'triangle',.12);play(784,.09,.16,'triangle',.09);play(988,.11,.14,'sine',.05)}
+    else if(type==='no'){play(233,0,.14,'sine',.1);play(196,.12,.22,'sine',.09)}
+    else if(type==='tick'){play(880,0,.05,'square',.04)}
+    else if(type==='warn'){play(660,0,.09,'triangle',.12);play(660,.13,.09,'triangle',.12)}
+    else if(type==='coin'){play(987,0,.09,'triangle',.1);play(1319,.08,.14,'triangle',.09)}
+    else if(type==='streak'){play(880,0,.08,'sine',.08);play(1109,.08,.08,'sine',.08);play(1319,.16,.18,'sine',.09)}
+    else if(type==='win'){play(523,0,.14,'triangle',.13);play(659,.14,.14,'triangle',.11);play(784,.28,.16,'triangle',.11);play(1047,.44,.5,'triangle',.13)}
+    else if(type==='perfect'){play(523,0,.12,'sine',.1);play(659,.12,.12,'sine',.1);play(784,.24,.12,'sine',.1);play(1047,.36,.14,'sine',.1);play(1319,.5,.5,'triangle',.13);play(1568,.5,.5,'triangle',.05)}
+    else if(type==='lv'){play(523,0,.1,'triangle',.12);play(659,.1,.1,'triangle',.12);play(784,.2,.1,'triangle',.12);play(1047,.3,.4,'triangle',.13);play(1319,.3,.4,'triangle',.05)}
   }catch(e){}
 }
 function vibe(p){if(set.vib&&navigator.vibrate)navigator.vibrate(p)}
@@ -1059,7 +1063,7 @@ function startTimer(){
   tLeft=set.timer;tv.textContent=tLeft;tb.classList.remove('warn');
   timer=setInterval(()=>{
     tLeft--;tv.textContent=tLeft;
-    if(tLeft<=5){tb.classList.add('warn');if(tLeft>0)sfx('tick')}
+    if(tLeft<=5){tb.classList.add('warn');if(tLeft===5)sfx('warn');if(tLeft>0)sfx('tick')}
     if(tLeft<=0){clearInterval(timer);timeUp()}
   },1000);
 }
@@ -1082,6 +1086,7 @@ function answer(i){
     toast('✅ صحيح! +'+p+' نقطة');
     if(curCat==='review'){if(S.wrongQs){delete S.wrongQs[qid(q)];save()}}
     sfx('ok');vibe(40);
+    if(streak>=5)sfx('streak');
   }else{
     wro++;streak=0;weekTick('wro',0);
     btns[+i].classList.add('wrong');
@@ -1170,7 +1175,7 @@ function finish(){
   S.wrong+=wro;
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
-  if(cor===questions.length){S.perfect++;S.lifelines.hint++;sfx('coin')}
+  if(cor===questions.length){S.perfect++;S.lifelines.hint++;sfx('perfect')}
   if(curCat&&curCat!=='mixed'&&!S.playedCats.includes(curCat))S.playedCats.push(curCat);
   const cs=S.catStats[curCat]||{g:0,cor:0,wro:0};cs.g++;cs.cor+=cor;cs.wro+=wro;S.catStats[curCat]=cs;
   if(curCat==='mixed'){const cm=S.catStats['_mixed']||{g:0,cor:0,wro:0};cm.g++;cm.cor+=cor;cm.wro+=wro;S.catStats['_mixed']=cm}
@@ -2591,8 +2596,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.11',SW_BUILD='v34';
+const APP_VERSION='1.3.12',SW_BUILD='v35';
 const CHANGES=[
+  {v:'v35 — مؤثرات صوتية أشطر',d:'14/9/2026',items:['لحن جديد كليًا عند الإجابة: صح = نغمة ستة دافئة، غلط = لحنين هادئين، فلوس = رنين عملات','فانفار «أداء خرافي» واللحن بتاع كل مستوى استوى','صوت خاص لما توصل سلسلة 5 صح متتالية ⚡ وتنبيه قبل قرب نهاية الوقت','الالتزام بمفتاح الصوت في الإعدادات، وشغال على أي جهاز (Web Audio) بدون ملفات']},
   {v:'v34 — تقرير مذاكرتي',d:'13/9/2026',items:['زر «تصدير تقرير مذاكرتي» في الإعدادات — ملف HTML جاهز للطباعة والمشاركة','التقرير فيه: بياناتك ومستويانك، دقة إجاباتك، إتقانك لكل مسار، شطارتك الأسبوعية، حالتك في خطتك، وقايمة أخطائك اللي تركز عليها','يعمل بدون إنترنت وزتون مع الكتب المصدّرة']},
   {v:'v33 — شطارتك الأسبوعية',d:'13/9/2026',items:['بطاقة «شطارتك» على الرئيسية بتلخص أسبوعك: إجاباتك ونجاحك وعملاتك','نجمات ⭐ من 1 إلى 5 وفق مجهودك — والبطاقة بتتحسب يوميًا تلقائيًا','رسالة تشجعك: «كل عدّادة بتبدأ من 1» حتى لو لسه بادئ','أعمالك بتتعد بكل الإجابات (جرعة يومية، مراجعة، دروس، امتحان)']},
   {v:'v32 — رسالة منّي + دفا المرشد',d:'13/9/2026',items:['رسالة قصيرة مني أنا كل ما تدخل على الرئيسية — تشجعك وتبعث لك همتك وبتتغير يوميًا','لو عندك خطة مذاكرة: الرسالة بتحسبلك فصول النهارده وتقولك «ابدأ بأول واحد بس»','ردود مرشدي الخاص بقت أدفى وأبسط — تشجيع في كل شرح وتلخيص ومعلومة ذهبية','نفس الشكل والتصميم — من غير أي تغيير بصري']},
