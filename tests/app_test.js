@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.22'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.23'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -655,6 +655,12 @@ ck('renderLB renders rows from cache', (()=>{try{vm.runInContext(`document.getEl
 ck('renderLB no network without key', (()=>{const before=fetchCalls.length;try{vm.runInContext(`set.jsonbinKey='';renderLB()`,sandbox)}catch(e){return 'ERR:'+e.message}return fetchCalls.length===before})());
 ck('lbUpsert safe in offline env', (()=>{try{vm.runInContext(`set.jsonbinKey='K';set.jsonbinBin='x';window.__p=lbUpsert()`,sandbox);vm.runInContext(`set.jsonbinKey='';set.jsonbinBin=''`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
 ck('default config ships the real leaderboard key', (()=>{try{return typeof SETDEF_x!=='undefined'?false:vm.runInContext(`window.__k=SETDEF.jsonbinKey`,sandbox).length>=40}catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v46 data self-heal ---- */
+vm.runInContext(`healRan=false`,sandbox);
+ck('healData defined', typeof sandbox.healData==='function');
+ck('healData passes when data complete (no reload)', (()=>{try{vm.runInContext(`healRan=false;window.__h1=window.STUDY.length;window.__h2=Object.keys(window.QUESTIONS).length;window.__hc=(window.STUDY.reduce((a,p)=>a+p.subjects.reduce((x,s)=>x+s.books.reduce((y,b)=>y+b.chapters.length,0),0),0));healData()`,sandbox);return JSON.stringify(vm.runInContext(`[healRan,window.__h1,window.__h2,window.__hc]`,sandbox))===JSON.stringify([false,6,13,567])}catch(e){return 'ERR:'+e.message}})());
+ck('full catalog present (6/567/13)', (()=>{try{const n=vm.runInContext(`(window.STUDY.length===6&&Object.keys(window.QUESTIONS).length===13)`,sandbox);return n===true}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

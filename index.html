@@ -1059,6 +1059,27 @@ const SETDEF={sound:true,vib:true,dark:false,notif:false,notifH:19,qCount:20,tim
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
+let healRan=false;
+function healData(){
+  try{
+    let bad=false;
+    try{
+      if(!window.STUDY||window.STUDY.length<6)bad=true;
+      else{
+        let ch=0;
+        window.STUDY.forEach(p=>(p.subjects||[]).forEach(s=>(s.books||[]).forEach(b=>ch+=(b.chapters||[]).length)));
+        if(ch<520)bad=true;
+      }
+      if(!window.QUESTIONS||Object.keys(window.QUESTIONS).length<13)bad=true;
+    }catch(e){bad=true}
+    if(!bad)return;
+    if(healRan)return;healRan=true;
+    toast('🔄 المحتوى ناقص — بحمّل كل الحاجة تاني تلقائيًا...');
+    const act=()=>{try{location.reload()}catch(e){}};
+    if(window.caches&&window.caches.keys){window.caches.keys().then(ks=>Promise.all((ks||[]).map(k=>window.caches.delete(k)))).then(act).catch(act)}
+    else act();
+  }catch(e){}
+}
 function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
@@ -1121,7 +1142,7 @@ window.addEventListener('load',()=>{
     document.getElementById('splash').classList.add('hide');
     setTimeout(()=>document.getElementById('splash').remove(),600);
   },2200);
-  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();
+  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();if(typeof healData==='function')try{healData()}catch(e){}
 });
 
 /* ================= TITLES ================= */
@@ -3168,8 +3189,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.22',SW_BUILD='v45';
+const APP_VERSION='1.3.23',SW_BUILD='v46';
 const CHANGES=[
+  {v:'v46 — كل المحتوى يوصلك متكامل 📦',d:'15/9/2026',items:['التطبيق بيقيس لوحده اكتمال المكتبة (6 أجزاء · 38 مادة · 124 كتاب · 567 فصل · 13 تصنيف أسئلة)','لو اكتشف إن جهازك حامل نسخة ناقصة أو قديمة: بيمسح الكاش ويحمّل كل الحاجة من النت تلقائيًا ويحدّث','الحل النهائي لمشكلة «في حجات مش موجودة» بسبب كاش الجهاز القديم']},
   {v:'v45 — تحديثات فورية بلا كباش 🚀',d:'15/9/2026',items:['المشكلة اللي كنت شايفها: المتصفح كان بيتمسك بكل نسخة قديمة. دلوقتي الصفحة بفحص وتبعت التحديث تلقائيًا كل مرة تفتحها — التحديثات كلها هتوصل فعلاً','السويف وركر اتظبط: الشبكة أولًا للصفحة المش عكس — يعني أي تحديث جديد يظهر فورًا على جهازك من أول فتحة','الصوت: الأداء بقى يعمل نفسه تلقائيًا لما الأصوات تبقى جاهزة على الجهاز']},
   {v:'v44 — اللوحة الحقيقية شغالة تلقائيًا ⚡',d:'15/9/2026',items:['المفتاح اتربط من الشركة مباشرة — افتح اللوحة تلاقيها حقيقية على طول من غير أي إعداد','السلة السحابية جاهزة: أي لعبة بتخلص تتبعت فيها وعليها في لوحتك','نفس اللوحة لأي حد بيفتح التطبيق — تصنيف مباشر مش أسماء وهمية']},
   {v:"v43 — لوحة متصدرين حقيقية 🌐",d:'15/9/2026',items:['اللوحة بقت حقيقية على مخزن JSONBin سحابي — نقاطك وكل اللاعبين في جدول مباشر مش أسماء وهمية','ربط واحد من الإعدادات: الصق مفتاح JSONBin المجاني وهيشتغل لحظيًا (ويتعمل سلة تلقائيًا)','نقاطك بتتحدث بعد كل لعبة، والشاشة تظهر ترتيبك الحقيقي وتحدثه من النت — وتشتغل حتى لو النت قطع بتخزين محلي']},
