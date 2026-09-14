@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.20'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.21'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -645,6 +645,7 @@ ck('toChunks keeps single sentence', (()=>{try{const c=vm.runInContext(`toChunks
 ck('podKick defined', typeof sandbox.podKick==='function');
 
 /* ---- v43 real leaderboard ---- */
+vm.runInContext(`set.jsonbinKey='';set.jsonbinBin=''`,sandbox);
 ck('lbMode false by default', !sandbox.lbMode());
 ck('lbMode true after key set', (()=>{try{vm.runInContext(`set.jsonbinKey='K';window.__m=lbMode()`,sandbox);return vm.runInContext('__m',sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('lbMode back to false after clear', (()=>{try{vm.runInContext(`set.jsonbinKey='';window.__m2=lbMode()`,sandbox);return vm.runInContext('__m2',sandbox)===false}catch(e){return 'ERR:'+e.message}})());
@@ -652,7 +653,8 @@ ck('lbSelfEntry computes ptsAll', (()=>{try{vm.runInContext(`S.correct=7;S.weekB
 ck('renderLB shows cached real entries', (()=>{try{vm.runInContext(`localStorage.setItem('iq_lb_cache',JSON.stringify({entries:[{name:'أحمد',games:2,correct:15,ptsAll:75,ptsWeek:30,ptsMonth:0},{name:'يوسف',games:1,correct:8,ptsAll:40,ptsWeek:10,ptsMonth:0}]}))`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
 ck('renderLB renders rows from cache', (()=>{try{vm.runInContext(`document.getElementById('lbKeyInput')&&0`,sandbox);vm.runInContext(`renderLB()`,sandbox);const n=vm.runInContext(`document.getElementById('lbList').children.length`,sandbox);return n===2}catch(e){return 'ERR:'+e.message}})());
 ck('renderLB no network without key', (()=>{const before=fetchCalls.length;try{vm.runInContext(`set.jsonbinKey='';renderLB()`,sandbox)}catch(e){return 'ERR:'+e.message}return fetchCalls.length===before})());
-ck('lbUpsert safe in offline env', (()=>{try{vm.runInContext(`set.jsonbinKey='K';set.jsonbinBin='x';window.__p=lbUpsert()`,sandbox);vm.runInContext(`set.jsonbinKey=''`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
+ck('lbUpsert safe in offline env', (()=>{try{vm.runInContext(`set.jsonbinKey='K';set.jsonbinBin='x';window.__p=lbUpsert()`,sandbox);vm.runInContext(`set.jsonbinKey='';set.jsonbinBin=''`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
+ck('default config ships the real leaderboard key', (()=>{try{return typeof SETDEF_x!=='undefined'?false:vm.runInContext(`window.__k=SETDEF.jsonbinKey`,sandbox).length>=40}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
