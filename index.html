@@ -456,6 +456,24 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .about-foot a{color:var(--primary);font-weight:700;text-decoration:none}
 .about-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,201,167,.12);color:#00C9A7;font-weight:800;font-size:11px;border-radius:12px;padding:5px 12px;margin-top:10px}
 
+.course-hero{display:flex;align-items:center;gap:10px;margin:12px 0;padding:14px;border-radius:16px;background:linear-gradient(135deg,#0F0E17,#232246 70%,#3a2c6b);border:1px solid var(--bg3)}
+.course-hero b{font-size:14px}.course-hero p{color:var(--dim);font-size:11.5px;margin-top:4px;line-height:1.7}
+.course-hero-pct{background:linear-gradient(135deg,#FFB300,#FF6B6B);color:#fff;border-radius:14px;padding:8px 12px;font-weight:900;font-size:16px;flex-shrink:0}
+.course-part{font-size:13px;font-weight:900;color:var(--gold);margin:14px 2px 6px}
+.course-mini{cursor:pointer;margin-bottom:8px}
+.course-row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:10px 12px;margin:8px 0}
+.course-sid{background:var(--bg3);border-radius:10px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--primary);flex-shrink:0}
+.course-info{flex:1;min-width:0}
+.course-info b{font-size:13.5px;display:block;line-height:1.5}
+.course-info span{font-size:11.5px;color:var(--dim)}
+.course-acts{display:flex;gap:6px;flex-shrink:0}
+.course-bt{border:none;border-radius:12px;padding:8px 12px;font-family:inherit;font-weight:800;font-size:11.5px;cursor:pointer}
+.course-bt.ok{background:rgba(0,201,167,.14);color:#00C9A7}
+.course-bt.go{background:linear-gradient(135deg,#6C63FF,#FF6B6B);color:#fff}
+.course-bt.next{display:block;width:100%;margin-top:10px;padding:13px;border:none;border-radius:14px;background:linear-gradient(135deg,#1286FF,#6C63FF);color:#fff;font-family:inherit;font-weight:900;font-size:14px;cursor:pointer}
+.course-cta{display:flex;gap:8px;margin:14px 0}
+.course-cta button{flex:1;padding:13px;border:none;border-radius:14px;font-family:inherit;font-weight:900;font-size:13px;cursor:pointer}
+
 @media(min-width:481px){#app{border-left:1px solid var(--bg3);border-right:1px solid var(--bg3)}}
 </style>
 </head>
@@ -541,6 +559,16 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         <p>25 دقيقة تركيز + 5 دقائق راحة — يتناوبون تلقائيًا</p>
       </div>
       <button class="sb-btn" id="pomoBtn">افتح</button>
+    </div>
+
+    <div class="study-banner" id="courseBanner">
+      <span class="sb-ico">📕</span>
+      <div class="sb-info">
+        <b>كورسات الشرح</b>
+        <p>الشرح كامل لكل المواد وتحته أسئلته مباشرة — بيجيب مع التحميل ويشتغل بدون إنترنت</p>
+        <div class="sb-prog"><div class="sb-fill" id="courseFill" style="width:0%"></div></div>
+      </div>
+      <button class="sb-btn">افتح</button>
     </div>
 
     <div class="chal" id="weekCard">
@@ -805,6 +833,16 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
     <div id="studyReadBody"></div>
   </div>
 
+  <!-- COURSES -->
+  <div id="courses" class="screen">
+    <div class="page-head"><button class="icon-btn" id="coursesBackHome">→</button><h2>📚 كورسات الشرح</h2></div>
+    <div id="coursesList"></div>
+  </div>
+  <div id="courseView" class="screen">
+    <div class="page-head"><button class="icon-btn" id="cvBack">→</button><h2 id="cvTitle">الكورس</h2></div>
+    <div id="courseLessons"></div>
+  </div>
+
   <!-- ABOUT SHEET -->
   <div class="ai-sheet" id="aboutSheet" style="display:none">
     <div class="ai-card">
@@ -927,6 +965,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 
   <div class="bottom">
     <button class="nav-btn active" data-nav="home"><span class="ni">🏠</span>الرئيسية</button>
+    <button class="nav-btn" data-nav="courses"><span class="ni">📚</span>كورسات</button>
     <button class="nav-btn" data-nav="shop"><span class="ni">🛒</span>المتجر</button>
     <button class="nav-btn" data-nav="leaderboard"><span class="ni">🏆</span>المتصدرين</button>
     <button class="nav-btn" data-nav="profile"><span class="ni">👤</span>ملفي</button>
@@ -999,7 +1038,7 @@ function sfx(type){
 function vibe(p){if(set.vib&&navigator.vibrate)navigator.vibrate(p)}
 
 /* ================= SHOW ================= */
-const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats',study:'study',studyBooks:'studyBooks',studyBook:'studyBook',studyRead:'studyRead'};
+const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats',study:'study',studyBooks:'studyBooks',studyBook:'studyBook',studyRead:'studyRead',courses:'courses',courseView:'courseView'};
 function show(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.getElementById(scrPairs[s]||'home').classList.add('active');
@@ -1051,6 +1090,12 @@ function updateHome(){
   if(typeof renderStudyPlan==='function')renderStudyPlan();
   if(typeof renderHomeNote==='function')renderHomeNote();
   if(typeof renderWeekCard==='function')renderWeekCard();
+  const cf=document.getElementById('courseFill');
+  if(cf&&window.STUDY){
+    let d=0,tt=0;
+    try{window.STUDY.forEach((p,pi)=>p.subjects.forEach((s,si)=>s.books.forEach((b,bi)=>{tt+=b.chapters.length;b.chapters.forEach((c,ci)=>{if(getChStars(chKey(pi,si,bi,ci))>0)d++})})))}catch(e){}
+    cf.style.width=(tt?Math.round(d/tt*100):0)+'%';
+  }
 }
 function checkDaily(){
   const today=new Date().toDateString();
@@ -1597,6 +1642,7 @@ function bindEvents(){
     b.onclick=()=>{
       const s=b.dataset.nav;
       if(s==='home'){show('home');updateHome();checkDaily()}
+      else if(s==='courses'){if(typeof renderCourses==='function')renderCourses();show('courses')}
       else if(s==='shop'){show('shop');renderShop()}
       else if(s==='leaderboard'){show('leaderboard');renderLB()}
       else if(s==='profile'){show('profile');renderProfile()}
@@ -1634,6 +1680,12 @@ function bindEvents(){
   // STUDY NAV
   if(window.STUDY){
     document.getElementById('studyBanner').onclick=()=>{renderStudyParts();show('study')};
+    const cb=document.getElementById('courseBanner');
+    if(cb)cb.onclick=()=>{if(typeof renderCourses==='function')renderCourses();show('courses')};
+    const cbh=document.getElementById('coursesBackHome');
+    if(cbh)cbh.onclick=()=>{show('home');updateHome()};
+    const cvb=document.getElementById('cvBack');
+    if(cvb)cvb.onclick=()=>{if(typeof renderCourses==='function')renderCourses();show('courses')};
     const ss=document.getElementById('studySearch');
     if(ss)ss.oninput=()=>runStudySearch(ss.value);
     document.getElementById('studyBackHome').onclick=()=>{show('home');updateHome()};
@@ -1701,6 +1753,70 @@ function renderStudyParts(){
     d.innerHTML='<span class="pi">'+p.icon+'</span><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-prog-row"><div class="part-prog-bar"><div class="part-prog-fill" style="width:'+pct+'%"></div></div><span class="part-prog-txt">'+done+' ⭐</span></div>';
     d.onclick=()=>openStudyPart(pi);el.appendChild(d);
   });
+}
+function subjectProgress(pi,si){
+  let done=0,tot=0;
+  const s=window.STUDY[pi].subjects[si];
+  s.books.forEach((b,bi)=>b.chapters.forEach((c,ci)=>{tot++;if(getChStars(chKey(pi,si,bi,ci))>0)done++}));
+  return {done,tot,pct:tot?Math.round(done/tot*100):0,totBooks:s.books.length};
+}
+function renderCourses(){
+  const el=document.getElementById('coursesList');el.innerHTML='';
+  if(!window.STUDY){el.innerHTML='<p style="color:var(--dim);text-align:center">تعذر تحميل الكورسات — تحقق من الإنترنت</p>';return}
+  let done=0,tot=0;
+  window.STUDY.forEach((p,pi)=>p.subjects.forEach((s,si)=>{const g=subjectProgress(pi,si);done+=g.done;tot+=g.tot}));
+  const hero=document.createElement('div');hero.className='course-hero';
+  hero.innerHTML='<div><b>منهج التعليم — كورسات كل المواد</b><p>الشرح كامل وتحته أسئلته · جاي مع التحميل ويشتغل بدون إنترنت</p></div><div class="course-hero-pct">'+(tot?Math.round(done/tot*100):0)+'%</div>';
+  el.appendChild(hero);
+  window.STUDY.forEach((p,pi)=>{
+    const ph=document.createElement('div');ph.className='course-part';ph.textContent=p.icon+' '+p.name;el.appendChild(ph);
+    p.subjects.forEach((s,si)=>{
+      const g=subjectProgress(pi,si);
+      const d=document.createElement('div');d.className='subj-card course-mini';
+      d.innerHTML='<div class="subj-ico" style="background:'+s.color+'22;border:1.5px solid '+s.color+'">'+s.icon+'</div><div class="subj-info"><b>كورس '+s.name+'</b><p>'+g.totBooks+' كتب · '+g.tot+' درس · أتقنت '+g.done+'</p><div class="part-prog-bar"><div class="part-prog-fill" style="width:'+g.pct+'%"></div></div></div><span class="subj-arrow">▶</span>';
+      d.onclick=()=>openCourse(pi,si);el.appendChild(d);
+    });
+  });
+}
+function openCourse(pi,si){
+  _studyPi=pi;_studySi=si;
+  const p=window.STUDY[pi],s=p.subjects[si];
+  document.getElementById('cvTitle').textContent='كورس '+s.name;
+  const el=document.getElementById('courseLessons');el.innerHTML='';
+  const acts=document.createElement('div');acts.className='course-cta';
+  const r=document.createElement('button');r.className='course-bt go';r.textContent='▶ كمّل من حيث وقفت';
+  r.onclick=()=>resumeCourse(pi,si);
+  const a=document.createElement('button');a.className='course-bt ok';a.textContent='📖 من أول الكورس';
+  a.onclick=()=>{const sb=s.books[0];if(sb&&sb.chapters[0])openChapter(pi,si,0,0,sb.chapters[0],true);else toast('الكورس فاضي')};
+  acts.appendChild(r);acts.appendChild(a);el.appendChild(acts);
+  s.books.forEach((b,bi)=>b.chapters.forEach((ch,ci)=>{
+    const stars=getChStars(chKey(pi,si,bi,ci));
+    const row=document.createElement('div');row.className='course-row';
+    const sid=document.createElement('div');sid.className='course-sid';sid.textContent=ci+1;row.appendChild(sid);
+    const info=document.createElement('div');info.className='course-info';
+    const tb=document.createElement('b');tb.textContent=ch.title;info.appendChild(tb);
+    const ts=document.createElement('span');ts.textContent=b.title+' · '+stars+'⭐'+(stars>0?' · متقن':'');info.appendChild(ts);row.appendChild(info);
+    const acts=document.createElement('div');acts.className='course-acts';
+    const ob=document.createElement('button');ob.className='course-bt ok';ob.textContent='📖 شرح';ob.onclick=()=>openChapter(pi,si,bi,ci,ch,true);acts.appendChild(ob);
+    const gb=document.createElement('button');gb.className='course-bt go';gb.textContent='🎯 أسئلته';gb.onclick=()=>startStudyQuiz(pi,si,bi,ci,ch);acts.appendChild(gb);
+    row.appendChild(acts);
+    el.appendChild(row);
+  }));
+  show('courseView');
+}
+function resumeCourse(pi,si){
+  const s=window.STUDY[pi].subjects[si];
+  for(let bi=0;bi<s.books.length;bi++)for(let ci=0;ci<s.books[bi].chapters.length;ci++){
+    if(getChStars(chKey(pi,si,bi,ci))<3){openChapter(pi,si,bi,ci,s.books[bi].chapters[ci],true);return}
+  }
+  toast('🎉 أتقنت الكورس كاملًا — مراجعة من الأول؟');
+  const b=s.books[0];if(b&&b.chapters[0])openChapter(pi,si,0,0,b.chapters[0],true);
+}
+function courseNext(pi,si,bi,ci){
+  const s=window.STUDY[pi].subjects[si];
+  if(ci+1<s.books[bi].chapters.length)return {bi,ci:ci+1,ch:s.books[bi].chapters[ci+1]};
+  if(bi+1<s.books.length)return {bi:bi+1,ci:0,ch:s.books[bi+1].chapters[0]};
+  return null;
 }
 function studyLastResolve(){
   if(!S||!S.studyLast||!window.STUDY)return null;
@@ -1888,7 +2004,7 @@ function fastAuto(){
     if(btn)btn.textContent='⏸ توقف';
   }else if(btn)btn.textContent='▶ تلقائي';
 }
-function openChapter(pi,si,bi,ci,ch){
+function openChapter(pi,si,bi,ci,ch,fromCourse){
   _studyPi=pi;_studySi=si;_aiChapter=ch;
   S.studyLast={key:chKey(pi,si,bi,ci),pi:pi,si:si,bi:bi,ci:ci,title:ch&&ch.title||''};save();
   document.getElementById('srTitle').textContent='الفصل '+(ci+1)+' — '+ch.title;
@@ -1906,6 +2022,10 @@ function openChapter(pi,si,bi,ci,ch){
   bf.innerHTML='⚔️ تحدّى صديقك — الفصل ده بالذات';
   bf.onclick=()=>{studyCtx=studyCtx||{key:chKey(pi,si,bi,ci)};buildChallengeLink(chKey(pi,si,bi,ci))};
   el.appendChild(bf);
+  if(fromCourse&&typeof courseNext==='function'){
+    const nx=courseNext(pi,si,bi,ci);
+    if(nx){const bn=document.createElement('button');bn.className='course-bt next';bn.innerHTML='▶ الدرس التالي في الكورس: '+nx.ch.title;bn.onclick=()=>openChapter(pi,si,nx.bi,nx.ci,nx.ch,true);el.appendChild(bn)}
+  }
   show('studyRead');
 }
 function startStudyQuiz(pi,si,bi,ci,ch){
@@ -2746,8 +2866,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.14',SW_BUILD='v37';
+const APP_VERSION='1.3.15',SW_BUILD='v38';
 const CHANGES=[
+  {v:'v38 — كورسات الشرح 📚',d:'14/9/2026',items:['زر «كورسات» جديد في الشريط السفلي + بطاقة «كورسات الشرح» على الرئيسية','كل مادة بقيت «كورس» بايعين دروسه بالترتيب، وتقدم الإتقان وأكتر كورس ناقص تلحقه منين','كل درس فيه: الشرح كامل وتحته أسئلته مباشرة + زر «الدرس التالي في الكورس» يكمّل التسلسل','الشرح كله جاي مع التحميل وشغال بدون إنترنت — ذاكر أي مادة في أي وقت']},
   {v:'v37 — تذكير يومي بتوقيتك + تحدي صديقك ⚔️',d:'14/9/2026',items:['التذكير اليومي بقي عندك: اختار الساعة (الصبح/الظهر/المسا/الليل) وهيوصلك إشعار «يلا نذاكر شوية»','دعم كامل للتنبيهات الحقيقية على الموبايل مع إخفاء الزر التلقائي لو مش متاحة','تحدّي صديقك على فصل بعينه: زرار جديد «⚔️ تحدّى صديقك — الفصل ده» في كل فصل','صاحبك يفتح الرابط → بيخش يمتحن نفس الفصل بتاعك مباشرة، وكلكم تشاركوا النتايج']},
   {v:'v36 — قراءة سريعة ⚡',d:'14/9/2026',items:['زر «قراءة سريعة» فوق فصول كل كتاب — مراجعة كل فصوله في جلسة واحدة','وضع تلقائي يقلّب المقاطع لوحده (سريع/متوسط/مستريح) وتقدر توقف في أي لحظة','تكبير وتصغير الخط اللي يناسبك، وشريط تقدم يوريك مكانك','بس خلصت الكتاب بتاخد 3 عملات (مرة واحدة في اليوم)']},
   {v:'v35 — مؤثرات صوتية أشطر',d:'14/9/2026',items:['لحن جديد كليًا عند الإجابة: صح = نغمة ستة دافئة، غلط = لحنين هادئين، فلوس = رنين عملات','فانفار «أداء خرافي» واللحن بتاع كل مستوى استوى','صوت خاص لما توصل سلسلة 5 صح متتالية ⚡ وتنبيه قبل قرب نهاية الوقت','الالتزام بمفتاح الصوت في الإعدادات، وشغال على أي جهاز (Web Audio) بدون ملفات']},

@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.14'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.15'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -596,6 +596,20 @@ ck('maybeNotify safe in env', (()=>{try{sandbox.maybeNotify();return true}catch(
 ck('resolve study chapter works', (()=>{const r=vm.runInContext('window.__rc=resolveStudyChapter("0.0.0.0")',sandbox);return !!(r&&r.ch&&(r.ch.title||'').length)})());
 ck('challenge cfg carries chapter key', (()=>{const c=vm.runInContext('window.__cc=challengeCfg("0.0.1.2")',sandbox);return !!c&&c.f==='0.0.1.2'})());
 ck('challenge link build safe (no nav)', (()=>{try{sandbox.buildChallengeLink('0.0.1.2');return true}catch(e){return false}})());
+
+/* ---- courses ---- */
+ck('course funcs present', typeof sandbox.renderCourses==='function' && typeof sandbox.courseNext==='function' && typeof sandbox.subjectProgress==='function');
+sandbox.renderCourses();
+ck('courses render hero + subject courses', (()=>{const L=byId.coursesList.children||[];return L.length>1&&(L[0]._inner||'').includes('كورسات')&&L.some(c=>/course-mini/.test(c.className||''))})());
+sandbox.openCourse(0,0);
+ck('course view opens with lessons', byId.courseLessons.children.length>0);
+ck('lesson rows carry شرح / أسئلته buttons', (()=>{let txt=[];function w(n){if(!n)return;if(/course-bt/.test(n.className||''))txt.push(n.textContent||'');(n.children||[]).forEach(w)}w(byId.courseLessons);return txt.join(' ').includes('شرح')&&txt.join(' ').includes('أسئلته')})());
+vm.runInContext('window.__nx=courseNext(0,0,0,0)',sandbox);
+ck('courseNext yields next lesson', !!((sandbox.window.__nx||{}).ch));
+vm.runInContext('window.__sp=subjectProgress(0,0)',sandbox);
+ck('subjectProgress shape', (sandbox.window.__sp||{}).tot>0 && typeof (sandbox.window.__sp||{}).pct==='number');
+sandbox.resumeCourse(0,0);
+ck('resume opens a chapter read', (byId.srTitle.textContent||'').includes('الفصل'));
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
