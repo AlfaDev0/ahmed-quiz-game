@@ -2237,7 +2237,13 @@ function podKick(){
 function listenChapter(ch,label){
   try{
     if(!ch){return}
-    if(podS.playing&&podS.list.length>0){podStop();return}
+    if(podS.list.length>0){
+      if(podS.playing){podStop();return}
+      podS.playing=true;
+      try{window.speechSynthesis&&window.speechSynthesis.resume()}catch(e){}
+      if(podS.i>=podS.list.length-1){podS.i=0;podS.cancelNext=true;podSpeak()}
+      podPaint();return;
+    }
     if(!('speechSynthesis' in window)){toast('🔇 جهازك مش بيدعم القراءة الصوتية');return}
     try{window.speechSynthesis.cancel()}catch(e){}
     const parts=[label||'شرح الفصل'];
