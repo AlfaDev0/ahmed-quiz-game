@@ -290,6 +290,10 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .pomo-chip{flex:1;padding:11px;border-radius:12px;border:1.5px solid #e2e2ea;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#555;transition:.2s}
 .pomo-chip.on{border-color:#6C63FF;background:#6C63FF;color:#fff}
 .pomo-go{width:100%;margin-top:12px;padding:14px;border:none;border-radius:14px;background:#6C63FF;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.book-fast{margin:2px 12px 8px;padding:9px 12px;border-radius:12px;background:var(--bg2);border:1.5px dashed var(--primary);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;text-align:center}
+.fast-box{background:var(--bg);border-radius:14px;padding:16px;min-height:170px;max-height:48vh;overflow-y:auto;margin-top:6px;border:1px solid var(--bg3)}
+.fast-h{font-size:15px;font-weight:900;color:var(--gold);margin-bottom:10px;line-height:1.6}
+.fast-t{font-size:16px;line-height:2;color:var(--text);white-space:pre-line}
 .pomo-go.ghost{background:#f1f1f6;color:#555;font-weight:600}
 .home-note{margin:2px 0 12px;padding:11px 14px;border-radius:14px;background:linear-gradient(120deg,#fff3d6,#fff);border:1px solid #ffe4ad;color:#6b5218;font-size:13px;line-height:1.7;font-weight:600}
 .sb-prog{height:5px;background:rgba(255,255,255,.3);border-radius:3px;margin-top:7px;overflow:hidden}
@@ -843,6 +847,41 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         </div>
         <button class="pomo-go" id="pomoGo">▶ ابدأ</button>
         <button class="pomo-go ghost" id="pomoReset">↺ إعادة ضبط</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAST READING SHEET -->
+  <div class="ai-sheet" id="fastSheet" style="display:none">
+    <div class="ai-card">
+      <div class="ai-head">
+        <div class="ai-logo">⚡</div>
+        <div><b id="fastTitle">قراءة سريعة</b><div style="font-size:11px;color:var(--dim)" id="fastTag">مراجعة فصول الكتاب بسرعتك</div></div>
+        <button class="ai-close" id="fastCloseBtn">✕</button>
+      </div>
+      <div class="ai-body">
+        <div class="sb-prog"><div class="sb-fill" id="fastFill" style="width:0%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin:6px 0" id="fastPgo">0 / 0</div>
+        <div class="fast-box" id="fastBox">
+          <div class="fast-h" id="fastH">—</div>
+          <div class="fast-t" id="fastT">📖 افتح الكتاب ثم اضغط «التالى» واحنا نعدّي كل الفصول</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px">
+          <button class="pomo-chip" id="fastSmall" title="تصغير الخط">أ−</button>
+          <button class="pomo-chip" id="fastBig" title="تكبير الخط">أ+</button>
+          <button class="pomo-chip" id="fastPlay" title="قراءة تلقائية">▶ تلقائي</button>
+          <button class="pomo-chip" id="fastPrev">السابق</button>
+          <button class="pomo-chip" id="fastNext" style="border-color:#6C63FF">التالى ▸</button>
+          <button class="pomo-chip" id="fastSkip" style="color:#4CAF50;border-color:#4CAF50">أنهيت القراءة ✓</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:12px;color:var(--dim)">
+          ⏱️ سرعة التلقائي
+          <select id="fastSpeed" style="background:var(--bg3);color:var(--text);border:1px solid var(--bg3);border-radius:10px;padding:4px 8px;font-family:inherit;font-weight:700">
+            <option value="4">سريع (4ث)</option>
+            <option value="6" selected>متوسط (6ث)</option>
+            <option value="10">مستريح (10ث)</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -1739,7 +1778,11 @@ function openStudySubject(pi,si){
     head.innerHTML='<span class="book-ico">'+b.icon+'</span><div class="book-info"><b>'+b.title+'</b><span>'+b.chapters.length+' فصول · اقرأ ثم اختبر نفسك</span></div><span class="subj-arrow">▼</span>';
     const list=document.createElement('div');list.className='ch-list';
     const toggle=()=>{const vis=list.style.display==='none';list.style.display=vis?'block':'none';const sa=head.querySelector&&head.querySelector('.subj-arrow');if(sa)sa.textContent=vis?'▲':'▼'};
-    head.onclick=toggle;wrap.appendChild(head);wrap.appendChild(list);el.appendChild(wrap);
+    head.onclick=toggle;wrap.appendChild(head);
+    const fbar=document.createElement('div');fbar.className='book-fast';
+    fbar.innerHTML='⚡ قراءة سريعة — مراجعة كل فصول الكتاب في جلسة واحدة';
+    fbar.onclick=e=>{e.stopPropagation();openFast(pi,si,bi)};
+    wrap.appendChild(fbar);wrap.appendChild(list);el.appendChild(wrap);
     b.chapters.forEach((ch,ci)=>{
       const k=chKey(pi,si,bi,ci),stars=getChStars(k);
       const row=document.createElement('div');row.className='ch-row';
@@ -1750,6 +1793,59 @@ function openStudySubject(pi,si){
     });
   });
   show('studyBook');
+}
+let fast=null;
+function openFast(pi,si,bi){
+  const p=window.STUDY[pi],s=p.subjects[si],b=s.books[bi];
+  const segs=[];
+  (b.chapters||[]).forEach((ch,ci)=>{
+    segs.push({h:'📘 الفصل '+(ci+1)+' — '+ch.title,t:'👇 تقييم سريع: اقرأ مقاطع الفصل دي كلها'});
+    (ch.read||[]).forEach(r=>{if(r&&(r.h||r.t))segs.push({h:r.h,t:r.t})});
+  });
+  fast={pi,si,bi,b,segs,idx:0,tick:null,auto:false,fs:16};
+  const t1=document.getElementById('fastTitle');if(t1)t1.textContent='⚡ قراءة سريعة — '+b.title;
+  const tg=document.getElementById('fastTag');if(tg)tg.textContent=b.chapters.length+' فصل · '+(fast.segs.length-1)+' مقطع شرح';
+  const st=document.getElementById('fastSheet');if(st)st.style.display='flex';
+  fastShow();
+}
+function fastShow(){
+  if(!fast)return;
+  const se=fast.segs[fast.idx];if(!se)return;
+  const h=document.getElementById('fastH');if(h)h.textContent=se.h;
+  const t=document.getElementById('fastT');if(t){t.textContent=se.t;t.style.fontSize=fast.fs+'px'}
+  const f=document.getElementById('fastFill');if(f)f.style.width=Math.round((fast.idx+1)/fast.segs.length*100)+'%';
+  const p=document.getElementById('fastPgo');if(p)p.textContent=(fast.idx+1)+' / '+fast.segs.length;
+}
+function fastNext(){if(!fast)return;if(fast.idx<fast.segs.length-1){fast.idx++;fastShow()}else fastDone()}
+function fastPrev(){if(!fast)return;if(fast.idx>0){fast.idx--;fastShow()}}
+function fastDone(){
+  if(!fast)return;
+  const ctx={pi:fast.pi,si:fast.si,bi:fast.bi};
+  if(fast.tick){clearInterval(fast.tick);fast.tick=null}
+  fast=null;
+  const st=document.getElementById('fastSheet');if(st)st.style.display='none';
+  const bkKey=ctx.pi+'_'+ctx.si+'_'+ctx.bi;
+  const today=dstr(new Date());
+  S.qReads=S.qReads||{};
+  const fresh=S.qReads[bkKey]!==today;
+  if(fresh){S.qReads[bkKey]=today;S.coins+=3;S.totalCoins+=3;save();try{sfx('coin')}catch(e){}toast('⚡ خلصت قراءة سريعة — +3 عملات')}
+  else toast('⚡ خلصت قراءة سريعة — كررت زيارة النهارده');
+}
+function fastClose(){
+  if(fast&&fast.tick){clearInterval(fast.tick);fast.tick=null}
+  fast=null;
+  const st=document.getElementById('fastSheet');if(st)st.style.display='none';
+}
+function fastAuto(){
+  if(!fast)return;
+  if(fast.tick){clearInterval(fast.tick);fast.tick=null}
+  fast.auto=!fast.auto;
+  const btn=document.getElementById('fastPlay');
+  if(fast.auto){
+    const vel=+(document.getElementById('fastSpeed').value)||6;
+    fast.tick=setInterval(fastNext,vel*1000);
+    if(btn)btn.textContent='⏸ توقف';
+  }else if(btn)btn.textContent='▶ تلقائي';
 }
 function openChapter(pi,si,bi,ci,ch){
   _studyPi=pi;_studySi=si;_aiChapter=ch;
@@ -2434,6 +2530,15 @@ function pomoReset(){
   if(pc)pc.onclick=()=>{pomo.run=false;if(pomo.tick){clearInterval(pomo.tick);pomo.tick=null}const s=document.getElementById('pomoSheet');if(s)s.style.display='none'};
   const ps=document.getElementById('pomoSheet');
   if(ps)ps.onclick=e=>{if(e.target.id==='pomoSheet'){pomo.run=false;if(pomo.tick){clearInterval(pomo.tick);pomo.tick=null}ps.style.display='none'}};
+  {const _fb=document.getElementById('fastCloseBtn');if(_fb)_fb.onclick=()=>{if(typeof fastClose==='function')fastClose()};
+   const _fs2=document.getElementById('fastSheet');if(_fs2)_fs2.onclick=e=>{if(e.target.id==='fastSheet'&&typeof fastClose==='function')fastClose()};
+   const _fN=document.getElementById('fastNext');if(_fN)_fN.onclick=()=>{if(typeof fastNext==='function')fastNext()};
+   const _fP=document.getElementById('fastPrev');if(_fP)_fP.onclick=()=>{if(typeof fastPrev==='function')fastPrev()};
+   const _fPlay=document.getElementById('fastPlay');if(_fPlay)_fPlay.onclick=()=>{if(typeof fastAuto==='function')fastAuto()};
+   const _fSkip=document.getElementById('fastSkip');if(_fSkip)_fSkip.onclick=()=>{if(typeof fastDone==='function')fastDone()};
+   const _fSm=document.getElementById('fastSmall');if(_fSm)_fSm.onclick=()=>{if(fast){fast.fs=Math.max(13,fast.fs-2);if(typeof fastShow==='function')fastShow()}};
+   const _fBg=document.getElementById('fastBig');if(_fBg)_fBg.onclick=()=>{if(fast){fast.fs=Math.min(26,fast.fs+2);if(typeof fastShow==='function')fastShow()}};
+   const _fSp=document.getElementById('fastSpeed');if(_fSp)_fSp.onchange=()=>{if(fast&&fast.auto&&typeof fastAuto==='function'){clearInterval(fast.tick);fast.tick=null;fast.auto=false;fastAuto()}}}
   const go=document.getElementById('pomoGo');
   if(go)go.onclick=pomoStart;
   const rs=document.getElementById('pomoReset');
@@ -2596,8 +2701,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.12',SW_BUILD='v35';
+const APP_VERSION='1.3.13',SW_BUILD='v36';
 const CHANGES=[
+  {v:'v36 — قراءة سريعة ⚡',d:'14/9/2026',items:['زر «قراءة سريعة» فوق فصول كل كتاب — مراجعة كل فصوله في جلسة واحدة','وضع تلقائي يقلّب المقاطع لوحده (سريع/متوسط/مستريح) وتقدر توقف في أي لحظة','تكبير وتصغير الخط اللي يناسبك، وشريط تقدم يوريك مكانك','بس خلصت الكتاب بتاخد 3 عملات (مرة واحدة في اليوم)']},
   {v:'v35 — مؤثرات صوتية أشطر',d:'14/9/2026',items:['لحن جديد كليًا عند الإجابة: صح = نغمة ستة دافئة، غلط = لحنين هادئين، فلوس = رنين عملات','فانفار «أداء خرافي» واللحن بتاع كل مستوى استوى','صوت خاص لما توصل سلسلة 5 صح متتالية ⚡ وتنبيه قبل قرب نهاية الوقت','الالتزام بمفتاح الصوت في الإعدادات، وشغال على أي جهاز (Web Audio) بدون ملفات']},
   {v:'v34 — تقرير مذاكرتي',d:'13/9/2026',items:['زر «تصدير تقرير مذاكرتي» في الإعدادات — ملف HTML جاهز للطباعة والمشاركة','التقرير فيه: بياناتك ومستويانك، دقة إجاباتك، إتقانك لكل مسار، شطارتك الأسبوعية، حالتك في خطتك، وقايمة أخطائك اللي تركز عليها','يعمل بدون إنترنت وزتون مع الكتب المصدّرة']},
   {v:'v33 — شطارتك الأسبوعية',d:'13/9/2026',items:['بطاقة «شطارتك» على الرئيسية بتلخص أسبوعك: إجاباتك ونجاحك وعملاتك','نجمات ⭐ من 1 إلى 5 وفق مجهودك — والبطاقة بتتحسب يوميًا تلقائيًا','رسالة تشجعك: «كل عدّادة بتبدأ من 1» حتى لو لسه بادئ','أعمالك بتتعد بكل الإجابات (جرعة يومية، مراجعة، دروس، امتحان)']},

@@ -371,7 +371,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.12'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.13'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -558,6 +558,27 @@ ck('report has mastery section', (sandbox.window.__rep).includes('إتقاني �
 vm.runInContext('S.weekL={k:weekKey(),q:10,cor:7,wro:3,coins:33}',sandbox);
 ck('report includes weekly section', (sandbox.buildReportHTML()).includes('شطارتك'));
 ck('report export is safe to invoke', (vm.runInContext('window.__repok=(()=>{try{downloadReport();return true}catch(e){return false}})()',sandbox),!!sandbox.window.__repok));
+
+/* ---- fast reading ---- */
+vm.runInContext('window.__fastN=null;openFast(0,0,0);window.__fastN=fast.segs.length',sandbox);
+ck('fast reading opens with sections', (sandbox.window.__fastN||0)>1 && (byId.fastPgo.textContent||'').includes('1 /'));
+sandbox.fastNext();
+ck('fast next advances progress', (byId.fastPgo.textContent||'').includes('2 /'));
+sandbox.fastPrev();
+ck('fast prev goes back', (byId.fastPgo.textContent||'').includes('1 /'));
+byId.fastBig.onclick();
+ck('fast font size control works', (byId.fastT.style.fontSize||'')==='18px');
+vm.runInContext('const c1=S.coins;fast.idx=fast.segs.length-1',sandbox);
+sandbox.fastNext();
+ck('fast finishing awards coins once per day', (()=>{const d=vm.runInContext('S.coins-c1',sandbox);return d===3})());
+vm.runInContext('window.__fastGone=(fast===null)',sandbox);
+ck('fast session clears after done', sandbox.window.__fastGone===true);
+vm.runInContext('openFast(0,0,0);fast.idx=fast.segs.length-1',sandbox);
+sandbox.fastNext();
+ck('fast same-day repeat gives no extra coins', vm.runInContext('S.coins-c1===3',sandbox));
+sandbox.fastAuto();
+sandbox.fastClose();
+ck('fast auto/close safe', (()=>{return vm.runInContext('window.__fl=fast===null',sandbox), sandbox.window.__fl===true})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
