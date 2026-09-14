@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.28'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.29'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -697,6 +697,12 @@ ck('chapter screen has AI assistant button', (()=>{try{
   sandbox.openChapter(0,0,0,0,sandbox.window.STUDY[0].subjects[0].books[0].chapters[0]);
   return byId.studyReadBody.children.some(c=>(c.className||'')==='ai-btn')
 }catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v52 install download card ---- */
+ck('deferredPrompt starts null', vm.runInContext(`deferredPrompt===null`,sandbox));
+ck('dlCard exists (real browser hides it)', vm.runInContext(`!!document.getElementById('dlCard')`,sandbox));
+ck('renderDlHelp shows steps', (()=>{try{vm.runInContext(`renderDlHelp()`,sandbox);return vm.runInContext(`document.getElementById('dlCardTitle').textContent`.replace('dlCardTitle','dlCardTitle'),sandbox).includes('لينك التحميل')}catch(e){return 'ERR:'+e.message}})());
+ck('wireDownload wired without crashing', (()=>{try{vm.runInContext(`wireDownload()`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

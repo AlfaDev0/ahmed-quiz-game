@@ -611,6 +611,12 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
 
     <div class="home-note" id="weekReportWrap" style="display:none;margin-top:0"></div>
 
+    <div class="chal" id="dlCard" style="display:none">
+      <span class="chal-ico">📲</span>
+      <div class="chal-info"><b id="dlCardTitle">نزّل التطبيق على جهازك</b><p id="dlCardSub">دوسة واحدة بتنزّله كتطبيق — يشتغل من غيره نت ويفتح زي أي تطبيق</p></div>
+      <button class="chal-btn" id="dlBtn">تحميل التطبيق ⬇️</button>
+    </div>
+
     <div class="chip-row" id="diffChips">
       <button class="chip active" data-d="">الكل</button>
       <button class="chip" data-d="easy">سهل</button>
@@ -1169,7 +1175,7 @@ window.addEventListener('load',()=>{
     document.getElementById('splash').classList.add('hide');
     setTimeout(()=>document.getElementById('splash').remove(),600);
   },2200);
-  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();wireVoice();podS.rate=set&&set.voiceRate||0.9;if(typeof healData==='function')try{healData()}catch(e){}
+  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();wireDownload();wireVoice();podS.rate=set&&set.voiceRate||0.9;if(typeof healData==='function')try{healData()}catch(e){}
 });
 
 /* ================= TITLES ================= */
@@ -1184,6 +1190,42 @@ function monthKey(){const d=new Date();return d.getFullYear()+'-M'+(d.getMonth()
 function avSrc(){return S.avatar||'icons/avatar.jpg'}
 function refreshAvatars(){
   document.querySelectorAll('.avatar img,#pfAv,#modalAv,.big-av img').forEach(i=>{i.src=avSrc()});
+}
+/* ================= DOWNLOAD / INSTALL ================= */
+var deferredPrompt=null;
+function wireDownload(){
+  const db=document.getElementById('dlBtn');
+  if(typeof window.addEventListener==='function'){
+    window.addEventListener('beforeinstallprompt',function(e){
+      e.preventDefault();
+      deferredPrompt=e;
+      const c=document.getElementById('dlCard');if(c)c.style.display='';
+      const t=document.getElementById('dlCardSub');if(t)t.textContent='جاهز — دوسة واحدة تحميل كتطبيق حقيقي';
+      try{navigator.vibrate&&navigator.vibrate(20)}catch(err){}
+    });
+    window.addEventListener('appinstalled',function(){
+      deferredPrompt=null;
+      const c=document.getElementById('dlCard');if(c)c.style.display='none';
+      try{if(typeof toast==='function')toast('🎉 تم تثبيت التطبيق — هتلاقيه على شاشتك')}catch(err){}
+    });
+  }
+  if(db)db.onclick=function(){
+    if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;return}
+    renderDlHelp();
+  };
+}
+function renderDlHelp(){
+  const dc=document.getElementById('dlCard');
+  const isIOS=/(iphone|ipod|ipad)/i.test(String(navigator&&navigator.userAgent||''));
+  if(!dc)return;
+  const t=document.getElementById('dlCardTitle'),s=document.getElementById('dlCardSub'),b=document.getElementById('dlBtn');
+  if(t)t.textContent='لينك التحميل على جهازك 📲';
+  if(b){b.style.display='';b.textContent='🔄 أعد المحاولة'}
+  if(isIOS){
+    if(s)s.innerHTML='<b style="color:var(--primary-dark)">اتبع الخطوات (Safari):</b><br>1. زرار المشاركة ⬆↑<br>2. «إضافة إلى الشاشة الرئيسية» → أضف ✓';
+  }else{
+    if(s)s.innerHTML='<b style="color:var(--primary-dark)">اتبع الخطوات:</b><br>1. اضغط ⋮ (فوق) → «تثبيت التطبيق»<br>2. أو: ⋮ → «إضافة إلى الشاشة الرئيسية»';
+  }
 }
 /* ---------- weekly performance tracker ---------- */
 function wkTrack(cor){
@@ -3354,8 +3396,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.28',SW_BUILD='v51';
+const APP_VERSION='1.3.29',SW_BUILD='v52';
 const CHANGES=[
+  {v:'v52 — نزّل التطبيق بدوسة 📲',d:'15/9/2026',items:['على الرئيسية كارت تحميل: أول ما يجي معلوم إن الجهاز جاهز بتظهر «تثبيت الآن ✓» — دوسة واحدة تركّب التطبيق وتنزّله','لو جهازك مش بيسمح بالتركيب التلقائي — الكارت نفسه بيشرح لك الخطوات على جهازك بالظبط (أندرويد أو آيفون)']},
   {v:'v51 — مرشدك · لياليك · أسبوعك 🧠🕶️📊',d:'15/9/2026',items:['🤖 زرار «اسأل مرشدك الذكي عن الفصل» داخل كل درس — يشرح لك الفصل بأبسط صورة','🕶️ الوضع الليلي العميق للقراءة: أسود مخملي + ذهبي مريح للعين آخر الليل','📊 تقرير أسبوعي على الرئيسية: أعمدة آخر 7 أيام — عدد أسئلتك ودقتك وأيام نشاطك']},
   {v:'v50 — سرعة القراءة تحت تحكمك ⚡',d:'15/9/2026',items:['في الإعدادات: تحكم بالسرعة (0.8 هادي · 0.9 متوسط · 1 · 1.15 · 1.3 سريع) وبيتسجل وفي كل الشروح','تقدر برضه تغيّر السرعة أثناء الاستماع من زرار السرعة في المشغّل — اختيارك ثابت بالحفاظ عليه بين الدروس']},
   {v:'v49 — اختار صوتك بنفسك 🔊🎚️',d:'15/9/2026',items:['الإعدادات فيها قايمة كل الأصوات العربية المتاحة على جهازك — اختار اللي يجننك وبيتسجل ومش بيضيع','زرار «▶️ جرّب الصوت» بيسمّعلك الكه قبل ما تختار، والاختيار بيتطبق فورًا على كل دروس القراءة','لو ملقتش حاجة عجباك — زرار «✨ الأفضل تلقائيًا» بيرجعلك أفضل صوت متاح']},
