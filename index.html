@@ -139,7 +139,9 @@ body{background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 /* ==== LEADERBOARD ==== */
 .page-head{display:flex;align-items:center;gap:14px;padding:18px;background:var(--bg2);border-radius:0 0 28px 28px}
 .page-head h2{font-size:19px}
-.lb-tabs{display:flex;gap:8px;padding:16px;justify-content:center}
+.lb-tabs{display:flex;gap:8px;padding:16px 16px 0;justify-content:center}
+.lb-status{padding:10px 16px 0;text-align:center;font-size:12px;font-weight:700}
+.lb-st{font-size:12px;font-weight:800}
 .lb-tab{padding:7px 18px;border-radius:20px;background:var(--bg2);border:none;color:var(--dim);font-family:inherit;font-size:13px;cursor:pointer;font-weight:700}
 .lb-tab.active{background:var(--primary);color:#fff}
 .lb-list{padding:0 16px}
@@ -718,6 +720,7 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
       <button class="lb-tab" id="ltWeek">أسبوعي</button>
       <button class="lb-tab" id="ltMonth">شهري</button>
     </div>
+    <div class="lb-status" id="lbStatus"></div>
     <div class="lb-list" id="lbList"></div>
   </div>
 
@@ -805,6 +808,20 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
           <span class="ai-badge off" id="aiBadge">وضع: اللمسات السريعة</span>
           <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="font-size:12px;color:var(--primary);font-weight:700">إزاي أفعّل مرشدي الكامل؟ ↖</a>
         </div>
+      </div>
+      <div class="set-item vertical">
+        <span class="set-label">🌐 لوحة المتصدرين الحقيقية</span>
+        <span style="font-size:12px;color:var(--dim)">اربطها مرة واحدة بمخزن JSONBin مجاني — وبعدها نقاطك وكل اللاعبين على مستوى العالم بواحدة</span>
+        <input type="password" id="lbKeyInput" placeholder="مفتاح JSONBin (الماستر)" style="background:var(--bg3);border:none;border-radius:12px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:13px;direction:ltr;text-align:left" spellcheck="false">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="sec-btn" id="lbSetBtn" style="flex:1;min-width:120px">🔗 ربط اللوحة</button>
+          <button class="sec-btn" id="lbUnsetBtn" style="flex:1;min-width:120px">🛑 فك الربط</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+          <span class="lb-st" id="lbStatusNote">○ غير متصل</span>
+          <a href="https://jsonbin.io/" target="_blank" rel="noopener" style="font-size:12px;color:var(--primary);font-weight:700">افتح حساب JSONBin المجاني؟ ↖</a>
+        </div>
+        <span style="font-size:11px;color:var(--dim)">خطوات: سجّل في jsonbin.io → انسخ الـ X-Master-Key → الصقه هنا → اضغط ربط. اللوحة هيتعمل لها سلة لوحدها من تلقاء نفسها.</span>
       </div>
       <button class="sec-btn" id="exportBtn">📤 تصدير البيانات (نسخة احتياطية)</button>
       <button class="sec-btn" id="reportBtn">📄 تصدير تقرير مذاكرتي</button>
@@ -1038,11 +1055,11 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
 <script>
 /* ================= DATA MODEL ================= */
 const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false};
-const SETDEF={sound:true,vib:true,dark:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:''};
+const SETDEF={sound:true,vib:true,dark:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'',jsonbinBin:''};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'}}
+function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string')set.jsonbinKey='';if(typeof set.jsonbinBin!=='string')set.jsonbinBin=''}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
@@ -1104,7 +1121,7 @@ window.addEventListener('load',()=>{
     document.getElementById('splash').classList.add('hide');
     setTimeout(()=>document.getElementById('splash').remove(),600);
   },2200);
-  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();
+  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();
 });
 
 /* ================= TITLES ================= */
@@ -1366,6 +1383,7 @@ function finish(){
   document.getElementById('rXp').textContent=score;
   checkAchv();
   save();updateHome();
+  if(typeof maybeLbSync==='function')maybeLbSync(true);
   show('result');
   if(lvup){sfx('lv');showLevelUp(S.level)}
 }
@@ -1401,24 +1419,100 @@ function checkAchv(){
 }
 
 /* ================= LEADERBOARD ================= */
+const LB_CACHE='iq_lb_cache';
+let lbLastPush=0;
+function lbLoadCache(){try{const v=JSON.parse(localStorage.getItem(LB_CACHE));return (v&&Array.isArray(v.entries))?v.entries:[]}catch(e){return []}}
+function lbSaveCache(entries){try{localStorage.setItem(LB_CACHE,JSON.stringify({entries}))}catch(e){}}
+function lbMode(){return !!(set&&set.jsonbinKey)}
+function lbEnsureBin(key){
+  return Promise.resolve().then(()=>{
+    if(set.jsonbinBin)return set.jsonbinBin;
+    if(typeof fetch!=='function')return null;
+    return fetch('https://api.jsonbin.io/v3/b',{method:'POST',headers:{'Content-Type':'application/json','X-Master-Key':key,'X-Bin-Name':'ahmed-quiz-leaderboard'},body:JSON.stringify({entries:[]})}).then(r=>{
+      if(!r.ok)return null;
+      return r.json().then(d=>{if(d.metadata&&d.metadata.id){set.jsonbinBin=d.metadata.id;saveSet()}return set.jsonbinBin||null}).catch(()=>null);
+    }).catch(()=>null);
+  });
+}
+function lbFetchLive(bin){
+  if(typeof fetch!=='function')return Promise.resolve(null);
+  return fetch('https://api.jsonbin.io/v3/b/'+bin+'/latest',{headers:{'X-Master-Key':set.jsonbinKey}}).then(r=>{
+    if(!r.ok)return null;
+    return r.json().then(d=>(d&&d.record&&Array.isArray(d.record.entries))?d.record.entries:null).catch(()=>null);
+  }).catch(()=>null);
+}
+function lbPush(bin,entries){
+  if(typeof fetch!=='function')return Promise.resolve(false);
+  return fetch('https://api.jsonbin.io/v3/b/'+bin,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':set.jsonbinKey},body:JSON.stringify({entries})}).then(r=>r.ok).catch(()=>false);
+}
+function lbsSelfEntry(){
+  if(!S)return null;
+  return{name:S.name||'لاعب',games:S.games||0,correct:S.correct||0,wrong:S.wrong||0,ptsAll:(S.correct||0)*5,ptsWeek:S.weekBest||0,ptsMonth:S.monthBest||0,at:Date.now()};
+}
+function lbUpsert(){
+  if(!lbMode())return Promise.resolve();
+  lbLastPush=Date.now();
+  const self=lbsSelfEntry();if(!self)return Promise.resolve();
+  return lbEnsureBin(set.jsonbinKey).then(bin=>{
+    if(!bin)return null;
+    return lbFetchLive(bin).then(entries=>{
+      const list=(Array.isArray(entries)?entries:[]).filter(x=>x&&x.name&&x.name!==S.name);
+      list.push(self);
+      list.sort((a,b)=>(b.ptsAll||0)-(a.ptsAll||0));
+      const top=list.slice(0,60);
+      lbSaveCache(top);
+      return lbPush(bin,top).then(ok=>{if(ok)lbSaveCache(top);renderLB()});
+    });
+  }).catch(()=>null);
+}
+function maybeLbSync(force){
+  if(!lbMode()||!S||!S.name)return Promise.resolve();
+  const now=Date.now();
+  if(!force&&now-lbLastPush<45000)return Promise.resolve();
+  return lbUpsert();
+}
 function renderLB(){
   const list=document.getElementById('lbList');list.innerHTML='';
   const tab=(document.querySelector('.lb-tab.active')&&document.querySelector('.lb-tab.active').id)||'ltAll';
-  const selfPts=tab==='ltWeek'?S.weekBest:tab==='ltMonth'?S.monthBest:S.correct*5;
-  const players=LEADERBOARD_NAMES.map((p,i)=>{
-    const base=p.self?selfPts:50+Math.floor(Math.random()*600);
-    return{...p,pts:base};
-  }).sort((a,b)=>b.pts-a.pts);
-  players.forEach((p,i)=>{
+  const key=tab==='ltWeek'?'ptsWeek':tab==='ltMonth'?'ptsMonth':'ptsAll';
+  const st=document.getElementById('lbStatus');
+  if(st){st.textContent=lbMode()?'🌐 لوحة حقيقية — متزامنة مع كل اللاعبين':'🧩 لوحة محلية — اربط من الإعدادات 🌐 للحقيقية';st.style.color=lbMode()?'var(--success)':'var(--dim)'}
+  const sorted=lbLoadCache().slice().sort((a,b)=>(b[key]||0)-(a[key]||0)).slice(0,30);
+  if(!sorted.length){
+    list.innerHTML='<p style="color:var(--dim);text-align:center;padding:30px 16px;line-height:2">🏁 مفيش منافسين لحد دلوقتي...<br>'+(lbMode()?'خد أول صفقة وقولهم يشتركوا':'اربط في الإعدادات عشان اللوحه الحقيقية تشتغل')+'</p>';
+    if(lbMode())maybeLbSync(true);
+    return;
+  }
+  const me=S&&S.name;
+  sorted.forEach((p,i)=>{
+    if(!p||!p.name)return;
     const el=document.createElement('div');
-    el.className='lb-item'+(p.self?' me':'');
+    el.className='lb-item'+(p.name===me?' me':'');
     const rk=i===0?'r1':i===1?'r2':i===2?'r3':'';
     el.innerHTML='<div class="rank '+rk+'">'+(i+1)+'</div>'+
       '<div class="lb-av"><img src="'+avSrc()+'"></div>'+
-      '<div><div class="lb-name">'+(p.self?S.name:p.name)+'</div><div class="lb-pts">'+p.pts+' نقطة</div></div>'+
-      '<div class="lb-val">'+p.pts+'</div>';
+      '<div style="flex:1;min-width:0"><div class="lb-name">'+p.name+'</div><div class="lb-pts">'+((p.games||0))+' لعبة · '+(p.correct||0)+' إجابة صحيحة</div></div>'+
+      '<div class="lb-val">'+(p[key]||0)+'</div>';
     list.appendChild(el);
   });
+  if(lbMode())maybeLbSync(false);
+}
+function wireLB(){
+  const inp=document.getElementById('lbKeyInput');
+  if(inp&&set)inp.value=set.jsonbinKey||'';
+  const sb=document.getElementById('lbSetBtn');
+  if(sb)sb.onclick=()=>{
+    const v=(document.getElementById('lbKeyInput')&&document.getElementById('lbKeyInput').value||'').trim();
+    set.jsonbinKey=v;set.jsonbinBin='';saveSet();
+    if(!v){toast('تم فك الربط — اللوحة محلية');lbDisp();renderLB();return}
+    lbEnsureBin(v).then(bin=>{toast(bin?'✔ تم ربط اللوحة الحقيقية بنجاح':'✖ تعذر الاتصال — تحقق من المفتاح');lbDisp();renderLB()});
+  };
+  const ub=document.getElementById('lbUnsetBtn');
+  if(ub)ub.onclick=()=>{set.jsonbinKey='';set.jsonbinBin='';saveSet();document.getElementById('lbKeyInput').value='';toast('تم فك الربط');lbDisp();renderLB()};
+}
+function lbDisp(){
+  const nx=document.getElementById('lbStatusNote');
+  if(nx)nx.textContent=lbMode()?'● متصل — نقاطك بتتحدث وتظهر لكل اللاعبين':'○ غير متصل — اللوحة محلية على جهازك';
 }
 
 /* ================= PROFILE ================= */
@@ -3059,8 +3153,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.19',SW_BUILD='v42';
+const APP_VERSION='1.3.20',SW_BUILD='v43';
 const CHANGES=[
+  {v:'v43 — لوحة متصدرين حقيقية 🌐',d:'15/9/2026',items:['اللوحة بقت حقيقية على مخزن JSONBin سحابي — نقاطك وكل اللاعبين في جدول مباشر مش أسماء وهمية','ربط واحد من الإعدادات: الصق مفتاح JSONBin المجاني وهيشتغل لحظيًا (ويتعمل سلة تلقائيًا)','نقاطك بتتحدث بعد كل لعبة، والشاشة تظهر ترتيبك الحقيقي وتحدثه من النت — وتشتغل حتى لو النت قطع بتخزين محلي']},
   {v:'v42 — قراءة سلسة بدون تقطيع 🔊',d:'15/9/2026',items:['بدّلنا طريقة القراءة: الجمل بتتكلم ورا بعض بقوائم المرور التلقائي من غير إلغاء متكرر — بيقرا كل الكلام كامل من غير ما يقص','اضفنا حارس بيظبط الصوت لو وقف من غير سبب (عطل معروف في أندرويد) ويكمّل لوحده','تقسيم الكلام اتحسّن: الجمل الصغيرة بتندمج في اللي قبلها — مفيش قفزات ومخنوقات']},
   {v:'v41 — صوت أوضح وأخشنّ 🎙️',d:'14/9/2026',items:['بختار تلقائيًا أفضل صوت عربي موجود على جهازك (مش أي صوت يقع الأول)','النطق بقي أهدى وأبطأ: سرعة افتراضية ×0.9 ونبرة أقل — إحساس شرح مريح','لو جهازك فيه أكتر من صوت عربي، هدور على الأجود منهم تلقائيًا']},
   {v:'v40 — النهضة 🫒',d:'14/9/2026',items:['هوية كاملة جديدة: ألوان الأخضر الزيتي والكهرماني — إحساس مذاكرة هادي وأنيق، فاتح افتراضي + نسخة ليلية داكنة','الرئيسية بقت متوازنة: بطاقة «كمّل من حيث وقفت» أول ما تفتح (اسمع/اقرأ/اختبر بضغطة) + شريط تقدم كورسات الشرح قدامك','مشغل بودكاست كامل: تشغيل/إيقاف/تقديم/إرجاع وتغيير السرعة ×0.8 ×1 ×1.15 ×1.3 — ثابت فوق الشريط ومن أي شاشة']},
