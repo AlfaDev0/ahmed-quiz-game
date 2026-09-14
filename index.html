@@ -340,6 +340,7 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 .read-sec h4{font-size:16px;margin-bottom:8px;color:var(--gold)}
 .read-sec p{font-size:13.5px;line-height:2;color:var(--text);opacity:.94}
 .read-quiz-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;font-family:inherit;font-weight:900;font-size:17px;cursor:pointer;box-shadow:0 8px 25px rgba(76,175,80,.4)}
+.chall-btn{display:block;width:100%;margin-top:10px;padding:12px;border:1.5px dashed var(--secondary);border-radius:14px;background:var(--bg2);color:var(--secondary);font-family:inherit;font-weight:800;font-size:14px;cursor:pointer}
 .r-stars{font-size:26px;letter-spacing:6px;margin:6px 0 12px;text-align:center}
 .r-stars .off{opacity:.2}
 .study-hidden{display:none}
@@ -712,6 +713,17 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
         <span class="set-label">🔔 التذكير اليومي</span>
         <label class="tgl"><input type="checkbox" id="sNotif"><span class="slider"></span></label>
       </div>
+      <div class="set-item">
+        <span class="set-label">⏰ وقت التذكير</span>
+        <select id="sNotifH" style="background:var(--bg3);color:var(--text);border:1px solid var(--bg3);border-radius:10px;padding:6px 10px;font-family:inherit;font-weight:700">
+          <option value="7">الصبح 7:00</option>
+          <option value="12">الظهر 12:00</option>
+          <option value="16">بعد العصر 4:00</option>
+          <option value="18">المسا 6:00</option>
+          <option value="19">المسا 7:00</option>
+          <option value="21">الليل 9:00</option>
+        </select>
+      </div>
       <div class="set-item vertical">
         <span class="set-label">📊 عدد الأسئلة</span>
         <div class="opts" id="qOpts">
@@ -945,11 +957,11 @@ html.light{--bg:#F3F4FA;--bg2:#FFFFFF;--bg3:#E9EBF5;--text:#16182D;--dim:#5B5F7A
 <script>
 /* ================= DATA MODEL ================= */
 const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false};
-const SETDEF={sound:true,vib:true,dark:true,notif:false,qCount:20,timer:20,aiKey:''};
+const SETDEF={sound:true,vib:true,dark:true,notif:false,notifH:19,qCount:20,timer:20,aiKey:''};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=true;if(typeof set.notif!=='boolean')set.notif=false}
+function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=true;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
@@ -1330,6 +1342,7 @@ function applySettings(){
   document.getElementById('sVib').checked=set.vib;
   const sd=document.getElementById('sDark');if(sd)sd.checked=set.dark;
   const sn=document.getElementById('sNotif');if(sn)sn.checked=set.notif;
+  const sh=document.getElementById('sNotifH');if(sh)sh.value=String(set.notifH||19);
   document.documentElement.classList.toggle('light',!set.dark);
   document.querySelectorAll('#qOpts .opt').forEach(b=>b.classList.toggle('active',+b.dataset.q===set.qCount));
   document.querySelectorAll('#tOpts .opt').forEach(b=>b.classList.toggle('active',+b.dataset.t===set.timer));
@@ -1461,19 +1474,29 @@ function setupNotif(){
     if(set.notif){
       Notification.requestPermission().then(p=>{
         if(p!=='granted'){set.notif=false;saveSet();applySettings();toast('🔕 لم يتم السماح بالتنبيهات')}
-        else{toast('🔔 سيتم تذكيرك يومياً')}
+        else{toast('🔔 هيوصل تذكيرك يوميًا الساعة '+set.notifH+':00')}
       });
     }
   };
+  const h=document.getElementById('sNotifH');
+  if(h)h.onchange=e=>{set.notifH=+e.target.value;saveSet();applySettings();toast('⏰ تذكيرك هيوصل الساعة '+set.notifH+':00')};
 }
+let notifTick=null;
 function maybeNotify(){
-  if(!set.notif||!('Notification' in window))return;
-  if(Notification.permission!=='granted')return;
-  const today=new Date().toDateString();
-  if(S.notifDay!==today){
-    S.notifDay=today;save();
-    try{new Notification('🧠 حان وقت تحدي الذكاء!',{body:'تحدى اليوم واكسب عملات ذهبية 💪',icon:'icons/avatar.jpg'})}catch(e){}
-  }
+  if(!('Notification' in window))return;
+  if(notifTick){clearInterval(notifTick);notifTick=null}
+  notifTick=setInterval(()=>{
+    try{
+      if(!set.notif)return;
+      if(Notification.permission!=='granted')return;
+      const now=new Date(),today=now.toDateString();
+      if(S.notifDay===today)return;
+      if(now.getHours()<(set.notifH||19))return;
+      S.notifDay=today;save();
+      try{new Notification('🧠 يلا نذاكر شوية!',{body:'أنا فاكرك — جرعة اليوم والتحدي والروح كلهم مستنيينك 💪',icon:'icons/avatar.jpg'})}catch(e){}
+      try{toast('🔔 وقت المذاكرة — يلا بينا 💪')}catch(e){}
+    }catch(e){}
+  },60000);
 }
 
 /* ================= CHALLENGES ================= */
@@ -1500,23 +1523,41 @@ function shareResult(){
   else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast('📤 تم نسخ النتيجة!')).catch(()=>toast('📤 '+txt))}
   else{toast('📤 '+txt.slice(0,60))}
 }
-function buildChallengeLink(){
-  const cfg={q:set.qCount,t:set.timer,c:curCat||'mixed'};
-  const url=location.href.split('?')[0]+'?ch='+btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
-  if(navigator.share){navigator.share({title:'تحدي الذكاء',text:'تحداك يا "الاسم" في لعبة تحدي الذكاء 🧠🎯\n'+url}).catch(()=>{}) }
-  else if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>toast('🔗 تم نسخ رابط التحدي!'))}
+function resolveStudyChapter(key){
+  try{
+    const p=String(key).split('.');
+    const pi=+p[0],si=+p[1],bi=+p[2],ci=+p[3];
+    const ch=window.STUDY[pi].subjects[si].books[bi].chapters[ci];
+    return ch?{pi,si,bi,ci,ch}:null;
+  }catch(e){return null}
+}
+function challengeCfg(forceKey){
+  return {q:set.qCount,t:set.timer,c:curCat||'mixed',f:forceKey||(studyCtx?studyCtx.key:null)};
+}
+function b64e(s){const b=new TextEncoder().encode(s);let x='';b.forEach(c=>x+=String.fromCharCode(c));return btoa(x)}
+function b64d(s){const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return new TextDecoder().decode(a)}
+function buildChallengeLink(forceKey){
+  const cfg=challengeCfg(forceKey);
+  const url=location.href.split('?')[0]+'?ch='+b64e(JSON.stringify(cfg));
+  const msg='تحداك يا "الاسم" في لعبة تحدي الذكاء 🧠🎯'+(cfg.f&&resolveStudyChapter(cfg.f)?' — على الفصل بتاعي اللي أنا ذاكرته':'')+'\n'+url;
+  if(navigator.share){navigator.share({title:'تحدي الذكاء',text:msg}).catch(()=>{}) }
+  else if(navigator.clipboard){navigator.clipboard.writeText(msg).then(()=>toast('🔗 تم نسخ رابط التحدي!'))}
   else{toast('🔗 '+url)}
 }
 function parseChallengeLink(){
   try{
     const p=new URLSearchParams(location.search).get('ch');
     if(!p)return;
-    const cfg=JSON.parse(decodeURIComponent(escape(atob(p))));
+    const cfg=JSON.parse(b64d(p));
     if(!cfg||!cfg.c)return;
     load();loadSet();bindEvents();applySettings();
     if(Number(cfg.q))set.qCount=+cfg.q;
     if(Number(cfg.t))set.timer=+cfg.t;
     saveSet();
+    if(cfg.f){
+      const t=resolveStudyChapter(cfg.f);
+      if(t){startStudyQuiz(t.pi,t.si,t.bi,t.ci,t.ch);return}
+    }
     startGame(cfg.c==='mixed'?'mixed':cfg.c,false);
   }catch(e){}
 }
@@ -1861,6 +1902,10 @@ function openChapter(pi,si,bi,ci,ch){
   const btn=document.createElement('button');btn.className='read-quiz-btn';
   btn.innerHTML='🎯 اختبر نفسك — '+ch.qs.length+' أسئلة';
   btn.onclick=()=>startStudyQuiz(pi,si,bi,ci,ch);el.appendChild(btn);
+  const bf=document.createElement('button');bf.className='chall-btn';
+  bf.innerHTML='⚔️ تحدّى صديقك — الفصل ده بالذات';
+  bf.onclick=()=>{studyCtx=studyCtx||{key:chKey(pi,si,bi,ci)};buildChallengeLink(chKey(pi,si,bi,ci))};
+  el.appendChild(bf);
   show('studyRead');
 }
 function startStudyQuiz(pi,si,bi,ci,ch){
@@ -2701,8 +2746,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.13',SW_BUILD='v36';
+const APP_VERSION='1.3.14',SW_BUILD='v37';
 const CHANGES=[
+  {v:'v37 — تذكير يومي بتوقيتك + تحدي صديقك ⚔️',d:'14/9/2026',items:['التذكير اليومي بقي عندك: اختار الساعة (الصبح/الظهر/المسا/الليل) وهيوصلك إشعار «يلا نذاكر شوية»','دعم كامل للتنبيهات الحقيقية على الموبايل مع إخفاء الزر التلقائي لو مش متاحة','تحدّي صديقك على فصل بعينه: زرار جديد «⚔️ تحدّى صديقك — الفصل ده» في كل فصل','صاحبك يفتح الرابط → بيخش يمتحن نفس الفصل بتاعك مباشرة، وكلكم تشاركوا النتايج']},
   {v:'v36 — قراءة سريعة ⚡',d:'14/9/2026',items:['زر «قراءة سريعة» فوق فصول كل كتاب — مراجعة كل فصوله في جلسة واحدة','وضع تلقائي يقلّب المقاطع لوحده (سريع/متوسط/مستريح) وتقدر توقف في أي لحظة','تكبير وتصغير الخط اللي يناسبك، وشريط تقدم يوريك مكانك','بس خلصت الكتاب بتاخد 3 عملات (مرة واحدة في اليوم)']},
   {v:'v35 — مؤثرات صوتية أشطر',d:'14/9/2026',items:['لحن جديد كليًا عند الإجابة: صح = نغمة ستة دافئة، غلط = لحنين هادئين، فلوس = رنين عملات','فانفار «أداء خرافي» واللحن بتاع كل مستوى استوى','صوت خاص لما توصل سلسلة 5 صح متتالية ⚡ وتنبيه قبل قرب نهاية الوقت','الالتزام بمفتاح الصوت في الإعدادات، وشغال على أي جهاز (Web Audio) بدون ملفات']},
   {v:'v34 — تقرير مذاكرتي',d:'13/9/2026',items:['زر «تصدير تقرير مذاكرتي» في الإعدادات — ملف HTML جاهز للطباعة والمشاركة','التقرير فيه: بياناتك ومستويانك، دقة إجاباتك، إتقانك لكل مسار، شطارتك الأسبوعية، حالتك في خطتك، وقايمة أخطائك اللي تركز عليها','يعمل بدون إنترنت وزتون مع الكتب المصدّرة']},

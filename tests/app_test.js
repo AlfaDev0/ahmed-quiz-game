@@ -180,12 +180,18 @@ const navigator = {
 };
 const location = { href: 'https://x/', search: '', reload() {} };
 const Notification = { requestPermission() {}, permission: 'default' };
+const { TextEncoder: wTE, TextDecoder: wTD } = (() => { try { return { TextEncoder, TextDecoder }; } catch (e) { return {}; } })();
+const b64e = s => Buffer.from(String(s), 'utf8').toString('base64');
+const b64d = s => Buffer.from(String(s), 'base64').toString('utf8');
+const TextEncoder = wTE || class { encode(s) { return Buffer.from(String(s), 'utf8'); } };
+const TextDecoder = wTD || class { decode(b) { return Buffer.from(b).toString('utf8'); } };
 
 const sandbox = {
   document, localStorage, navigator, window: windowObj, location, Notification,
   setTimeout: fST, clearTimeout: fCT, setInterval: fSI, clearInterval: fCT,
   fetch: fetchMock, confirm: () => true, prompt: () => '',
-  Math, Object, Array, JSON, parseInt, parseFloat, isNaN, Promise, Date, console, String, Number, Boolean, undefined
+  Math, Object, Array, JSON, parseInt, parseFloat, isNaN, Promise, Date, console, String, Number, Boolean, undefined,
+  btoa: b64e, atob: b64d, TextEncoder, TextDecoder
 };
 vm.createContext(sandbox);
 
@@ -371,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.13'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.14'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -579,6 +585,17 @@ ck('fast same-day repeat gives no extra coins', vm.runInContext('S.coins-c1===3'
 sandbox.fastAuto();
 sandbox.fastClose();
 ck('fast auto/close safe', (()=>{return vm.runInContext('window.__fl=fast===null',sandbox), sandbox.window.__fl===true})());
+
+/* ---- notification time + chapter challenges ---- */
+ck('notif toggle exists', !!byId.sNotif);
+ck('notif hour select wired & default 19', !!byId.sNotifH && byId.sNotifH.value==='19');
+vm.runInContext('set.notifH=21',sandbox);
+sandbox.applySettings();
+ck('notif hour applied to select', byId.sNotifH.value==='21');
+ck('maybeNotify safe in env', (()=>{try{sandbox.maybeNotify();return true}catch(e){return false}})());
+ck('resolve study chapter works', (()=>{const r=vm.runInContext('window.__rc=resolveStudyChapter("0.0.0.0")',sandbox);return !!(r&&r.ch&&(r.ch.title||'').length)})());
+ck('challenge cfg carries chapter key', (()=>{const c=vm.runInContext('window.__cc=challengeCfg("0.0.1.2")',sandbox);return !!c&&c.f==='0.0.1.2'})());
+ck('challenge link build safe (no nav)', (()=>{try{sandbox.buildChallengeLink('0.0.1.2');return true}catch(e){return false}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
