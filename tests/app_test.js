@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.17'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.18'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -633,6 +633,11 @@ ck('podShow shows dock and title', (()=>{try{vm.runInContext(`podShow()`,sandbox
 ck('podStop hides dock', (()=>{try{vm.runInContext(`podStop()`,sandbox);return vm.runInContext(`document.getElementById('pod').style.display==='none'`,sandbox)}catch(e){return false}})());
 ck('podSpeed cycles rate 1->1.15', (()=>{try{vm.runInContext(`podS.rate=1;podSpeed();window.__r=podS.rate`,sandbox);return vm.runInContext('__r',sandbox)===1.15}catch(e){return 'ERR:'+e.message}})());
 ck('listenChapter safe without speechSynthesis', (()=>{try{vm.runInContext(`podStop();listenChapter({read:[{h:'العنوان',t:'نص الشرح'}]},'فصل أول');window.__lst=listening`,sandbox);return vm.runInContext('__lst',sandbox)===false}catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v41 voice quality ---- */
+ck('pickVoice safe without speechSynthesis', (()=>{try{return sandbox.pickVoice()===null}catch(e){return 'ERR:'+e.message}})());
+ck('pod default rate is calm 0.9', (()=>{try{vm.runInContext(`window.__r0=podS.rate`,sandbox);return vm.runInContext('__r0',sandbox)===0.9}catch(e){return 'ERR:'+e.message}})());
+ck('podSpeed 1->1.15 still works', (()=>{try{vm.runInContext(`podS.rate=1;podSpeed();window.__r1=podS.rate`,sandbox);return vm.runInContext('__r1',sandbox)===1.15}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
