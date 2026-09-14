@@ -827,8 +827,9 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
       <button class="sec-btn" id="reportBtn">📄 تصدير تقرير مذاكرتي</button>
       <label class="sec-btn" for="importFile">📥 استيراد البيانات</label>
       <input type="file" id="importFile" accept=".json" style="display:none">
-      <button class="danger" id="resetBtn">🗑️ مسح جميع البيانات</button>
-      <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:6px">
+<button class="danger" id="resetBtn">🗑️ مسح جميع البيانات</button>
+    <button class="sec-btn" id="deepResetBtn" style="background:linear-gradient(135deg,#C05B3F,#C89B3C);color:#fff">⚠️ إعادة تحميل التطبيق كاملاً من النت (بدون مسح التقدم) — لو فيه محتوى ناقص أو مكرك</button>
+    <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:6px">
         <span class="set-label">📤 مركز التنزيل — كل الكتب أمامك، نزّل أي كتاب لوحده</span>
         <div class="dl-chips" id="dlChips"></div>
         <div class="dl-actions">
@@ -1847,6 +1848,15 @@ function bindEvents(){
     if(confirm('هل أنت متأكد من مسح جميع البيانات؟')){
       localStorage.clear();location.reload();
     }
+  };
+  const dr=document.getElementById('deepResetBtn');
+  if(dr)dr.onclick=()=>{
+    if(!confirm('هيتم إعادة تحميل كل الملفات من النت من جديد (بياناتك وتقدمك هيفضلوا). المتابعة؟'))return;
+    toast('🔄 بحذف الكاش وإعادة التحميل...');
+    const tasks=[];
+    if(window.caches&&window.caches.keys){tasks.push(window.caches.keys().then(ks=>Promise.all((ks||[]).map(k=>window.caches.delete(k)))).catch(()=>{}))}
+    if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){tasks.push(navigator.serviceWorker.getRegistrations().then(rs=>Promise.all((rs||[]).map(r=>r.unregister()))).catch(()=>{}))}
+    Promise.all(tasks).then(()=>{try{location.href=location.origin+location.pathname+'?fresh=1'}catch(e){location.reload()}});
   };
   document.getElementById('ltWeek').onclick=()=>setLbTab('ltWeek');
   document.getElementById('ltMonth').onclick=()=>setLbTab('ltMonth');
@@ -3189,8 +3199,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.24',SW_BUILD='v47';
+const APP_VERSION='1.3.25',SW_BUILD='v48';
 const CHANGES=[
+  {v:'v48 — إعادة تحميل من الصفر ⚠️',d:'15/9/2026',items:['الحل الجذري لأي جهاز عالق على نسخة قديمة أو ناقصة: زرار في الإعدادات بيمسح الكاش ويحمّل كل الملفات من النت تاني من غير ما يلمس تقدمك','إصلاح كاش التطبيق чтобы ملف الأسئلة يتحفظ كمان يعمل offline — كان معطلًا','الآن التطبيق كامل يشتغل بدونه انترنت حتى الأسئلة']},
   {v:'v47 — فتح الكورسات من الرئيسية 📚',d:'15/9/2026',items:['إصلاح: كارت «كورسات الشرح» على الرئيسية كان بيفتح شاشة فاضية — دلوقتي بيفتحها وفيها كل الدروس مباشرة','التأكد إن أي طريقة تدخل بيها الكورسات (زرار سفلي أو الكارت) بتعرض المحتوى كامل']},
   {v:'v46 — كل المحتوى يوصلك متكامل 📦',d:'15/9/2026',items:['التطبيق بيقيس لوحده اكتمال المكتبة (6 أجزاء · 38 مادة · 124 كتاب · 567 فصل · 13 تصنيف أسئلة)','لو اكتشف إن جهازك حامل نسخة ناقصة أو قديمة: بيمسح الكاش ويحمّل كل الحاجة من النت تلقائيًا ويحدّث','الحل النهائي لمشكلة «في حجات مش موجودة» بسبب كاش الجهاز القديم']},
   {v:'v45 — تحديثات فورية بلا كباش 🚀',d:'15/9/2026',items:['المشكلة اللي كنت شايفها: المتصفح كان بيتمسك بكل نسخة قديمة. دلوقتي الصفحة بفحص وتبعت التحديث تلقائيًا كل مرة تفتحها — التحديثات كلها هتوصل فعلاً','السويف وركر اتظبط: الشبكة أولًا للصفحة المش عكس — يعني أي تحديث جديد يظهر فورًا على جهازك من أول فتحة','الصوت: الأداء بقى يعمل نفسه تلقائيًا لما الأصوات تبقى جاهزة على الجهاز']},

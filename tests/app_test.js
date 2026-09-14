@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.24'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.25'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -665,6 +665,12 @@ ck('full catalog present (6/567/13)', (()=>{try{const n=vm.runInContext(`(window
 /* ---- v47 courses entry fix ---- */
 ck('hero card opens courses WITH content', (()=>{try{vm.runInContext(`updateHome()`,sandbox);const h=vm.runInContext(`document.getElementById('courseHero')`,sandbox);if(!h||!h.onclick)return 'nohero';h.onclick();const n=vm.runInContext(`document.getElementById('coursesList').children.length`,sandbox);return n>0}catch(e){return 'ERR:'+e.message}})());
 ck('courses list has all 6 parts', (()=>{try{const n=vm.runInContext(`document.getElementById('coursesList').querySelectorAll('.course-part').length`,sandbox);const grades=vm.runInContext(`Array.from(document.getElementById('coursesList').children).map(c=>c.className)`,sandbox);return n===6?'n=6 ok':('n='+n+' classes='+JSON.stringify(grades))}catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v48 deep reload + offline questions ---- */
+const swJS = fs.readFileSync(process.env.TEST_SW || '/home/kali/ahmed-quiz-game/sw.js', 'utf8');
+ck('sw caches questions with correct marker', swJS.indexOf('"QUESTIONS"') !== -1);
+ck('sw serves navigation network-first', swJS.indexOf('fetch(event.request)') !== -1 && swJS.indexOf('/latest') === -1);
+ck('deep reset button exists', (()=>{try{return !!vm.runInContext(`document.getElementById('deepResetBtn')`,sandbox)}catch(e){return false}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
