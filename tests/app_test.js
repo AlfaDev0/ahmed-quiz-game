@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.26'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.27'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -679,6 +679,11 @@ ck('voicePicked null without voiceId', vm.runInContext(`voicePicked()===null`,sa
 ck('renderVoiceSettings safe offline', (()=>{try{vm.runInContext(`renderVoiceSettings()`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
 ck('voice test disabled offline', (()=>{try{const d=vm.runInContext(`document.getElementById('voiceTestBtn').disabled`,sandbox);return d===true}catch(e){return 'ERR:'+e.message}})());
 ck('pickVoice respects saved voice id', (()=>{try{vm.runInContext(`bestVoice=null`,sandbox);return vm.runInContext(`pickVoice()===null`,sandbox)}catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v50 reading speed ---- */
+ck('voiceRate default 0.9 in SETDEF', (()=>{try{const d=vm.runInContext('SETDEF.voiceRate',sandbox);return d===0.9}catch(e){return 'ERR:'+e.message}})());
+ck('renderVoiceRates builds 5 chips', (()=>{try{const a=vm.runInContext(`renderVoiceRates();document.getElementById('voiceRateBox').children.length`,sandbox);return a===5?true:'n='+a}catch(e){return 'ERR:'+e.message}})());
+ck('voiceRate chip click updates podS.rate', (()=>{try{vm.runInContext(`document.getElementById('voiceRateBox')._inner[1].onclick();podS.rate`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

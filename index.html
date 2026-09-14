@@ -831,6 +831,11 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
           <button class="sec-btn" id="voiceTestBtn" style="flex:1;min-width:120px">▶️ جرّب الصوت</button>
           <button class="sec-btn" id="voiceDefBtn" style="flex:1;min-width:120px">✨ الأفضل تلقائيًا</button>
         </div>
+        <div style="width:100%;border-top:1px dashed var(--border, rgba(0,0,0,.08));padding-top:10px;margin-top:4px">
+          <span class="set-label" style="font-size:13px">⚡ سرعة القراءة</span>
+          <div id="voiceRateBox" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+          <span style="font-size:11px;color:var(--dim);display:block;margin-top:6px">متوسط = 0.9 · أسرع = 1.3 · تقدر تغيرها في المشغّل أثناء الاستماع برضه</span>
+        </div>
       </div>
       <button class="sec-btn" id="exportBtn">📤 تصدير البيانات (نسخة احتياطية)</button>
       <button class="sec-btn" id="reportBtn">📄 تصدير تقرير مذاكرتي</button>
@@ -1065,7 +1070,7 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
 <script>
 /* ================= DATA MODEL ================= */
 const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false};
-const SETDEF={sound:true,vib:true,dark:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:''};
+const SETDEF={sound:true,vib:true,dark:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
@@ -1090,7 +1095,7 @@ function healData(){
     else act();
   }catch(e){}
 }
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId=''}
+function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
@@ -1152,7 +1157,7 @@ window.addEventListener('load',()=>{
     document.getElementById('splash').classList.add('hide');
     setTimeout(()=>document.getElementById('splash').remove(),600);
   },2200);
-  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();wireVoice();if(typeof healData==='function')try{healData()}catch(e){}
+  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();wireVoice();podS.rate=set&&set.voiceRate||0.9;if(typeof healData==='function')try{healData()}catch(e){}
 });
 
 /* ================= TITLES ================= */
@@ -2406,12 +2411,28 @@ function voicePicked(){
   if(!(set&&set.voiceId))return null;
   return arVoices().find(v=>voiceIdOf(v)===set.voiceId)||null;
 }
+function renderVoiceRates(){
+  const box=document.getElementById('voiceRateBox');
+  if(!box)return;
+  box.innerHTML='';
+  const rates=[0.8,0.9,1,1.15,1.3];
+  const cur=set&&set.voiceRate?set.voiceRate:0.9;
+  rates.forEach(r=>{
+    const b=document.createElement('button');
+    b.className='course-bt'+(cur===r?' next':' go');
+    b.style.margin=0;b.style.padding='8px 14px';
+    b.textContent=String(r).replace(/\.(\d)$/,'.$1')+(r===0.9?' (متوسط)':r===1.3?' (سريع)':'');
+    b.onclick=()=>{set.voiceRate=r;saveSet();podS.rate=r;if(typeof podSpeed==='function')try{if(typeof podDisp==='function')podDisp()}catch(e){}renderVoiceRates();toast('⚡ هتقرا بسرعة '+r)};
+    box.appendChild(b);
+  });
+}
 function wireVoice(){
   const tb=document.getElementById('voiceTestBtn');
   if(tb)tb.onclick=()=>{const v=voicePicked()||pickVoice();playVoiceTest(v);toast(typeof v==='object'&&v?'🔊 بجرّب صوت '+v.name:'بجرّب الصوت')};
   const db=document.getElementById('voiceDefBtn');
   if(db)db.onclick=()=>{set.voiceId='';saveSet();bestVoice=null;pickVoice();renderVoiceSettings();playVoiceTest(pickVoice());toast('✨ رجّعنا الأفضل تلقائيًا')};
   renderVoiceSettings();
+  renderVoiceRates();
 }
 function toChunks(t){
   const out=[];
@@ -3263,8 +3284,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.26',SW_BUILD='v49';
+const APP_VERSION='1.3.27',SW_BUILD='v50';
 const CHANGES=[
+  {v:'v50 — سرعة القراءة تحت تحكمك ⚡',d:'15/9/2026',items:['في الإعدادات: تحكم بالسرعة (0.8 هادي · 0.9 متوسط · 1 · 1.15 · 1.3 سريع) وبيتسجل وفي كل الشروح','تقدر برضه تغيّر السرعة أثناء الاستماع من زرار السرعة في المشغّل — اختيارك ثابت بالحفاظ عليه بين الدروس']},
   {v:'v49 — اختار صوتك بنفسك 🔊🎚️',d:'15/9/2026',items:['الإعدادات فيها قايمة كل الأصوات العربية المتاحة على جهازك — اختار اللي يجننك وبيتسجل ومش بيضيع','زرار «▶️ جرّب الصوت» بيسمّعلك الكه قبل ما تختار، والاختيار بيتطبق فورًا على كل دروس القراءة','لو ملقتش حاجة عجباك — زرار «✨ الأفضل تلقائيًا» بيرجعلك أفضل صوت متاح']},
   {v:'v48 — إعادة تحميل من الصفر ⚠️',d:'15/9/2026',items:['الحل الجذري لأي جهاز عالق على نسخة قديمة أو ناقصة: زرار في الإعدادات بيمسح الكاش ويحمّل كل الملفات من النت تاني من غير ما يلمس تقدمك','إصلاح كاش التطبيق чтобы ملف الأسئلة يتحفظ كمان يعمل offline — كان معطلًا','الآن التطبيق كامل يشتغل بدونه انترنت حتى الأسئلة']},
   {v:'v47 — فتح الكورسات من الرئيسية 📚',d:'15/9/2026',items:['إصلاح: كارت «كورسات الشرح» على الرئيسية كان بيفتح شاشة فاضية — دلوقتي بيفتحها وفيها كل الدروس مباشرة','التأكد إن أي طريقة تدخل بيها الكورسات (زرار سفلي أو الكارت) بتعرض المحتوى كامل']},
