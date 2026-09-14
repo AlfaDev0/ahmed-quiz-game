@@ -1040,6 +1040,9 @@ function vibe(p){if(set.vib&&navigator.vibrate)navigator.vibrate(p)}
 /* ================= SHOW ================= */
 const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats',study:'study',studyBooks:'studyBooks',studyBook:'studyBook',studyRead:'studyRead',courses:'courses',courseView:'courseView'};
 function show(s){
+  if(typeof listening==='boolean'&&listening){try{window.speechSynthesis&&window.speechSynthesis.cancel()}catch(e){}
+    const lb2=document.getElementById('listenBtn');if(lb2)lb2.innerHTML='🔊 اسمع شرح الفصل كامل';
+  }
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.getElementById(scrPairs[s]||'home').classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===s));
@@ -1951,7 +1954,8 @@ function openStudySubject(pi,si){
   });
   show('studyBook');
 }
-let fast=null;
+var listening=false;
+var fast=null;
 function openFast(pi,si,bi){
   const p=window.STUDY[pi],s=p.subjects[si],b=s.books[bi];
   const segs=[];
@@ -2010,6 +2014,13 @@ function openChapter(pi,si,bi,ci,ch,fromCourse){
   document.getElementById('srTitle').textContent='الفصل '+(ci+1)+' — '+ch.title;
   const el=document.getElementById('studyReadBody');el.innerHTML='';
   const head=document.createElement('div');head.className='read-chapter';head.textContent=ch.title;el.appendChild(head);
+  if('speechSynthesis' in window){
+    const lb=document.createElement('button');lb.className='course-bt next';lb.id='listenBtn';
+    lb.innerHTML='🔊 اسمع شرح الفصل كامل';
+    lb.style.background='linear-gradient(135deg,#FF6B6B,#FFB300)';
+    lb.onclick=()=>listenChapter(ch,(ci+1)+' — '+ch.title);
+    el.appendChild(lb);
+  }
   ch.read.forEach((sec,i)=>{
     const d=document.createElement('div');d.className='read-sec';
     d.innerHTML='<h4>📖 '+(i+1)+'. '+sec.h+'</h4><p>'+sec.t+'</p>';
@@ -2125,6 +2136,24 @@ function speakQuestion(){
 function speakLastAi(){
   const last=document.querySelector('#aiChats .ai-b:not(.me) .bub');
   if(last)speak(last.textContent);
+}
+function listenChapter(ch,label){
+  try{
+    if(!ch||!('speechSynthesis' in window)){toast('🔇 جهازك مش بيدعم القراءة الصوتية');return}
+    const ss=window.speechSynthesis;
+    try{ss.cancel()}catch(e){}
+    const reset=()=>{listening=false;const b2=document.getElementById('listenBtn');if(b2)b2.innerHTML='🔊 اسمع شرح الفصل كامل'};
+    if(listening){reset();return}
+    const parts=[label||'شرح الفصل'];
+    (ch.read||[]).forEach((r,i)=>{if(r&&(r.h||r.t))parts.push('المقطع '+(i+1)+'. '+r.h+' . '+r.t)});
+    parts.push('انتهى شرح الفصل. شدّ حيلك!');
+    listening=true;
+    const b=document.getElementById('listenBtn');if(b)b.innerHTML='⏸ وقّف القراءة';
+    const u=new window.SpeechSynthesisUtterance(parts.join(' '));
+    u.lang='ar-SA';u.rate=0.9;u.pitch=1.05;
+    u.onend=reset;u.onerror=reset;
+    ss.speak(u);
+  }catch(e){listening=false}
 }
 function masteryHTML(){
   let h='',T=0,G=0;
@@ -2866,8 +2895,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.15',SW_BUILD='v38';
+const APP_VERSION='1.3.16',SW_BUILD='v39';
 const CHANGES=[
+  {v:'v39 — اسمع الشرح 🔊',d:'14/9/2026',items:['زرار «🔊 اسمع شرح الفصل كامل» في كل درس — بيقرالك الشرح كله بصوت الجهاز','يتوقف لو ضغط «وقّف»، وبيتوقف لوحده لما تتنقل لشاشة تانية','شغال مع كورسات الشرح والمكتبة وكل المواد، وبيشتغل بدون إنترنت (صوت الجهاز)']},
   {v:'v38 — كورسات الشرح 📚',d:'14/9/2026',items:['زر «كورسات» جديد في الشريط السفلي + بطاقة «كورسات الشرح» على الرئيسية','كل مادة بقيت «كورس» بايعين دروسه بالترتيب، وتقدم الإتقان وأكتر كورس ناقص تلحقه منين','كل درس فيه: الشرح كامل وتحته أسئلته مباشرة + زر «الدرس التالي في الكورس» يكمّل التسلسل','الشرح كله جاي مع التحميل وشغال بدون إنترنت — ذاكر أي مادة في أي وقت']},
   {v:'v37 — تذكير يومي بتوقيتك + تحدي صديقك ⚔️',d:'14/9/2026',items:['التذكير اليومي بقي عندك: اختار الساعة (الصبح/الظهر/المسا/الليل) وهيوصلك إشعار «يلا نذاكر شوية»','دعم كامل للتنبيهات الحقيقية على الموبايل مع إخفاء الزر التلقائي لو مش متاحة','تحدّي صديقك على فصل بعينه: زرار جديد «⚔️ تحدّى صديقك — الفصل ده» في كل فصل','صاحبك يفتح الرابط → بيخش يمتحن نفس الفصل بتاعك مباشرة، وكلكم تشاركوا النتايج']},
   {v:'v36 — قراءة سريعة ⚡',d:'14/9/2026',items:['زر «قراءة سريعة» فوق فصول كل كتاب — مراجعة كل فصوله في جلسة واحدة','وضع تلقائي يقلّب المقاطع لوحده (سريع/متوسط/مستريح) وتقدر توقف في أي لحظة','تكبير وتصغير الخط اللي يناسبك، وشريط تقدم يوريك مكانك','بس خلصت الكتاب بتاخد 3 عملات (مرة واحدة في اليوم)']},

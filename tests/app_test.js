@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.15'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.16'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -610,6 +610,12 @@ vm.runInContext('window.__sp=subjectProgress(0,0)',sandbox);
 ck('subjectProgress shape', (sandbox.window.__sp||{}).tot>0 && typeof (sandbox.window.__sp||{}).pct==='number');
 sandbox.resumeCourse(0,0);
 ck('resume opens a chapter read', (byId.srTitle.textContent||'').includes('الفصل'));
+
+/* ---- listen mode ---- */
+ck('listenChapter exists', typeof sandbox.listenChapter==='function');
+ck('listenChapter safe without speechSynthesis', (()=>{try{sandbox.listenChapter({read:[{h:'العنوان',t:'النص'}]},'فصل أول');return true}catch(e){return false}})());
+ck('listening stays off in env', vm.runInContext('window.__lst=listening',sandbox)===false);
+ck('no listen button when TTS unsupported', !('listenBtn' in byId));
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
