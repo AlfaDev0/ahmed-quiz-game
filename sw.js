@@ -1,5 +1,5 @@
 const BASE = self.location.pathname.replace(/\/?sw\.js$/, '');
-const CACHE_NAME = 'ahmed-quiz-v47';
+const CACHE_NAME = 'ahmed-quiz-v48';
 
 const REL = {
     '/': '',
@@ -15,7 +15,7 @@ const urlsToCache = Object.values(REL).map(p => BASE + p);
 
 const BIG_FILES = {
     [BASE + '/study.js']: { marker: '"books"', minSize: 1000000 },
-    [BASE + '/questions.js']: { marker: 'window.QUESTIONS', minSize: 10000 }
+    [BASE + '/questions.js']: { marker: '"QUESTIONS"', minSize: 10000 }
 };
 
 function matchRule(rule, text) {
