@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.25'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.26'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -671,6 +671,14 @@ const swJS = fs.readFileSync(process.env.TEST_SW || '/home/kali/ahmed-quiz-game/
 ck('sw caches questions with correct marker', swJS.indexOf('"QUESTIONS"') !== -1);
 ck('sw serves navigation network-first', swJS.indexOf('fetch(event.request)') !== -1 && swJS.indexOf('/latest') === -1);
 ck('deep reset button exists', (()=>{try{return !!vm.runInContext(`document.getElementById('deepResetBtn')`,sandbox)}catch(e){return false}})());
+
+/* ---- v49 voice picker ---- */
+ck('arVoices empty offline', (()=>{try{return Array.isArray(vm.runInContext('arVoices()',sandbox))&&vm.runInContext('arVoices().length',sandbox)===0}catch(e){return 'ERR:'+e.message}})());
+ck('voiceIdOf builds stable id', (()=>{try{return vm.runInContext(`voiceIdOf({name:'A',lang:'ar-SA'})`,sandbox)==='A|ar-SA'}catch(e){return 'ERR:'+e.message}})());
+ck('voicePicked null without voiceId', vm.runInContext(`voicePicked()===null`,sandbox));
+ck('renderVoiceSettings safe offline', (()=>{try{vm.runInContext(`renderVoiceSettings()`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
+ck('voice test disabled offline', (()=>{try{const d=vm.runInContext(`document.getElementById('voiceTestBtn').disabled`,sandbox);return d===true}catch(e){return 'ERR:'+e.message}})());
+ck('pickVoice respects saved voice id', (()=>{try{vm.runInContext(`bestVoice=null`,sandbox);return vm.runInContext(`pickVoice()===null`,sandbox)}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
