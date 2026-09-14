@@ -219,6 +219,12 @@ body{background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 /* ==== LIGHT MODE ==== */
 html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;--gold:#C9A84C;--primary:#96AE52;--primary-dark:#7C8F3C;--secondary:#D9AD4F}
 
+/* ==== NIGHT READING MODE (أعمق + أدفا عينيك) ==== */
+html.night{--bg:#0B0C07;--bg2:#101209;--bg3:#191B0F;--text:#F3EEDC;--dim:#8F936F;--gold:#DFB54F;--primary:#A3BC5C;--primary-dark:#7C8F3C;--secondary:#E0B34E}
+html.night .read-sec{background:rgba(38,42,20,.7);box-shadow:0 1px 0 rgba(255,255,255,.05)}
+html.night .read-chapter{text-shadow:0 0 24px rgba(223,181,79,.28)}
+html.night .read-sec p{line-height:1.85;color:#EAE6D4}
+
 /* ==== CHIPS (difficulty filter) ==== */
 .chip-row{display:flex;gap:8px;padding:12px 16px 0;flex-wrap:wrap}
 .chip{font-family:inherit;padding:8px 18px;border-radius:20px;border:1.5px solid var(--bg3);background:var(--bg2);color:var(--dim);font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
@@ -603,6 +609,8 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
       <span class="chal-ico" id="weekCardStars" style="font-size:15px"></span>
     </div>
 
+    <div class="home-note" id="weekReportWrap" style="display:none;margin-top:0"></div>
+
     <div class="chip-row" id="diffChips">
       <button class="chip active" data-d="">الكل</button>
       <button class="chip" data-d="easy">سهل</button>
@@ -755,6 +763,10 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
       <div class="set-item">
         <span class="set-label">🌙 الوضع الليلي</span>
         <label class="tgl"><input type="checkbox" id="sDark" checked><span class="slider"></span></label>
+      </div>
+      <div class="set-item">
+        <span class="set-label" style="font-size:13px">🕶️ الوضع الليلي العميق للقراءة <span style="font-size:10px;color:var(--dim);display:block">أسود مخملي + ذهبي — أريح لعينيك وقت المذاكرة آخر الليل</span></span>
+        <label class="tgl"><input type="checkbox" id="sNight" checked><span class="slider"></span></label>
       </div>
       <div class="set-item">
         <span class="set-label">🔊 الأصوات</span>
@@ -1070,7 +1082,7 @@ html.dark{--bg:#14160F;--bg2:#1D2017;--bg3:#2A2E20;--text:#F1EFE4;--dim:#9AA084;
 <script>
 /* ================= DATA MODEL ================= */
 const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false};
-const SETDEF={sound:true,vib:true,dark:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9};
+const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
@@ -1095,7 +1107,7 @@ function healData(){
     else act();
   }catch(e){}
 }
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9}
+function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
@@ -1173,6 +1185,50 @@ function avSrc(){return S.avatar||'icons/avatar.jpg'}
 function refreshAvatars(){
   document.querySelectorAll('.avatar img,#pfAv,#modalAv,.big-av img').forEach(i=>{i.src=avSrc()});
 }
+/* ---------- weekly performance tracker ---------- */
+function wkTrack(cor){
+  try{
+    const key=new Date().toISOString().slice(0,10);
+    if(!Array.isArray(S.wk))S.wk=[];
+    const today=S.wk.find(w=>w.d===key);
+    if(today){today.q++;today.c+=(cor||0)}else{S.wk.push({d:key,q:1,c:(cor||0)})}
+    if(S.wk.length>14)S.wk=S.wk.slice(-14);
+    save();
+  }catch(e){}
+}
+function wkBars(){
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(Date.now()-i*864e5).toISOString().slice(0,10);
+    const w=S.wk&&S.wk.find(x=>x.d===d);
+    days.push({d,w:w?w.q:0,c:w?w.c:0,a:w?w.q>0:false});
+  }
+  return days;
+}
+function renderWeekReport(){
+  const wrap=document.getElementById('weekReportWrap');
+  if(!wrap)return;
+  const bars=wkBars();
+  const tot=bars.reduce((s,b)=>s+b.q,0);
+  const cor=bars.reduce((s,b)=>s+b.c,0);
+  const act=bars.filter(b=>b.a).length;
+  if(!tot){
+    wrap.style.display='none';return;
+  }
+  const acc=tot?Math.round(cor/tot*100):0;
+  const max=Math.max(1,...bars.map(b=>b.q));
+  const barHtml=bars.map(b=>{
+    const h=Math.max(4,Math.round(b.q/max*46));
+    const wd=new Date(b.d).getDay();
+    const names=['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1"><div style="height:48px;width:100%;display:flex;align-items:flex-end;justify-content:center"><div style="height:'+h+'px;width:14px;border-radius:5px 5px 2px 2px;background:'+(b.a?'linear-gradient(180deg,var(--secondary,#C89B3C),var(--primary,#7C8F3C))':'#E4DCC3')+';opacity:'+(b.a?'1':'.3')+'" title="'+b.q+' سؤال"></div></div><span style="font-size:9px;color:var(--dim)">'+names[wd]+'</span></div>';
+  }).join('');
+  wrap.style.display='block';
+  wrap.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+
+    '<b>📊 تقرير الأداء — آخر 7 أيام</b>'+
+    '<span style="font-size:12px;font-weight:700;color:var(--primary-dark)">'+tot+' سؤال · دقة '+acc+'% · '+act+'/7 أيام</span></div>'+
+    '<div style="display:flex;gap:6px;align-items:flex-end">'+barHtml+'</div>';
+}
 function updateHome(){
   document.getElementById('hmLv').textContent=S.level;
   document.getElementById('hmXp').textContent=S.xp;
@@ -1189,6 +1245,7 @@ function updateHome(){
   if(typeof renderStudyPlan==='function')renderStudyPlan();
   if(typeof renderHomeNote==='function')renderHomeNote();
   if(typeof renderWeekCard==='function')renderWeekCard();
+  if(typeof renderWeekReport==='function')renderWeekReport();
   const cf=document.getElementById('courseHero');
   if(cf&&window.STUDY){
     let d=0,tt=0;
@@ -1381,7 +1438,7 @@ function finish(){
   set.timer=origTimer;saveSet();
   S.games++;
   S.correct+=cor;
-  S.wrong+=wro;
+  S.wrong+=wro;wkTrack(cor);
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
   if(cor===questions.length){S.perfect++;S.lifelines.hint++;sfx('perfect')}
@@ -1576,9 +1633,11 @@ function applySettings(){
   document.getElementById('sSound').checked=set.sound;
   document.getElementById('sVib').checked=set.vib;
   const sd=document.getElementById('sDark');if(sd)sd.checked=set.dark;
+  const snight=document.getElementById('sNight');if(snight)snight.checked=!!set.nightRead;
   const sn=document.getElementById('sNotif');if(sn)sn.checked=set.notif;
   const sh=document.getElementById('sNotifH');if(sh)sh.value=String(set.notifH||19);
   document.documentElement.classList.toggle('dark',!!set.dark);
+  document.documentElement.classList.toggle('night',!!set.nightRead);
   document.querySelectorAll('#qOpts .opt').forEach(b=>b.classList.toggle('active',+b.dataset.q===set.qCount));
   document.querySelectorAll('#tOpts .opt').forEach(b=>b.classList.toggle('active',+b.dataset.t===set.timer));
   if(typeof renderAI==='function')renderAI();
@@ -1850,6 +1909,7 @@ function bindEvents(){
   {const rb=document.getElementById('reportBtn');if(rb)rb.onclick=()=>{if(typeof downloadReport==='function')downloadReport()}}
   document.getElementById('importFile').onchange=e=>importData(e.target.files[0]);
   document.getElementById('sDark').onchange=e=>{set.dark=e.target.checked;saveSet();applySettings()};
+  document.getElementById('sNight').onchange=e=>{set.nightRead=e.target.checked;saveSet();applySettings();toast(set.nightRead?'🕶️ الوضع الليلي العميق يعمل':'🕶️ رجعنا للسابق');};
   document.querySelectorAll('#qOpts .opt').forEach(b=>{
     b.onclick=()=>{set.qCount=+b.dataset.q;document.querySelectorAll('#qOpts .opt').forEach(x=>x.classList.remove('active'));b.classList.add('active');saveSet()}
   });
@@ -2229,6 +2289,10 @@ function openChapter(pi,si,bi,ci,ch,fromCourse){
   bf.innerHTML='⚔️ تحدّى صديقك — الفصل ده بالذات';
   bf.onclick=()=>{studyCtx=studyCtx||{key:chKey(pi,si,bi,ci)};buildChallengeLink(chKey(pi,si,bi,ci))};
   el.appendChild(bf);
+  const ab=document.createElement('button');ab.className='ai-btn';
+  ab.innerHTML='🤖 اسأل مرشدك الذكي أسئلة عن الفصل';
+  ab.onclick=()=>{const i=document.getElementById('aiInput');if(i)i.value='اشرح لي الفصل ده بأبسط صورة مع أمثلة من الحياة';if(typeof openAISheet==='function')openAISheet();else if(window.show)show('ai')};
+  el.appendChild(ab);
   if(fromCourse&&typeof courseNext==='function'){
     const nx=courseNext(pi,si,bi,ci);
     if(nx){const bn=document.createElement('button');bn.className='course-bt next';bn.innerHTML='▶ الدرس التالي في الكورس: '+nx.ch.title;bn.onclick=()=>openChapter(pi,si,nx.bi,nx.ci,nx.ch,true);el.appendChild(bn)}
@@ -2284,7 +2348,9 @@ function startExam(pi){
 function finishExam(){
   clearInterval(timer);set.timer=origTimer;saveSet();
   const acc=questions.length?Math.round(cor/questions.length*100):0;
-  S.games++;S.correct+=cor;S.wrong+=wro;
+  S.games++;
+  S.correct+=cor;
+  S.wrong+=wro;wkTrack(cor);
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
   if(cor===questions.length){S.perfect++;S.lifelines.hint++}
@@ -2833,7 +2899,9 @@ function finishStudy(){
   S.study[ctx.key].done=true;
   const bonus=stars*10;
   S.coins+=bonus;S.totalCoins+=bonus;
-  S.games++;S.correct+=cor;S.wrong+=wro;
+  S.games++;
+  S.correct+=cor;
+  S.wrong+=wro;wkTrack(cor);
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
   if(cor===questions.length){S.perfect++;S.lifelines.hint++}
@@ -3039,7 +3107,9 @@ function startQuickReview(){
 function finishQuick(){
   clearInterval(timer);set.timer=origTimer;saveSet();
   const acc=questions.length?Math.round(cor/questions.length*100):0;
-  S.games++;S.correct+=cor;S.wrong+=wro;
+  S.games++;
+  S.correct+=cor;
+  S.wrong+=wro;wkTrack(cor);
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
   if(cor===questions.length){S.perfect++;S.lifelines.hint++}
@@ -3284,8 +3354,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.27',SW_BUILD='v50';
+const APP_VERSION='1.3.28',SW_BUILD='v51';
 const CHANGES=[
+  {v:'v51 — مرشدك · لياليك · أسبوعك 🧠🕶️📊',d:'15/9/2026',items:['🤖 زرار «اسأل مرشدك الذكي عن الفصل» داخل كل درس — يشرح لك الفصل بأبسط صورة','🕶️ الوضع الليلي العميق للقراءة: أسود مخملي + ذهبي مريح للعين آخر الليل','📊 تقرير أسبوعي على الرئيسية: أعمدة آخر 7 أيام — عدد أسئلتك ودقتك وأيام نشاطك']},
   {v:'v50 — سرعة القراءة تحت تحكمك ⚡',d:'15/9/2026',items:['في الإعدادات: تحكم بالسرعة (0.8 هادي · 0.9 متوسط · 1 · 1.15 · 1.3 سريع) وبيتسجل وفي كل الشروح','تقدر برضه تغيّر السرعة أثناء الاستماع من زرار السرعة في المشغّل — اختيارك ثابت بالحفاظ عليه بين الدروس']},
   {v:'v49 — اختار صوتك بنفسك 🔊🎚️',d:'15/9/2026',items:['الإعدادات فيها قايمة كل الأصوات العربية المتاحة على جهازك — اختار اللي يجننك وبيتسجل ومش بيضيع','زرار «▶️ جرّب الصوت» بيسمّعلك الكه قبل ما تختار، والاختيار بيتطبق فورًا على كل دروس القراءة','لو ملقتش حاجة عجباك — زرار «✨ الأفضل تلقائيًا» بيرجعلك أفضل صوت متاح']},
   {v:'v48 — إعادة تحميل من الصفر ⚠️',d:'15/9/2026',items:['الحل الجذري لأي جهاز عالق على نسخة قديمة أو ناقصة: زرار في الإعدادات بيمسح الكاش ويحمّل كل الملفات من النت تاني من غير ما يلمس تقدمك','إصلاح كاش التطبيق чтобы ملف الأسئلة يتحفظ كمان يعمل offline — كان معطلًا','الآن التطبيق كامل يشتغل بدونه انترنت حتى الأسئلة']},

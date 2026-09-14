@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.27'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.28'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -684,6 +684,19 @@ ck('pickVoice respects saved voice id', (()=>{try{vm.runInContext(`bestVoice=nul
 ck('voiceRate default 0.9 in SETDEF', (()=>{try{const d=vm.runInContext('SETDEF.voiceRate',sandbox);return d===0.9}catch(e){return 'ERR:'+e.message}})());
 ck('renderVoiceRates builds 5 chips', (()=>{try{const a=vm.runInContext(`renderVoiceRates();document.getElementById('voiceRateBox').children.length`,sandbox);return a===5?true:'n='+a}catch(e){return 'ERR:'+e.message}})());
 ck('voiceRate chip click updates podS.rate', (()=>{try{vm.runInContext(`document.getElementById('voiceRateBox')._inner[1].onclick();podS.rate`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v51 night + AI assistant in chapter + weekly report ---- */
+ck('nightRead defaults false', vm.runInContext('SETDEF.nightRead===false',sandbox));
+ck('applySettings toggles night class', (()=>{try{const v=vm.runInContext(`set.nightRead=true;applySettings();document.documentElement._cls.has('night')`,sandbox);vm.runInContext(`set.nightRead=false;applySettings()`,sandbox);return v===true}catch(e){return 'ERR:'+e.message}})());
+ck('wkTrack aggregates today', vm.runInContext(`S.wk=[];wkTrack(3);wkTrack(2);S.wk[0].q===2&&S.wk[0].c===5`,sandbox));
+ck('wkBars always returns 7 slots', vm.runInContext(`S.wk=[];wkTrack(4);wkBars().length===7&&wkBars().filter(b=>b.a).length===1`,sandbox));
+ck('week report renders without throwing after play', (()=>{try{vm.runInContext(`S.wk=[];wkTrack(4);renderWeekReport()`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
+ck('week report hides when no play', vm.runInContext(`S.wk=[];renderWeekReport();document.getElementById('weekReportWrap').style.display==='none'`,sandbox));
+ck('chapter screen has AI assistant button', (()=>{try{
+  sandbox.show('study');sandbox.renderStudyParts();sandbox.openStudyPart(0);sandbox.openStudySubject(0,0);
+  sandbox.openChapter(0,0,0,0,sandbox.window.STUDY[0].subjects[0].books[0].chapters[0]);
+  return byId.studyReadBody.children.some(c=>(c.className||'')==='ai-btn')
+}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
