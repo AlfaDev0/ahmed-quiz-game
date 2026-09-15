@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.29'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.30'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -703,6 +703,12 @@ ck('deferredPrompt starts null', vm.runInContext(`deferredPrompt===null`,sandbox
 ck('dlCard exists (real browser hides it)', vm.runInContext(`!!document.getElementById('dlCard')`,sandbox));
 ck('renderDlHelp shows steps', (()=>{try{vm.runInContext(`renderDlHelp()`,sandbox);return vm.runInContext(`document.getElementById('dlCardTitle').textContent`.replace('dlCardTitle','dlCardTitle'),sandbox).includes('لينك التحميل')}catch(e){return 'ERR:'+e.message}})());
 ck('wireDownload wired without crashing', (()=>{try{vm.runInContext(`wireDownload()`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v53 book-listen chain ---- */
+ck('podChain defaults null', vm.runInContext(`podChain===null`,sandbox));
+ck('podChainAdvance safe when no chain', (()=>{try{return vm.runInContext(`podChain=null;podChainAdvance();true`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('podStop clears chain', vm.runInContext(`podChain={pi:0,si:0,bi:0,ci:0};podStop();podChain===null`,sandbox));
+ck('listening flag keeps chain marker', vm.runInContext(`podS={list:['x'],i:0,playing:false,stop:false};podChain={pi:0,si:0,bi:0,ci:0};podS.chain=!!podChain;podS.chain===true`,sandbox));
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
