@@ -630,6 +630,11 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
       <button class="chal-btn" id="weekBtn">ابدأ</button>
     </div>
     <div class="chal">
+      <span class="chal-ico">⚡</span>
+      <div class="chal-info"><b>جرعة خاطفة</b><p>8 أسئلة سريعة — لأي دقيقة فراغ بين المحاضرات</p></div>
+      <button class="chal-btn" id="quickBtn">ابدأ</button>
+    </div>
+    <div class="chal">
       <span class="chal-ico">🏅</span>
       <div class="chal-info"><b>تحدي الشهر</b><p>15 سؤال شاق — جائزة كبرى 250💰</p></div>
       <button class="chal-btn" id="monthBtn">ابدأ</button>
@@ -705,6 +710,9 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
         </div>
         <div class="r-exam" id="rExamStrip" style="display:none"></div>
         <button class="btn-main" id="replayBtn">🔄 إعادة اللعب</button>
+        <div id="rAutoReview" style="display:none;margin-top:10px;width:100%">
+          <button class="sec-btn" id="rAutoReviewBtn" style="width:100%">🔁 أعد أسئلتك الغلط</button>
+        </div>
         <div class="r-stars" id="rStars" style="display:none"></div>
         <button class="btn-sec" id="homeBtn">🏠 الرئيسية</button>
         <button class="btn-share" id="shareBtn">📤 شارك نتيجتك</button>
@@ -1087,10 +1095,10 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
 <script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0};
 const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9};
 let S,set;
-function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null}
+function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
 let healRan=false;
 function healData(){
@@ -1318,7 +1326,7 @@ function checkDaily(){
 
 /* ================= GAME ================= */
 function startGame(cat,daily){
-  curCat=cat;dailyMode=!!daily;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
+  curCat=cat;dailyMode=!!daily;quickMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
   replayStudy=null;studyCtx=null;
   startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
@@ -1333,6 +1341,25 @@ function startGame(cat,daily){
   if(cat==='speed')set.timer=10;
   document.getElementById('gCat').textContent=(daily?'تحدي اليوم — ':'')+CAT_NAMES[cat];
   show('game');showQ();updateLL();
+}
+function startQuickGame(){
+  quickMode=true;curCat='mixed';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
+  replayStudy=null;studyCtx=null;
+  startCoins=S.coins;
+  usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
+  let pool=[];Object.keys(QUESTIONS).forEach(k=>pool.push(...(QUESTIONS[k]||[])));
+  shuffle(pool);
+  questions=pool.slice(0,8);
+  origTimer=set.timer;if(origTimer>15)set.timer=15;saveSet();
+  document.getElementById('gCat').textContent='⚡ جرعة خاطفة — 8 أسئلة';
+  show('game');showQ();updateLL();
+}
+function showAutoReview(){
+  const rw=document.getElementById('rAutoReview'),rwb=document.getElementById('rAutoReviewBtn');
+  if(!rw||!rwb){return}
+  const n=(S.wrongQs&&Object.keys(S.wrongQs).length)||0;
+  if(wro>0&&n>0){rw.style.display='block';rwb.textContent='🔁 أعد أسئلتك الغلط ('+n+')';rwb.onclick=startReviewQuiz}
+  else rw.style.display='none';
 }
 function makeQ(src){
   const idx=shuffle([0,1,2,3]);
@@ -1481,6 +1508,8 @@ function finish(){
   S.games++;
   S.correct+=cor;
   S.wrong+=wro;wkTrack(cor);
+  if(quickMode){S.quickGames=(S.quickGames||0)+1;quickMode=false}
+  if(curCat==='review')S.reviewed=(S.reviewed||0)+questions.length;
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
   if(cor===questions.length){S.perfect++;S.lifelines.hint++;sfx('perfect')}
@@ -1518,6 +1547,7 @@ function finish(){
   document.getElementById('rXp').textContent=score;
   checkAchv();
   save();updateHome();
+  showAutoReview();
   if(typeof maybeLbSync==='function')maybeLbSync(true);
   show('result');
   if(lvup){sfx('lv');showLevelUp(S.level)}
@@ -1915,6 +1945,8 @@ function bindEvents(){
   document.getElementById('shareBtn').onclick=shareResult;
   document.getElementById('inviteBtn').onclick=buildChallengeLink;
   document.getElementById('weekBtn').onclick=()=>startChallenge('week');
+  const qb=document.getElementById('quickBtn');
+  if(qb)qb.onclick=()=>{try{startQuickGame()}catch(e){console.error(e);toast('⚠️ حصل خطأ — حاول تاني');startGame('mixed',false)}};
   document.getElementById('monthBtn').onclick=()=>startChallenge('month');
   document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{
     const t=b.dataset.back||'home';
@@ -2612,6 +2644,7 @@ function listenChapter(ch,label){
     const flat=[];
     parts.forEach(p=>flat.push(...toChunks(p)));
     podS={list:flat,i:0,playing:true,rate:podS.rate||0.9,title:(label||'شرح الفصل'),stop:false,cancelNext:false,chain:!!podChain};
+    S.audioCount=(S.audioCount||0)+1;save();if(typeof checkAchv==='function')try{checkAchv()}catch(e){};
     podShow();podSpeak();podKick();
   }catch(e){podStop()}
 }
@@ -3427,8 +3460,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.30',SW_BUILD='v53';
+const APP_VERSION='1.3.31',SW_BUILD='v54';
 const CHANGES=[
+  {v:'v54 — جرعات · مراجعة · أوسمة ⚡🔁🏅',d:'15/9/2026',items:['⚡ «جرعة خاطفة» على الرئيسية: 8 أسئلة سريعة لأي دقيقة فراغ','🔁 بعد كل اختبار لو غلطت: زرار «أعد أسئلتك الغلط» بيظهر تلقائيًا ويراجعلك اللي وقعت فيه','🏅 6 أوسمة جديدة: أذن واعية، مستمع ذكي، لا تخطئ مرتين، جرعة خاطفة، يومك كامل، سريع ومركز']},
   {v:'v53 — اسمع الكتاب كامل 🎧📖',d:'15/9/2026',items:['داخل أي درس زرار «🎧 اسمع الكتاب كامل من هنا» — بيشغّل الفصل اللي واقف عنده وكل الفصول اللي بعده على التوالي لنهاية الكتاب','بيمشي لواحده من غير ما تحتاج تلمس حاجة — الصوت والسرعة اللي اخترتهم بيتطبقوا، ولما يخلص بيقولك «📚 خلّصت الكتاب كامل»']},
   {v:'v52 — نزّل التطبيق بدوسة 📲',d:'15/9/2026',items:['على الرئيسية كارت تحميل: أول ما يجي معلوم إن الجهاز جاهز بتظهر «تثبيت الآن ✓» — دوسة واحدة تركّب التطبيق وتنزّله','لو جهازك مش بيسمح بالتركيب التلقائي — الكارت نفسه بيشرح لك الخطوات على جهازك بالظبط (أندرويد أو آيفون)']},
   {v:'v51 — مرشدك · لياليك · أسبوعك 🧠🕶️📊',d:'15/9/2026',items:['🤖 زرار «اسأل مرشدك الذكي عن الفصل» داخل كل درس — يشرح لك الفصل بأبسط صورة','🕶️ الوضع الليلي العميق للقراءة: أسود مخملي + ذهبي مريح للعين آخر الليل','📊 تقرير أسبوعي على الرئيسية: أعمدة آخر 7 أيام — عدد أسئلتك ودقتك وأيام نشاطك']},

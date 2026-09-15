@@ -5359,7 +5359,14 @@ var ACHIEVEMENTS = [
     { id: 'level5', icon: '⭐', name: 'متفوق', desc: 'صول إلى المستوى 5', condition: s => s.level >= 5 },
     { id: 'best100', icon: '🏆', name: 'نقطة العبقرية', desc: 'حقّق 100 نقطة في لعبة واحدة', condition: s => s.bestScore >= 100 },
     { id: 'all_cats', icon: '🗂️', name: 'موسوعة', desc: 'العب في كل التصنيفات', condition: s => s.playedCats.length >= 13 },
-    { id: 'perfect10', icon: '💎', name: 'أسطورة الكمال', desc: 'أكمل 10 ألعاب مثالية', condition: s => s.perfect >= 10 }
+    { id: 'perfect10', icon: '💎', name: 'أسطورة الكمال', desc: 'أكمل 10 ألعاب مثالية', condition: s => s.perfect >= 10 },
+    { id: 'quick_1', icon: '⚡', name: 'جرعة خاطفة', desc: 'أكمل أول اختبار سريع', condition: s => (s.quickGames||0) >= 1 },
+    { id: 'quick_5', icon: '⚡🔥', name: 'سريع ومركز', desc: 'أكمل 5 اختبارات سريعة', condition: s => (s.quickGames||0) >= 5 },
+    { id: 'audio_1', icon: '🔊', name: 'أذن واعية', desc: 'اسمع أول درس صوتيًا', condition: s => (s.audioCount||0) >= 1 },
+    { id: 'audio_5', icon: '🎧', name: 'مستمع ذكي', desc: 'اسمع 5 دروس صوتيًا', condition: s => (s.audioCount||0) >= 5 },
+    { id: 'audio_25', icon: '🎧👑', name: 'مستمع لا يكل', desc: 'اسمع 25 درسًا صوتيًا', condition: s => (s.audioCount||0) >= 25 },
+    { id: 'daily3', icon: '📅', name: 'يومك كامل', desc: 'أجب 3 أسئلة أو أكثر اليوم', condition: s => { try { const b = s && s.wk ? s.wk : null; return !!b && b.length ? (function(){ const today=new Date().toISOString().slice(0,10); const t=b.find(w=>w.d===today); return !!t&&t.q>=3 })() : false } catch(e){ return false } } },
+    { id: 'review15', icon: '🔁', name: 'لا تخطئ مرتين', desc: 'راجع 15 سؤالًا غلطًا صح', condition: s => (s.reviewed||0) >= 15 }
 ];
 
 var LEADERBOARD_NAMES = [
