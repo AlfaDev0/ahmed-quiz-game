@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.30'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.31'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -709,6 +709,16 @@ ck('podChain defaults null', vm.runInContext(`podChain===null`,sandbox));
 ck('podChainAdvance safe when no chain', (()=>{try{return vm.runInContext(`podChain=null;podChainAdvance();true`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('podStop clears chain', vm.runInContext(`podChain={pi:0,si:0,bi:0,ci:0};podStop();podChain===null`,sandbox));
 ck('listening flag keeps chain marker', vm.runInContext(`podS={list:['x'],i:0,playing:false,stop:false};podChain={pi:0,si:0,bi:0,ci:0};podS.chain=!!podChain;podS.chain===true`,sandbox));
+
+/* ---- v54 quick dose + auto-review + new achievements ---- */
+(function quickDose(){
+  vm.runInContext(`startQuickGame()`,sandbox);
+  ck('quick mode builds 8 questions', t().qn()===8 && t().active()==='game');
+  for(let g=0;g<40&&t().qi()<t().qn();g++){sandbox.answer(t().qc());pump(1600)}
+  ck('quick mode finished and counted', (()=>{const dbg=t();const ac=dbg.active();const bg=(dbg.S().quickGames||0);return (ac==='result'&&bg>=1)?true:('ac='+ac+' bg='+bg)})());
+})();
+ck('quickGames/reviewed default 0', vm.runInContext(`DEFAULTS.quickGames===0&&DEFAULTS.reviewed===0`,sandbox));
+ck('new achievements defined', (()=>{try{const ids=vm.runInContext(`ACHIEVEMENTS.map(a=>a.id).join(',')`,sandbox);return ids.includes('quick_1')&&ids.includes('audio_1')&&ids.includes('daily3')&&ids.includes('review15')}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
