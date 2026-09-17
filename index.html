@@ -869,6 +869,7 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
       <input type="file" id="importFile" accept=".json" style="display:none">
 <button class="danger" id="resetBtn">🗑️ مسح جميع البيانات</button>
     <button class="sec-btn" id="deepResetBtn" style="background:linear-gradient(135deg,#C05B3F,#C89B3C);color:#fff">⚠️ إعادة تحميل التطبيق كاملاً من النت (بدون مسح التقدم) — لو فيه محتوى ناقص أو مكرك</button>
+    <a class="sec-btn" id="dlLinkBtn" href="download/" style="text-align:center;display:flex;align-items:center;justify-content:center">📲 صفحة تحميل اللعبة كاملة (ملف واحد — بدون إنترنت)</a>
     <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:6px">
         <span class="set-label">📤 مركز التنزيل — كل الكتب أمامك، نزّل أي كتاب لوحده</span>
         <div class="dl-chips" id="dlChips"></div>
@@ -3460,8 +3461,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.31',SW_BUILD='v54';
+const APP_VERSION='1.3.32',SW_BUILD='v55';
 const CHANGES=[
+  {v:'v55 — نسخة تحميل كاملة 📲💾',d:'15/9/2026',items:['دلوقتي فيه ملف جاهز تثبّته وتلعب به من غير إنترنت — كل اللعبة والمحتوى في ملف واحد (رابطه على صفحة التحميل في نهاية الإعدادات)','رابط مباشر: https://alfadev0.github.io/ahmed-quiz-game/download/ — الملف ~2.4MB يفتح ويشتغل فورًا']},
   {v:'v54 — جرعات · مراجعة · أوسمة ⚡🔁🏅',d:'15/9/2026',items:['⚡ «جرعة خاطفة» على الرئيسية: 8 أسئلة سريعة لأي دقيقة فراغ','🔁 بعد كل اختبار لو غلطت: زرار «أعد أسئلتك الغلط» بيظهر تلقائيًا ويراجعلك اللي وقعت فيه','🏅 6 أوسمة جديدة: أذن واعية، مستمع ذكي، لا تخطئ مرتين، جرعة خاطفة، يومك كامل، سريع ومركز']},
   {v:'v53 — اسمع الكتاب كامل 🎧📖',d:'15/9/2026',items:['داخل أي درس زرار «🎧 اسمع الكتاب كامل من هنا» — بيشغّل الفصل اللي واقف عنده وكل الفصول اللي بعده على التوالي لنهاية الكتاب','بيمشي لواحده من غير ما تحتاج تلمس حاجة — الصوت والسرعة اللي اخترتهم بيتطبقوا، ولما يخلص بيقولك «📚 خلّصت الكتاب كامل»']},
   {v:'v52 — نزّل التطبيق بدوسة 📲',d:'15/9/2026',items:['على الرئيسية كارت تحميل: أول ما يجي معلوم إن الجهاز جاهز بتظهر «تثبيت الآن ✓» — دوسة واحدة تركّب التطبيق وتنزّله','لو جهازك مش بيسمح بالتركيب التلقائي — الكارت نفسه بيشرح لك الخطوات على جهازك بالظبط (أندرويد أو آيفون)']},
