@@ -635,6 +635,11 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
       <button class="chal-btn" id="quickBtn">ابدأ</button>
     </div>
     <div class="chal">
+      <span class="chal-ico">⏳</span>
+      <div class="chal-info"><b>ساعة المذاكرة</b><p id="focusTime">وقت هادي تقرّب فيه المذاكرة — بدون ضغط</p></div>
+      <button class="chal-btn" id="focusBtn">▶️ ابدأ التركيز</button>
+    </div>
+    <div class="chal">
       <span class="chal-ico">🏅</span>
       <div class="chal-info"><b>تحدي الشهر</b><p>15 سؤال شاق — جائزة كبرى 250💰</p></div>
       <button class="chal-btn" id="monthBtn">ابدأ</button>
@@ -781,6 +786,10 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
       <div class="set-item">
         <span class="set-label" style="font-size:13px">🕶️ الوضع الليلي العميق للقراءة <span style="font-size:10px;color:var(--dim);display:block">أسود مخملي + ذهبي — أريح لعينيك وقت المذاكرة آخر الليل</span></span>
         <label class="tgl"><input type="checkbox" id="sNight" checked><span class="slider"></span></label>
+      </div>
+      <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <span class="set-label" style="font-size:13px">⏳ مدة جلسة ساعة المذاكرة</span>
+        <div id="focusMBox" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       </div>
       <div class="set-item">
         <span class="set-label">🔊 الأصوات</span>
@@ -1097,7 +1106,7 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
 <script>
 /* ================= DATA MODEL ================= */
 const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0};
-const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9};
+const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9,focusM:25};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
@@ -1122,7 +1131,7 @@ function healData(){
     else act();
   }catch(e){}
 }
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9}
+function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
@@ -1236,6 +1245,48 @@ function renderDlHelp(){
     if(s)s.innerHTML='<b style="color:var(--primary-dark)">اتبع الخطوات:</b><br>1. اضغط ⋮ (فوق) → «تثبيت التطبيق»<br>2. أو: ⋮ → «إضافة إلى الشاشة الرئيسية»';
   }
 }
+/* ================= FOCUS / STUDY TIMER (هادئ) ================= */
+var focusState={on:false,paused:false,left:0,id:null};
+function fmtFocus(s){s=Math.max(0,s|0);const m=Math.floor(s/60),r=s%60;return m+':'+(r<10?'0':'')+r}
+function focusPaint(){
+  const el=document.getElementById('focusTime');
+  if(el)el.textContent=focusState.on?('⏳ باقي '+fmtFocus(focusState.left)):'وقت هادي تقرّب فيه المذاكرة — بدون ضغط';
+}
+function focusTick(){
+  if(!focusState.on||focusState.paused)return;
+  focusState.left--;
+  focusPaint();
+  if(focusState.left<=0){focusDone();return}
+  focusState.id=setTimeout(focusTick,1000);
+}
+function focusToggle(){
+  const b=document.getElementById('focusBtn');
+  if(!focusState.on){
+    focusState.on=true;focusState.paused=false;
+    focusState.left=(set&&set.focusM||25)*60;
+    if(b)b.textContent='⏸ وقفة';
+    focusPaint();focusTick();
+    try{toast('🌿 ركّز بهدوء '+(set&&set.focusM||25)+' دقيقة — عينيك معاك')}catch(e){}
+    return;
+  }
+  if(focusState.paused){
+    focusState.paused=false;if(b)b.textContent='⏸ وقفة';focusTick();
+  }else{
+    focusState.paused=true;clearTimeout(focusState.id);
+    if(b)b.textContent='▶ متابعة';
+  }
+}
+function focusDone(){
+  clearTimeout(focusState.id);
+  focusState.on=false;focusState.paused=false;
+  const b=document.getElementById('focusBtn');if(b)b.textContent='▶️ ابدأ التركيز';
+  const el=document.getElementById('focusTime');if(el)el.textContent='🎉 استراحة — خذ 5 دقائق بهدوء';
+  try{if(typeof sfx==='function')sfx('perfect')}catch(e){}
+  try{toast('🎉 خلصت الجلسة! خذ 5 دقائق استراحة — عينيك تستاهل')}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}
+}
+function focusStop(){clearTimeout(focusState.id);focusState.on=false;focusState.paused=false;const b=document.getElementById('focusBtn');if(b)b.textContent='▶️ ابدأ التركيز';focusPaint()}
+
 /* ---------- weekly performance tracker ---------- */
 function wkTrack(cor){
   try{
@@ -1948,6 +1999,8 @@ function bindEvents(){
   document.getElementById('weekBtn').onclick=()=>startChallenge('week');
   const qb=document.getElementById('quickBtn');
   if(qb)qb.onclick=()=>{try{startQuickGame()}catch(e){console.error(e);toast('⚠️ حصل خطأ — حاول تاني');startGame('mixed',false)}};
+  const fb=document.getElementById('focusBtn');
+  if(fb)fb.onclick=()=>{try{focusToggle()}catch(e){console.error(e)}};
   document.getElementById('monthBtn').onclick=()=>startChallenge('month');
   document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{
     const t=b.dataset.back||'home';
@@ -2573,6 +2626,20 @@ function renderVoiceRates(){
     box.appendChild(b);
   });
 }
+function renderFocusChips(){
+  const box=document.getElementById('focusMBox');
+  if(!box)return;
+  box.innerHTML='';
+  const vals=[25,45,60,90],cur=set&&set.focusM||25;
+  vals.forEach(m=>{
+    const b=document.createElement('button');
+    b.className='course-bt'+(cur===m?' next':' go');
+    b.style.margin=0;b.style.padding='8px 12px';
+    b.textContent=m+' دقيقة';
+    b.onclick=()=>{set.focusM=m;saveSet();renderFocusChips();toast('⏳ المدة الجديدة: '+m+' دقيقة — تبدأ من الزر في الرئيسية')};
+    box.appendChild(b);
+  });
+}
 function wireVoice(){
   const tb=document.getElementById('voiceTestBtn');
   if(tb)tb.onclick=()=>{const v=voicePicked()||pickVoice();playVoiceTest(v);toast(typeof v==='object'&&v?'🔊 بجرّب صوت '+v.name:'بجرّب الصوت')};
@@ -2580,6 +2647,7 @@ function wireVoice(){
   if(db)db.onclick=()=>{set.voiceId='';saveSet();bestVoice=null;pickVoice();renderVoiceSettings();playVoiceTest(pickVoice());toast('✨ رجّعنا الأفضل تلقائيًا')};
   renderVoiceSettings();
   renderVoiceRates();
+  if(typeof renderFocusChips==='function')renderFocusChips();
 }
 function toChunks(t){
   const out=[];
@@ -3461,8 +3529,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.32',SW_BUILD='v55';
+const APP_VERSION='1.3.33',SW_BUILD='v56';
 const CHANGES=[
+  {v:'v56 — ساعة مذاكرة هادية ⏳🌿',d:'15/9/2026',items:['كارت «ساعة المذاكرة» على الرئيسية: تايمر تركيز 25/45/60/90 دقيقة يشتغل وأنت تروح وتقرأ — وما يتحركش من غيرك','لما يخلص بيقولك «استراحة — خذ 5 دقائق بهدوء» مع اهتزاز لطيف','تقدر تغيّر المدة من الإعدادات، والباقي زي ما هو تمامًا']},
   {v:'v55 — نسخة تحميل كاملة 📲💾',d:'15/9/2026',items:['دلوقتي فيه ملف جاهز تثبّته وتلعب به من غير إنترنت — كل اللعبة والمحتوى في ملف واحد (رابطه على صفحة التحميل في نهاية الإعدادات)','رابط مباشر: https://alfadev0.github.io/ahmed-quiz-game/download/ — الملف ~2.4MB يفتح ويشتغل فورًا']},
   {v:'v54 — جرعات · مراجعة · أوسمة ⚡🔁🏅',d:'15/9/2026',items:['⚡ «جرعة خاطفة» على الرئيسية: 8 أسئلة سريعة لأي دقيقة فراغ','🔁 بعد كل اختبار لو غلطت: زرار «أعد أسئلتك الغلط» بيظهر تلقائيًا ويراجعلك اللي وقعت فيه','🏅 6 أوسمة جديدة: أذن واعية، مستمع ذكي، لا تخطئ مرتين، جرعة خاطفة، يومك كامل، سريع ومركز']},
   {v:'v53 — اسمع الكتاب كامل 🎧📖',d:'15/9/2026',items:['داخل أي درس زرار «🎧 اسمع الكتاب كامل من هنا» — بيشغّل الفصل اللي واقف عنده وكل الفصول اللي بعده على التوالي لنهاية الكتاب','بيمشي لواحده من غير ما تحتاج تلمس حاجة — الصوت والسرعة اللي اخترتهم بيتطبقوا، ولما يخلص بيقولك «📚 خلّصت الكتاب كامل»']},
