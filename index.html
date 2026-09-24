@@ -576,6 +576,10 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 .part-prog-bar,.part-prog-fill,.st-bar,.st-fill{overflow:hidden}
 
 /* ==== مشغّل الصوت: dock أنيق ==== */
+.gb{height:9px;background:var(--bg3);border-radius:999px;margin-top:7px;overflow:hidden}
+.gbFill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--primary,#7C8F3C),var(--secondary,#C89B3C));transition:width .5s var(--fx-ease)}
+.gbFill.gbDone{background:linear-gradient(90deg,#C89B3C,#E8C257);box-shadow:0 0 12px rgba(232,194,87,.8)}
+.daystreak{display:flex;align-items:center;background:rgba(200,155,60,.14);border:1px solid rgba(200,155,60,.4);color:var(--secondary,#B98913);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:900;flex:none}
 .pod{
   position:sticky;bottom:0;z-index:45;margin:0 12px 12px;border-radius:22px;border:1px solid var(--bg3);
   background:linear-gradient(120deg,var(--bg3),var(--bg2));backdrop-filter:blur(14px);box-shadow:0 -8px 30px -10px rgba(0,0,0,.4)
@@ -691,6 +695,16 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
       <span class="chal-ico">🏆</span>
       <div class="chal-info"><b>شطارتك الأسبوعية</b><p id="weekCardTxt"></p></div>
       <span class="chal-ico" id="weekCardStars" style="font-size:15px"></span>
+    </div>
+
+    <div class="chal" id="goalCard" style="padding:14px">
+      <span class="chal-ico" style="background:linear-gradient(135deg,#C89B3C,#E2B04B)">🎯</span>
+      <div class="chal-info" style="flex:1;min-width:0">
+        <b>هدف النهاردة</b>
+        <div class="gb"><div class="gbFill" id="dgFill"></div></div>
+        <p id="dgTxt" style="margin:5px 0 0;font-size:12px"></p>
+      </div>
+      <span class="daystreak" id="dsTag" title="أيام متتالية تحقق فيها هدف"><span id="dsTxt">🔥 0</span></span>
     </div>
 
     <div class="home-note" id="weekReportWrap" style="display:none;margin-top:0"></div>
@@ -874,6 +888,10 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:8px">
         <span class="set-label" style="font-size:13px">⏳ مدة جلسة ساعة المذاكرة</span>
         <div id="focusMBox" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+      <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <span class="set-label" style="font-size:13px">🎯 هدف النهاردة (إجابات صحيحة)</span>
+        <div id="dayGoalBox" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       </div>
       <div class="set-item">
         <span class="set-label">🔊 الأصوات</span>
@@ -1189,8 +1207,8 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 <script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0};
-const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9,focusM:25};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0,gday:''};
+const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9,focusM:25,dayGoal:50};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
@@ -1215,7 +1233,7 @@ function healData(){
     else act();
   }catch(e){}
 }
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25}
+function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
@@ -1371,6 +1389,53 @@ function focusDone(){
 }
 function focusStop(){clearTimeout(focusState.id);focusState.on=false;focusState.paused=false;const b=document.getElementById('focusBtn');if(b)b.textContent='▶️ ابدأ التركيز';focusPaint()}
 
+/* -------- daily goal + day streak -------- */
+function goalInfo(){
+  const key=new Date().toISOString().slice(0,10);
+  const wk=Array.isArray(S.wk)?S.wk:[];
+  const today=wk.find(w=>w.d===key);
+  let streakDays=0;
+  for(let i=0;i<365;i++){
+    const d=new Date(Date.now()-i*864e5).toISOString().slice(0,10);
+    const w=wk.find(x=>x.d===d);
+    if(!w||!w.q)break;
+    streakDays++;
+  }
+  return {key,todayC:(today&&today.c)||0,streakDays};
+}
+function renderDayGoal(){
+  try{
+    const gi=goalInfo(),goal=(set&&set.dayGoal||50);
+    const pct=Math.min(100,Math.round(gi.todayC/goal*100));
+    const done=gi.todayC>=goal;
+    const fill=document.getElementById('dgFill');
+    if(fill){fill.style.width=pct+'%';fill.className='gbFill'+(done?' gbDone':'')}
+    const tx=document.getElementById('dgTxt');
+    if(tx)tx.textContent='أنت جاوبت صح النهاردة: '+gi.todayC+' / '+goal+(done?' — 🎉 أنّجزه!':'');
+    const ds=document.getElementById('dsTxt');
+    if(ds)ds.textContent='🔥 '+gi.streakDays;
+    if(done&&S.gday!==gi.key){
+      S.gday=gi.key;save();
+      try{if(typeof confetti==='function')confetti()}catch(e){}
+      try{toast('🎉 مبروك! خلّصت هدف النهاردة — استمرارية تحترم نفسها')}catch(e){}
+    }
+  }catch(e){}
+}
+function renderDayGoalChips(){
+  const box=document.getElementById('dayGoalBox');
+  if(!box)return;
+  box.innerHTML='';
+  const vals=[15,25,50,100],cur=set&&set.dayGoal||50;
+  vals.forEach(m=>{
+    const b=document.createElement('button');
+    b.className='course-bt'+(cur===m?' next':' go');
+    b.style.margin=0;b.style.padding='8px 12px';
+    b.textContent=m;
+    b.onclick=()=>{set.dayGoal=m;saveSet();renderDayGoalChips();renderDayGoal();toast('🎯 هدفك الجديد: '+m+' إجابة صحيحة / يوم')};
+    box.appendChild(b);
+  });
+}
+
 /* ---------- weekly performance tracker ---------- */
 function wkTrack(cor){
   try{
@@ -1380,6 +1445,7 @@ function wkTrack(cor){
     if(today){today.q++;today.c+=(cor||0)}else{S.wk.push({d:key,q:1,c:(cor||0)})}
     if(S.wk.length>14)S.wk=S.wk.slice(-14);
     save();
+    if(typeof renderDayGoal==='function')renderDayGoal();
   }catch(e){}
 }
 function wkBars(){
@@ -1416,6 +1482,7 @@ function renderWeekReport(){
     '<div style="display:flex;gap:6px;align-items:flex-end">'+barHtml+'</div>';
 }
 function updateHome(){
+  try{renderDayGoal()}catch(e){}
   document.getElementById('hmLv').textContent=S.level;
   document.getElementById('hmXp').textContent=S.xp;
   document.getElementById('hmCoins').textContent=S.coins;
@@ -2732,6 +2799,7 @@ function wireVoice(){
   renderVoiceSettings();
   renderVoiceRates();
   if(typeof renderFocusChips==='function')renderFocusChips();
+  if(typeof renderDayGoalChips==='function')renderDayGoalChips();
 }
 function toChunks(t){
   const out=[];
@@ -3613,8 +3681,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.34',SW_BUILD='v57';
+const APP_VERSION='1.3.35',SW_BUILD='v58';
 const CHANGES=[
+  {v:'v58 — هدف النهاردة والاستمرارية 🎯🔥',d:'24/9/2026',items:['كارت «هدف النهاردة» على الرئيسية: بار ذهبي يتقدّم بعد كل إجابة صحيحة وبتغيّر هدفك (15/25/50/100) من الإعدادات','لما تخلّصه: كونفيتي + تهنئة، وشارة 🔥 بتعدّ أيام متتالية حققت فيها الهدف — استمرارية تشجعك تفتح التطبيق كل يوم']},
   {v:'v57 — تنسيق احترافي 🎨✨',d:'24/9/2026',items:['رئيسية بهوية متدرجة أنيقة (Hero) مع دائرة صورة مضيئة وشارات في الستايل','الشريط السفلي أصبح عائمًا بشفافية ضبابية والحساب الفعّال يلمع','كروت ناعمة وظلال طبقات وأزرار عند الضغط تتموّط بدقة — وكل ده شغال في الليلي والليلي العميق','تجربة أسرع: حركة ناعمة بين الصفحات (Fade) وسكرول نظيف']},
   {v:'v56 — ساعة مذاكرة هادية ⏳🌿',d:'24/9/2026',items:['كارت «ساعة المذاكرة» على الرئيسية: تايمر تركيز 25/45/60/90 دقيقة يشتغل وأنت تروح وتقرأ — وما يتحركش من غيرك','لما يخلص بيقولك «استراحة — خذ 5 دقائق بهدوء» مع اهتزاز لطيف','تقدر تغيّر المدة من الإعدادات، والباقي زي ما هو تمامًا']},
   {v:'v55 — نسخة تحميل كاملة 📲💾',d:'15/9/2026',items:['دلوقتي فيه ملف جاهز تثبّته وتلعب به من غير إنترنت — كل اللعبة والمحتوى في ملف واحد (رابطه على صفحة التحميل في نهاية الإعدادات)','رابط مباشر: https://alfadev0.github.io/ahmed-quiz-game/download/ — الملف ~2.4MB يفتح ويشتغل فورًا']},
