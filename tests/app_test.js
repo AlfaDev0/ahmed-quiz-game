@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.32'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.33'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -719,6 +719,14 @@ ck('listening flag keeps chain marker', vm.runInContext(`podS={list:['x'],i:0,pl
 })();
 ck('quickGames/reviewed default 0', vm.runInContext(`DEFAULTS.quickGames===0&&DEFAULTS.reviewed===0`,sandbox));
 ck('new achievements defined', (()=>{try{const ids=vm.runInContext(`ACHIEVEMENTS.map(a=>a.id).join(',')`,sandbox);return ids.includes('quick_1')&&ids.includes('audio_1')&&ids.includes('daily3')&&ids.includes('review15')}catch(e){return 'ERR:'+e.message}})());
+
+/* ---- v56 focus study timer ---- */
+ck('focusM default 25', vm.runInContext(`SETDEF.focusM===25`,sandbox));
+ck('fmtFocus formats mm:ss', vm.runInContext(`fmtFocus(1500)==='25:00'&&fmtFocus(61)==='1:01'`,sandbox));
+ck('focusToggle starts 25-min state', (()=>{try{const v=vm.runInContext(`focusToggle();focusState.on===true&&focusState.left>=1490&&focusState.left<=1500`,sandbox);return v===true}catch(e){return 'ERR:'+e.message}})());
+ck('focus pause toggle works', (()=>{try{const a=vm.runInContext(`focusToggle();focusState.paused===true`,sandbox);const b=vm.runInContext(`focusToggle();focusState.paused===false`,sandbox);return a===true&&b===true}catch(e){return 'ERR:'+e.message}})());
+ck('renderFocusChips draws 4 durations', (()=>{try{vm.runInContext(`renderFocusChips();document.getElementById('focusMBox').children.length===4`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
+(()=>{try{vm.runInContext(`focusStop()`,sandbox)}catch(e){}})();
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
