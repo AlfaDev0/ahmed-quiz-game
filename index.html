@@ -29,6 +29,8 @@
 }
 body{background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 #app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:75px}
+/* v57: مع الشريط العائم sticky لا حاجة لحشوة كبيرة أسفل */
+#app{padding-bottom:16px}
 .screen{display:none;min-height:100vh;animation:fadeIn .4s ease}
 .screen.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
@@ -500,6 +502,88 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
 .course-cta button{flex:1;padding:13px;border:none;border-radius:14px;font-family:inherit;font-weight:900;font-size:13px;cursor:pointer}
 
 @media(min-width:481px){#app{border-left:1px solid var(--bg3);border-right:1px solid var(--bg3)}}
+
+/* ============================================================
+   v57 — الطبقة الجمالية «Premium»
+   (إضافية فوق التصميم الأصلي — لا كسر، يعمل مع ليلي وليلي عميق)
+   ============================================================ */
+:root{--fx-ease:cubic-bezier(.34,1.35,.42,1);--r-xl:20px;--r-lg:16px;--sh-card:0 6px 22px -8px rgba(20,22,15,.28),0 1px 0 rgba(255,255,255,.06)}
+html.dark{--sh-card:0 8px 26px -10px rgba(0,0,0,.6)}
+html.night{--sh-card:0 10px 30px -12px rgba(0,0,0,.75)}
+*{-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Cairo",Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.screen{animation:fadeIn .28s var(--fx-ease)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ==== الرئيسية: Hero ==== */
+.screen[data-hero="true"] .header,
+#home .header{
+  position:relative;overflow:hidden;margin:14px 14px 4px;padding:20px 18px;border-radius:var(--r-xl);
+  background:linear-gradient(140deg,var(--primary,#7C8F3C) 0%,var(--primary-dark,#5f7330) 46%,var(--secondary,#B98913) 130%);
+  box-shadow:0 14px 34px -14px rgba(95,115,48,.55);
+}
+#home .header::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 85% -20%,rgba(255,255,255,.28),transparent 55%)}
+#home .header>*{position:relative;z-index:1}
+#home .name{color:#fff;font-size:20px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.25)}
+#home .title-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;backdrop-filter:blur(4px)}
+#home .avatar{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35),0 8px 20px -6px rgba(0,0,0,.4)}
+#home .mini-stats{margin-top:8px;gap:6px}
+#home .mini{background:rgba(11,12,7,.18);border:1px solid rgba(255,255,255,.25);color:#FBF8EA;border-radius:999px;padding:4px 11px;font-size:11px;backdrop-filter:blur(4px)}
+#home .mini b{color:#FFE9A8}
+
+/* ==== بطاقة معاودة + الرصيد السكة: كروت ==== */
+.resume-card,.chal,.home-note,.week-card,.plan-banner,.course-hero{transition:transform .22s var(--fx-ease),box-shadow .22s}
+.resume-card:hover,.chal:hover{transform:translateY(-2px)}
+.chal{background:linear-gradient(180deg,var(--bg2),var(--bg));border:1px solid var(--bg3);border-radius:var(--r-lg);box-shadow:var(--sh-card);padding:13px 14px}
+.chal .chal-ico{
+  width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:14px;font-size:20px;color:#0B0C07;
+  box-shadow:0 6px 16px -6px rgba(124,143,60,.6)
+}
+.chal-info b{font-size:14.5px}
+.chal-btn{background:linear-gradient(135deg,var(--primary,#7C8F3C),var(--secondary,#C89B3C));color:#0B0C07;border:none;border-radius:12px;padding:9px 14px;font-weight:900;font-size:12px;box-shadow:0 5px 14px -5px rgba(124,143,60,.55)}
+.chal-btn:active,.btn-main:active,.sec-btn:active{transform:scale(.96)}
+.home-note{border-radius:var(--r-lg);box-shadow:var(--sh-card)}
+
+/* ==== الشريط السفلي: عائم ==== */
+.bottom{
+  position:sticky;bottom:0;z-index:40;transform:none;left:auto;right:auto;width:auto;max-width:480px;
+  margin:0 12px 12px;background:var(--bg2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--bg3);border-radius:22px;box-shadow:0 -6px 26px -10px rgba(0,0,0,.28);padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px))
+}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:transparent;color:var(--dim);font-size:10px;font-weight:700;font-family:inherit;padding:6px 4px;border-radius:14px;flex:1;transition:.18s var(--fx-ease)}
+.nav-btn .ni{font-size:18px;line-height:1}
+.nav-btn.active{color:var(--primary-dark,var(--primary));background:linear-gradient(180deg,var(--primary),var(--secondary));color:#0B0C07;box-shadow:0 4px 14px -4px rgba(124,143,60,.6);transform:translateY(-2px)}
+html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
+
+/* ==== أزرار موحدة ==== */
+.btn-main{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#0B0C07;border:none;border-radius:16px;padding:14px;font-family:inherit;font-weight:900;font-size:15px;box-shadow:0 10px 24px -10px rgba(124,143,60,.65)}
+.sec-btn{border-radius:13px;border:1px solid var(--bg3);background:var(--bg2);font-family:inherit;font-weight:800}
+.course-bt{border-radius:12px}
+.chip{border-radius:999px;border:1px solid var(--bg3);background:var(--bg2);font-family:inherit;font-weight:800}
+.chip.active{background:linear-gradient(135deg,var(--primary),var(--secondary));border-color:transparent;color:#0B0C07}
+
+/* ==== حواشي الصفحات ==== */
+.page-head{position:sticky;top:0;z-index:20;background:var(--bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.page-head h2{font-size:18px}
+.icon-btn{border-radius:12px;background:var(--bg2);border:1px solid var(--bg3)}
+
+/* ==== القراءة ==== */
+.read-sec{border-radius:var(--r-lg);background:var(--bg2);border:1px solid var(--bg3);box-shadow:var(--sh-card);padding:16px 16px;line-height:1.9}
+.read-sec h4{color:var(--primary-dark,var(--primary))}
+.read-chapter{font-size:19px;padding:16px}
+.read-quiz-btn{width:100%;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#0B0C07;font-family:inherit;font-weight:900;border:none;padding:15px;box-shadow:0 10px 22px -10px rgba(124,143,60,.6)}
+.part-prog-bar,.part-prog-fill,.st-bar,.st-fill{overflow:hidden}
+
+/* ==== مشغّل الصوت: dock أنيق ==== */
+.pod{
+  position:sticky;bottom:0;z-index:45;margin:0 12px 12px;border-radius:22px;border:1px solid var(--bg3);
+  background:linear-gradient(120deg,var(--bg3),var(--bg2));backdrop-filter:blur(14px);box-shadow:0 -8px 30px -10px rgba(0,0,0,.4)
+}
+.pod-top{padding:10px 12px}
+/* ==== شريط التمرير ==== */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:999px}
 </style>
 </head>
 <body>
@@ -3529,9 +3613,10 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.33',SW_BUILD='v56';
+const APP_VERSION='1.3.34',SW_BUILD='v57';
 const CHANGES=[
-  {v:'v56 — ساعة مذاكرة هادية ⏳🌿',d:'15/9/2026',items:['كارت «ساعة المذاكرة» على الرئيسية: تايمر تركيز 25/45/60/90 دقيقة يشتغل وأنت تروح وتقرأ — وما يتحركش من غيرك','لما يخلص بيقولك «استراحة — خذ 5 دقائق بهدوء» مع اهتزاز لطيف','تقدر تغيّر المدة من الإعدادات، والباقي زي ما هو تمامًا']},
+  {v:'v57 — تنسيق احترافي 🎨✨',d:'24/9/2026',items:['رئيسية بهوية متدرجة أنيقة (Hero) مع دائرة صورة مضيئة وشارات في الستايل','الشريط السفلي أصبح عائمًا بشفافية ضبابية والحساب الفعّال يلمع','كروت ناعمة وظلال طبقات وأزرار عند الضغط تتموّط بدقة — وكل ده شغال في الليلي والليلي العميق','تجربة أسرع: حركة ناعمة بين الصفحات (Fade) وسكرول نظيف']},
+  {v:'v56 — ساعة مذاكرة هادية ⏳🌿',d:'24/9/2026',items:['كارت «ساعة المذاكرة» على الرئيسية: تايمر تركيز 25/45/60/90 دقيقة يشتغل وأنت تروح وتقرأ — وما يتحركش من غيرك','لما يخلص بيقولك «استراحة — خذ 5 دقائق بهدوء» مع اهتزاز لطيف','تقدر تغيّر المدة من الإعدادات، والباقي زي ما هو تمامًا']},
   {v:'v55 — نسخة تحميل كاملة 📲💾',d:'15/9/2026',items:['دلوقتي فيه ملف جاهز تثبّته وتلعب به من غير إنترنت — كل اللعبة والمحتوى في ملف واحد (رابطه على صفحة التحميل في نهاية الإعدادات)','رابط مباشر: https://alfadev0.github.io/ahmed-quiz-game/download/ — الملف ~2.4MB يفتح ويشتغل فورًا']},
   {v:'v54 — جرعات · مراجعة · أوسمة ⚡🔁🏅',d:'15/9/2026',items:['⚡ «جرعة خاطفة» على الرئيسية: 8 أسئلة سريعة لأي دقيقة فراغ','🔁 بعد كل اختبار لو غلطت: زرار «أعد أسئلتك الغلط» بيظهر تلقائيًا ويراجعلك اللي وقعت فيه','🏅 6 أوسمة جديدة: أذن واعية، مستمع ذكي، لا تخطئ مرتين، جرعة خاطفة، يومك كامل، سريع ومركز']},
   {v:'v53 — اسمع الكتاب كامل 🎧📖',d:'15/9/2026',items:['داخل أي درس زرار «🎧 اسمع الكتاب كامل من هنا» — بيشغّل الفصل اللي واقف عنده وكل الفصول اللي بعده على التوالي لنهاية الكتاب','بيمشي لواحده من غير ما تحتاج تلمس حاجة — الصوت والسرعة اللي اخترتهم بيتطبقوا، ولما يخلص بيقولك «📚 خلّصت الكتاب كامل»']},
