@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.35'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.36'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -734,7 +734,14 @@ ck('renderDayGoalChips draws 4 options', (()=>{try{vm.runInContext(`renderDayGoa
 ck('goalInfo uses today wk correct', (()=>{try{return vm.runInContext(`S.wk=[{d:new Date().toISOString().slice(0,10),q:5,c:20}];goalInfo().todayC===20`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('renderDayGoal sets width+text', (()=>{try{return vm.runInContext(`renderDayGoal();document.getElementById('dgFill').style.width==='40%'&&(document.getElementById('dgTxt').textContent||'').indexOf('20')>=0`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('day goal reached fires celebrate', (()=>{try{const a=vm.runInContext(`S.wk=[{d:new Date().toISOString().slice(0,10),q:9,c:60}];renderDayGoal();S.gday===S.wk[0].d`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
-ck('day streak counts 3 consecutive', (()=>{try{return vm.runInContext(`S.wk=[{d:new Date().toISOString().slice(0,10),q:1,c:1},{d:new Date(Date.now()-864e5).toISOString().slice(0,10),q:1,c:1},{d:new Date(Date.now()-2*864e5).toISOString().slice(0,10),q:1,c:1}];goalInfo().streakDays===3`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('day streak counts 3 consecutive', (()=>{try{return vm.runInContext(`S.wk=[{d:new Date().toISOString().slice(0,10),q:1,c:1},{d:new Date(Date.now()-864e5).toISOString().slice(0,10),q:1,c:1},{d:new Date(Date.now()-2*864e5).toISOString().slice(0,10),q:1,c:1}];goalInfo().streakDays===3`,sandbox)===true}catch(e){return e.message}})());
+
+/* v59 flashcards */
+ck('startFlash caps queue at 15', (()=>{try{return vm.runInContext(`const qs=[];for(let i=0;i<30;i++)qs.push({q:'q'+i,a:['a','b','c','d'],c:0,d:'easy'});startFlash(qs,'ت');flashBox.qs.length===15`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('flashReveal opens score controls', (()=>{try{return vm.runInContext(`flashReveal();document.getElementById('flashA').style.display===''&&document.getElementById('flashScore').style.display===''`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('flashNext correct counts ok', (()=>{try{return vm.runInContext(`flashNext(true);flashBox.i===1&&flashBox.ok===1`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('flashNext miss records wrong', (()=>{try{const a=vm.runInContext(`const k=Object.keys(S.wrongQs||{}).length;flashNext(false);const b=Object.keys(S.wrongQs||{}).length;b>k&&flashBox.i===2`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
+ck('flashClose restores studyRead', (()=>{try{vm.runInContext(`closeFlash();flashBox===null`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
