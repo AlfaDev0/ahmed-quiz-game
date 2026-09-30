@@ -575,6 +575,7 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 .gbFill.gbDone{background:linear-gradient(90deg,#C89B3C,#E8C257);box-shadow:0 0 12px rgba(232,194,87,.8)}
 .daystreak{display:flex;align-items:center;background:rgba(200,155,60,.14);border:1px solid rgba(200,155,60,.4);color:var(--secondary,#B98913);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:900;flex:none}
 /* ==== بطاقات الحفظ ==== */
+.book-fast.gold{background:linear-gradient(135deg,#C89B3C,#C05B3F);color:#fff;box-shadow:0 8px 18px -8px rgba(192,91,63,.6)}
 .card-btn{display:block;width:100%;margin:10px 0 0;padding:14px;border:none;border-radius:16px;background:linear-gradient(135deg,#C89B3C,#C05B3F);color:#fff;font-family:inherit;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 10px 22px -10px rgba(192,91,63,.6)}
 .cardface{padding:18px;display:flex;flex-direction:column;gap:12px}
 .fm-head{display:flex;align-items:center;justify-content:space-between;font-weight:900;font-size:15px;color:var(--primary-dark,var(--primary))}
@@ -6843,10 +6844,11 @@ function renderDayGoalChips(){
 }
 
 var flashBox=null;
-function startFlash(qs,title){
+function startFlash(qs,title,maxN){
   if(!qs||!qs.length){try{toast('🤏 ما فيش أسئلة في الفصل ده')}catch(e){}return}
   const list=qs.slice();try{shuffle(list)}catch(e){}
-  flashBox={qs:list.slice(0,15),i:0,ok:0,title:title||'🃏 بطاقات الحفظ'};
+  const cap=maxN||15;
+  flashBox={qs:list.slice(0,cap),i:0,ok:0,title:title||'🃏 بطاقات الحفظ'};
   document.getElementById('fTitle').textContent=flashBox.title;
   const cb=document.getElementById('flashCloseBtn');if(cb)cb.textContent='خروج';
   paintFlash();
@@ -7956,7 +7958,11 @@ function openStudySubject(pi,si){
     const fbar=document.createElement('div');fbar.className='book-fast';
     fbar.innerHTML='⚡ قراءة سريعة — مراجعة كل فصول الكتاب في جلسة واحدة';
     fbar.onclick=e=>{e.stopPropagation();openFast(pi,si,bi)};
-    wrap.appendChild(fbar);wrap.appendChild(list);el.appendChild(wrap);
+    wrap.appendChild(fbar);
+    const flbar=document.createElement('div');flbar.className='book-fast gold';
+    flbar.innerHTML='🃏 بطاقات حفظ كامل الكتاب — '+(b.chapters||[]).reduce((n,c)=>n+(c.qs?c.qs.length:0),0)+' سؤال';
+    flbar.onclick=e=>{e.stopPropagation();const all=[];(b.chapters||[]).forEach(c=>{(c.qs||[]).forEach(q=>all.push(q))});startFlash(all,'🃏 حفظ كامل: '+b.title,30)};
+    wrap.appendChild(flbar);wrap.appendChild(list);el.appendChild(wrap);
     b.chapters.forEach((ch,ci)=>{
       const k=chKey(pi,si,bi,ci),stars=getChStars(k);
       const row=document.createElement('div');row.className='ch-row';
@@ -9166,8 +9172,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.36',SW_BUILD='v59';
+const APP_VERSION='1.3.37',SW_BUILD='v60';
 const CHANGES=[
+  {v:'v60 — بطاقات حفظ الكتاب كامل 🃏📚',d:'24/9/2026',items:['جنب «قراءة سريعة» في أي كتاب تلاقي «🃏 بطاقات حفظ كامل الكتاب» — يجمع أسئلة كل فصوله في جلسة واحدة (حتى 30 بطاقة)','زر البطاقات الأصلي داخل الفصل شغال زي ما هو']},
   {v:'v59 — بطاقات الحفظ 🃏🧠',d:'24/9/2026',items:['زر «بطاقات حفظ الفصل» في كل درس: تشوف السؤال، تحاول، تدوس «إظهار الجواب»، وبتقيّم نفسك بصدق (✅ عرفتها / 🔁 محتاج أرجع لها)','اللي بتقولله «محتاج أرجع لها» بيترجعلأخطائك ويطلعلك في مراجعاتك والجرعة اليومية — وتقييم >=70% بيصربك كونفيتي ونقاط XP أصلية']},
   {v:'v58 — هدف النهاردة والاستمرارية 🎯🔥',d:'24/9/2026',items:['كارت «هدف النهاردة» على الرئيسية: بار ذهبي يتقدّم بعد كل إجابة صحيحة وبتغيّر هدفك (15/25/50/100) من الإعدادات','لما تخلّصه: كونفيتي + تهنئة، وشارة 🔥 بتعدّ أيام متتالية حققت فيها الهدف — استمرارية تشجعك تفتح التطبيق كل يوم']},
   {v:'v57 — تنسيق احترافي 🎨✨',d:'24/9/2026',items:['رئيسية بهوية متدرجة أنيقة (Hero) مع دائرة صورة مضيئة وشارات في الستايل','الشريط السفلي أصبح عائمًا بشفافية ضبابية والحساب الفعّال يلمع','كروت ناعمة وظلال طبقات وأزرار عند الضغط تتموّط بدقة — وكل ده شغال في الليلي والليلي العميق','تجربة أسرع: حركة ناعمة بين الصفحات (Fade) وسكرول نظيف']},

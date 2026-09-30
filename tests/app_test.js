@@ -377,7 +377,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.36'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.37'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -742,6 +742,7 @@ ck('flashReveal opens score controls', (()=>{try{return vm.runInContext(`flashRe
 ck('flashNext correct counts ok', (()=>{try{return vm.runInContext(`flashNext(true);flashBox.i===1&&flashBox.ok===1`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('flashNext miss records wrong', (()=>{try{const a=vm.runInContext(`const k=Object.keys(S.wrongQs||{}).length;flashNext(false);const b=Object.keys(S.wrongQs||{}).length;b>k&&flashBox.i===2`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('flashClose restores studyRead', (()=>{try{vm.runInContext(`closeFlash();flashBox===null`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
+ck('startFlash book mode cap 30', (()=>{try{const a=vm.runInContext(`S.gday='';const qs=[];for(let i=0;i<40;i++)qs.push({q:'b'+i,a:['1','2','3','4'],c:0,d:'easy'});startFlash(qs,'كتاب',30);flashBox.qs.length===30`,sandbox);vm.runInContext(`closeFlash()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
