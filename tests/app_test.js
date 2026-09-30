@@ -280,7 +280,8 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
   ck('study screen active', t().active() === 'study');
   ck('six part cards', byId.studyParts.children.length === 6);
   sandbox.openStudyPart(0);
-  ck('adabi shows 8 subjects', t().active() === 'studyBooks' && byId.studyBooksWrap.children.length === 8);
+  ck('adabi shows 8 subjects', t().active() === 'studyBooks' && [].filter.call(byId.studyBooksWrap.children, c => (c.className || '').split(/\s+/).indexOf('subj-card') >= 0).length === 8);
+  (function(){const bars=[].filter.call(byId.studyBooksWrap.children,c=>(c.className||'').split(/\s+/).indexOf('book-fast')>=0);ck('subject flash bars rendered',bars.length===8)})();
   const p0 = sandbox.window.STUDY[0];
   const s0 = p0.subjects[0];
   const b0 = s0.books[0];
@@ -377,7 +378,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.37'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.38'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -743,6 +744,7 @@ ck('flashNext correct counts ok', (()=>{try{return vm.runInContext(`flashNext(tr
 ck('flashNext miss records wrong', (()=>{try{const a=vm.runInContext(`const k=Object.keys(S.wrongQs||{}).length;flashNext(false);const b=Object.keys(S.wrongQs||{}).length;b>k&&flashBox.i===2`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('flashClose restores studyRead', (()=>{try{vm.runInContext(`closeFlash();flashBox===null`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
 ck('startFlash book mode cap 30', (()=>{try{const a=vm.runInContext(`S.gday='';const qs=[];for(let i=0;i<40;i++)qs.push({q:'b'+i,a:['1','2','3','4'],c:0,d:'easy'});startFlash(qs,'كتاب',30);flashBox.qs.length===30`,sandbox);vm.runInContext(`closeFlash()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
+ck('startFlash subject mode cap 40', (()=>{try{const a=vm.runInContext(`const qs=[];for(let i=0;i<60;i++)qs.push({q:'m'+i,a:['1','2','3','4'],c:0,d:'easy'});startFlash(qs,'مادة',40);flashBox.qs.length===40`,sandbox);vm.runInContext(`closeFlash()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
