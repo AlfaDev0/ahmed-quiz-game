@@ -378,7 +378,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.41'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.42'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -753,6 +753,14 @@ ck('relaxOpen shows relax+quote', (()=>{try{const a=vm.runInContext(`document.ge
 ck('toggleBreath stops relax', (()=>{try{return vm.runInContext(`relax.on===false&&!relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('setRelaxPreset sets minutes', (()=>{try{const a=vm.runInContext(`setRelaxPreset(10);relax.preset===10&&relax.left>=590&&relax.left<=600`,sandbox);vm.runInContext(`toggleBreath()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('relaxDone resets state', (()=>{try{return vm.runInContext(`relaxDone();relax.on===false && !relax.breath && !relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+
+/* v65 fast boot (lazy study.js) */
+ck('no blocking study.js script tag', (()=>{try{return !/<script[^>]*src=["']?study\.js/.test(html)}catch(e){return 'ERR:'+e.message}})());
+ck('lazy study loader present', (()=>{try{return vm.runInContext(`typeof loadStudy==='function'&&typeof studyWait==='function'&&typeof studyHas==='function'`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('loadStudy ready path works', (()=>{try{return vm.runInContext(`STUDY_READY=false;loadStudy();STUDY_READY===true`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('studyWait queues renderer', (()=>{try{const a=vm.runInContext(`STUDY_WANT=[];studyWait('courses');STUDY_WANT.length===1`,sandbox);vm.runInContext(`STUDY_WANT=[]`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
+ck('study guards installed in screens', (()=>{try{const src=html;return /function renderCourses\(\)\{\s*if\(!studyHas\(\)\)/.test(src)&&/function renderStudyParts\(\)\{\s*if\(!studyHas\(\)\)/.test(src)}catch(e){return 'ERR:'+e.message}})());
+ck('offline build uses lazy studySrc blob', (()=>{try{const fsx=require('fs');const p='/home/kali/ahmed-quiz-game/download/ahmed-quiz-offline.html';if(!fsx.existsSync(p))return 'skip';const t=fsx.readFileSync(p,'utf8');return t.indexOf('id="studySrc"')>0&&t.indexOf('type="text/plain"')>0}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);

@@ -12,21 +12,22 @@ const firstScript=html.indexOf('<script src=',bodyStart);
 const bodyMarkup=html.slice(bodyStart,firstScript);
 // 3) extract inline script blocks in order
 const blocks=[];
-const re=/<script(?![^>]*src)[^>]*>([\s\S]*?)<\/script>/g;
+const re=/<script(?![^>]*src)(?![^>]*text\/plain)[^>]*>([\s\S]*?)<\/script>/g;
 let m;while((m=re.exec(html)))blocks.push(m[1]);
 const esc=(s)=>s.replace(/<\/script>/gi,'<\\/script>');
 
 const out=[
-'<!DOCTYPE html><html dir="rtl" lang="ar"><head>',
-'<meta charset="utf-8">',
-'<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">',
-'<title>تحدي الذكاء — أحمد أيمن فكري (نسخة تحميل)</title>',
-'<style>',style[1],'</style></head><body>',
-bodyMarkup,
-'<script>',esc(questions),'</script>',
-'<script>',esc(study),'</script>',
-...blocks.map(b=>'<script>'+esc(b)+'</script>'),
-'</body></html>'
+ '<!DOCTYPE html><html dir="rtl" lang="ar"><head>',
+ '<meta charset="utf-8">',
+ '<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">',
+ '<title>تحدي الذكاء — أحمد أيمن فكري (نسخة تحميل)</title>',
+ '<style>',style[1],'</style></head><body>',
+ bodyMarkup,
+ '<script>',esc(questions),'</script>',
+ // v65: study.js as an inert text blob -> eval'd lazily after boot (instant start, works offline)
+ '<script type="text/plain" id="studySrc">',esc(study),'</'+'script>',
+ ...blocks.map(b=>'<script>'+esc(b)+'</script>'),
+ '</body></html>'
 ].join('\n');
 
 fs.mkdirSync('/home/kali/ahmed-quiz-game/download',{recursive:true});
