@@ -6693,7 +6693,7 @@ var LEADERBOARD_NAMES = [
 ];
 
 </script>
-<script type="text/plain" id="studySrc">
+<script>
 /* تحدي الذكاء — المكتبة التعليمية الكاملة
    ثالثة ثانوي بكالوريا 2027 (الآداب + الهندسة + الطب + الأعمال) + الأزهرية — دروس المنهج الرسمي
 */
@@ -6784,12 +6784,13 @@ function toast(msg){
 /* ================= SPLASH ================= */
 window.addEventListener('load',()=>{
   load();loadSet();
-  setTimeout(()=>{document.getElementById('loadFill').style.width='100%'},50);
+  try{const lf=document.getElementById('loadFill');if(lf)lf.style.width='100%'}catch(e){}
   setTimeout(()=>{
-    document.getElementById('splash').classList.add('hide');
-    setTimeout(()=>document.getElementById('splash').remove(),600);
+    const sp=document.getElementById('splash');
+    if(!sp)return;
+    sp.classList.add('hide');
+    setTimeout(()=>{try{sp.remove()}catch(e){}},600);
   },900);
-  loadStudy();
   applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();wireDownload();wireVoice();podS.rate=set&&set.voiceRate||0.9;if(typeof healData==='function')try{healData()}catch(e){}
   try{autoUpdate()}catch(e){}
 });
@@ -6800,60 +6801,25 @@ function getTitle(lv){
   let r='مبتدئ';for(const[i,n]of t)if(lv>=i)r=n;return r;
 }
 
-/* ================= FAST BOOT (الفصول بعد التشغيل) ================= */
-var STUDY_READY=false,STUDY_WANT=[];
-function studyHas(){return !!(window.STUDY&&window.STUDY.length)}
-function loadStudy(cb){
-  var fin=function(){
-    try{STUDY_READY=studyHas()}catch(e){}
-    try{if(typeof updateHome==='function')updateHome()}catch(e){}
-    try{var w=STUDY_WANT.splice(0);w.forEach(function(f){try{f()}catch(e){}})}catch(e){}
-    try{if(cb)cb()}catch(e){}
-  };
-  if(studyHas()){fin();return}
-  try{
-    var blob=document.getElementById('studySrc');
-    if(blob){
-      var txt='';
-      try{txt=blob.textContent||blob._text||''}catch(e){}
-      if(txt){try{(0,eval)(txt)}catch(e){}}
-      fin();return;
-    }
-  }catch(e){}
-  try{
-    var s=document.createElement('script');
-    s.src='study.js';s.async=true;
-    s.onload=fin;s.onerror=fin;
-    (document.head||document.documentElement).appendChild(s);
-  }catch(e){fin()}
-}
-function studyWait(where){
-  try{
-    const box=document.getElementById('coursesList')||document.getElementById('studyParts');
-    if(box)box.innerHTML='<div class="study-none">⏳ جاري تحميل الفصول… ثانية واحدة</div>';
-  }catch(e){}
-  STUDY_WANT.push(function(){
-    if(where==='courses'&&typeof renderCourses==='function')renderCourses();
-    else if(typeof renderStudyParts==='function')renderStudyParts();
-  });
-}
-
-/* ================= AUTO UPDATE (كاش قديم) ================= */
+/* ================= AUTO UPDATE (آمن بدون لوب) ================= */
+function vnum(v){const m=String(v||'').match(/(\d+)/);return m?parseInt(m[1],10):0}
 function autoUpdate(){
   try{
     if(location.protocol==='file:')return;
     if(typeof fetch!=='function')return;
+    let last=0;try{last=parseInt(localStorage.getItem('iq_auc')||'0',10)||0}catch(e){}
+    if(Date.now()-last<1800000)return;
+    try{localStorage.setItem('iq_auc',String(Date.now()))}catch(e){}
     fetch('index.html?iu='+Date.now(),{cache:'no-store'}).then(function(r){return r&&r.ok?r.text():''}).then(function(txt){
-      if(!txt||txt.indexOf('SW_BUILD')===-1)return;
-      var remote=(txt.match(/SW_BUILD\s*=\s*'([^']+)'/)||[])[1]||'';
-      if(!remote||remote===SW_BUILD){
-        try{sessionStorage.removeItem('iq_upd')}catch(e){}
-        return;
-      }
-      var again=false;
-      try{again=sessionStorage.getItem('iq_upd')===remote}catch(e){}
-      try{sessionStorage.setItem('iq_upd',remote)}catch(e){}
-      if(!again){setTimeout(function(){location.reload()},350);}
+      if(!txt)return;
+      const m=txt.match(/SW_BUILD\s*=\s*'v(\d+)'/);
+      if(!m)return;
+      const rv=parseInt(m[1],10),lv=vnum(SW_BUILD);
+      if(!(rv>lv))return;
+      let seen='';try{seen=sessionStorage.getItem('iq_upd')||''}catch(e){}
+      if(seen===String(rv))return;
+      try{sessionStorage.setItem('iq_upd',String(rv))}catch(e){}
+      setTimeout(function(){location.reload()},400);
     }).catch(function(){});
   }catch(e){}
 }
@@ -7981,7 +7947,6 @@ function renderStudyFill(){
   if(el)el.style.width=(t?Math.round(d/t*100):0)+'%';
 }
 function renderStudyParts(){
-  if(!studyHas())return studyWait('study');
   renderStudyTools();
   const el=document.getElementById('studyParts');el.innerHTML='';
   if(!window.STUDY)return;
@@ -8001,7 +7966,6 @@ function subjectProgress(pi,si){
   return {done,tot,pct:tot?Math.round(done/tot*100):0,totBooks:s.books.length};
 }
 function renderCourses(){
-  if(!studyHas())return studyWait('courses');
   const el=document.getElementById('coursesList');el.innerHTML='';
   if(!window.STUDY){el.innerHTML='<p style="color:var(--dim);text-align:center">تعذر تحميل الكورسات — تحقق من الإنترنت</p>';return}
   let done=0,tot=0;
@@ -8153,7 +8117,6 @@ function startReviewQuiz(){
   show('game');showQ();updateLL();
 }
 function openStudyPart(pi){
-  if(!studyHas()){studyWait('subject');show('studyBooks');return}
   _studyPi=pi;const p=window.STUDY[pi];
   document.getElementById('sbTitle').textContent=p.name;
   const el=document.getElementById('studyBooksWrap');el.innerHTML='';
@@ -9400,8 +9363,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.42',SW_BUILD='v65';
+const APP_VERSION='1.3.43',SW_BUILD='v66';
 const CHANGES=[
+  {v:'v66 — رجّعنا الضمان 🔧💚',d:'24/9/2026',items:['رجّعنا تحميل الفصول زي ما كان مضمون 100% — عشان ما يحصلش أي «جاري تحميل…» معلق تاني','شاشة البداية بتختفي لوحدها بأمان تام (مش بتتعلّق أبدًا)، والتحديث التلقائي بقى أذكى: بيفحص كل 30 دقيقة، وبيحدّث بس لو فيه نسخة أحدث فعلاً — ممنوع أي ريلoad متكرر','النسخة المحمّلة رجعت كمان لتحميل الفصول الفوري الكامل']},
   {v:'v65 — إقلاع فوري ⚡',d:'24/9/2026',items:['أهم إصلاح: اللعبة بتشتغل فورًا — كانت بتستنى 3.2MB (الفصول) قبل ما تفتح وتاخد ثواني طويلة على الموبايل','دلوقتي الفصول بتتحمّل في الخلفية بعد ما تشتغل اللعبة: الشاشة بتفتح فورًا والأقسام بتظهر أول ما تجهز','النسخة المحمّلة كمان بقت فورية — الفصول متحطمة جواه文件 كفص شغّال بيتقرا عند اللزوم','لو فتحت «كورسات» بسرعة هتشوف «جاري تحميل الفصول…» لثانية وبعدها كل حاجة تظهر لوحدها']},
   {v:'v64 — تحديث تلقائي 🔄✅',d:'24/9/2026',items:['التطبيق بقى يحدّث نفسه لوحده: أول ما تفتحه بيجيب أحدث نسخة من النت ويقارنها، ولو فيه نسخة جديدة بيعمل تحديث فوري من غير ما تحتاج تدوس حاجة','مهم جدًا لإلغاء مشكلة «مبيتحملش الجديد» اللي كانت بتظهر عندك: البيانات بتتعبى تاني لوحدها']},
   {v:'v63 — ألوان الطيف وروقان بسريع ⚡🌈',d:'24/9/2026',items:['شاشة البداية بقت ألوان الطيف (قوس قزح) بألوان مرحة بتتحرك — وشريط تحميله ملون قوس قزح','مشكلة البطء اتصلحت: شلنا كل الـ blur/الشفافية الثقيلة اللي بتثقل على الموبايل (الشريط السفلي والمشغل والصفحات) — الحركة دلوقتي بقت خفيفة جدًا على المعالج']},

@@ -24,8 +24,7 @@ const out=[
  '<style>',style[1],'</style></head><body>',
  bodyMarkup,
  '<script>',esc(questions),'</script>',
- // v65: study.js as an inert text blob -> eval'd lazily after boot (instant start, works offline)
- '<script type="text/plain" id="studySrc">',esc(study),'</'+'script>',
+ '<script>',esc(study),'</script>',
  ...blocks.map(b=>'<script>'+esc(b)+'</script>'),
  '</body></html>'
 ].join('\n');
