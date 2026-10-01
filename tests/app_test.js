@@ -378,7 +378,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.38'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.39'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -745,6 +745,14 @@ ck('flashNext miss records wrong', (()=>{try{const a=vm.runInContext(`const k=Ob
 ck('flashClose restores studyRead', (()=>{try{vm.runInContext(`closeFlash();flashBox===null`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
 ck('startFlash book mode cap 30', (()=>{try{const a=vm.runInContext(`S.gday='';const qs=[];for(let i=0;i<40;i++)qs.push({q:'b'+i,a:['1','2','3','4'],c:0,d:'easy'});startFlash(qs,'كتاب',30);flashBox.qs.length===30`,sandbox);vm.runInContext(`closeFlash()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('startFlash subject mode cap 40', (()=>{try{const a=vm.runInContext(`const qs=[];for(let i=0;i<60;i++)qs.push({q:'m'+i,a:['1','2','3','4'],c:0,d:'easy'});startFlash(qs,'مادة',40);flashBox.qs.length===40`,sandbox);vm.runInContext(`closeFlash()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
+
+/* v62 splash + relax */
+ck('splash elements reachable without crash', (()=>{try{return vm.runInContext(`(function(){const s=document.getElementById('splash');s.classList.add('hide');document.getElementById('loadFill').style.width='100%';const m=document.getElementById('spMsg');m.textContent='خد نفس عميق...';return s.classList.contains('hide')&&m.textContent.indexOf('خد')>=0})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('relax DOM ids created on open', (()=>{try{vm.runInContext(`relaxOpen()`,sandbox);return !!(byId.brMsg&&byId.brBtn&&byId.brRing)}catch(e){return 'ERR:'+e.message}})());
+ck('relaxOpen shows relax+quote', (()=>{try{const a=vm.runInContext(`document.getElementById('relax').classList.contains('active')&&relax.on===true`,sandbox);vm.runInContext(`toggleBreath()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
+ck('toggleBreath stops relax', (()=>{try{return vm.runInContext(`relax.on===false&&!relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('setRelaxPreset sets minutes', (()=>{try{const a=vm.runInContext(`setRelaxPreset(10);relax.preset===10&&relax.left>=590&&relax.left<=600`,sandbox);vm.runInContext(`toggleBreath()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
+ck('relaxDone resets state', (()=>{try{return vm.runInContext(`relaxDone();relax.on===false && !relax.breath && !relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
