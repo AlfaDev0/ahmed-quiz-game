@@ -596,8 +596,60 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:var(--primary);border-radius:999px}
 
+/* ==== v62 splash (وروقان) ==== */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#0B0C07;overflow:hidden;text-align:center;transition:opacity .7s ease,transform .7s ease;background:linear-gradient(135deg,#F4EED3,#D8E0A9,#A9B76E 55%,#C89B3C);background-size:320% 320%;animation:spShift 9s ease-in-out infinite}
+#splash.splash-out{opacity:0;pointer-events:none;transform:scale(1.04)}
+@keyframes spShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.sp-bg{position:absolute;inset:-20%;background:radial-gradient(40% 45% at 20% 15%,rgba(255,255,255,.45),transparent 60%),radial-gradient(38% 42% at 85% 30%,rgba(255,244,196,.5),transparent 60%),radial-gradient(45% 50% at 50% 95%,rgba(95,115,48,.25),transparent 65%);animation:spShift 12s ease-in-out infinite reverse}
+#splash>*{position:relative;z-index:2}
+.sp-logo{width:88px;height:88px;border-radius:50%;overflow:hidden;border:4px solid #0B0C07;box-shadow:0 0 0 10px rgba(255,255,255,.3),0 18px 40px -14px rgba(11,12,7,.45);animation:spBreath 4.5s ease-in-out infinite}
+.sp-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.sp-title{font-size:24px;font-weight:900;letter-spacing:.5px}
+.sp-line{font-size:13.5px;font-weight:700;color:#3d4426;min-height:20px}
+.sp-dots{display:flex;gap:7px}
+.sp-dots span{width:9px;height:9px;border-radius:50%;background:#0B0C07;opacity:.35;animation:spDot 1.1s ease-in-out infinite}
+.sp-dots span:nth-child(2){animation-delay:.18s}
+.sp-dots span:nth-child(3){animation-delay:.36s}
+@keyframes spDot{0%,100%{transform:translateY(0);opacity:.35}50%{transform:translateY(-6px);opacity:.9}}
+.sp-sh{position:absolute;font-size:26px;opacity:.5;animation:spFloat 6s ease-in-out infinite}
+@keyframes spFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-16px) rotate(12deg)}}
+.sp-sh:nth-child(1){top:12%;right:16%}
+.sp-sh:nth-child(2){top:22%;left:12%}
+.sp-sh:nth-child(3){bottom:18%;right:22%}
+.sp-sh:nth-child(4){bottom:26%;left:18%}
+.sp-sh:nth-child(5){top:48%;right:8%;font-size:20px}
+@keyframes spBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+.sp-load{width:170px;height:6px;background:rgba(11,12,7,.18);border-radius:999px;overflow:hidden}
+.sp-fill{height:100%;width:2%;border-radius:999px;background:#0B0C07;transition:width .4s ease}
+#splash.hide{opacity:0;pointer-events:none;transform:scale(1.04)}
+
+/* ==== relax screen ==== */
+#relax{background:linear-gradient(180deg,var(--bg2),var(--bg))}
+.relax-hero{display:flex;flex-direction:column;align-items:center;gap:16px;padding:22px 16px 6px}
+.br-ring{width:170px;height:170px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px dashed var(--primary);box-shadow:0 0 0 10px rgba(124,143,60,.1);transition:transform 4.5s ease-in-out}
+.br-ring.in{transform:scale(1.12);border-color:var(--secondary)}
+.br-ring.out{transform:scale(.92);border-color:var(--primary)}
+.br-core{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#7C8F3C,#C89B3C);display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 14px 30px -12px rgba(124,143,60,.7)}
+.br-txt{font-size:16px;font-weight:800;min-height:24px}
+.relax-quote{margin-top:6px;padding:12px 18px;border-radius:16px;background:var(--bg2);border:1px solid var(--bg3);color:var(--dim);font-size:13px;font-weight:700;max-width:320px;line-height:2;text-align:center}
+
 </style></head><body>
 
+<div id="splash" role="status" aria-label="جارٍ التحميل">
+  <div class="sp-bg"></div>
+  <div class="sp-shapes">
+    <span class="sp-sh" style="animation-delay:0s">🌸</span>
+    <span class="sp-sh" style="animation-delay:.6s">🌿</span>
+    <span class="sp-sh" style="animation-delay:1.2s">🌙</span>
+    <span class="sp-sh" style="animation-delay:1.8s">⭐</span>
+    <span class="sp-sh" style="animation-delay:2.4s">🍃</span>
+  </div>
+  <div class="sp-logo"><img src="icons/avatar.jpg" alt="" id="spLogo"></div>
+  <div class="sp-title">تحدي الذكاء</div>
+  <div class="sp-line" id="spMsg">خد نفس عميق...</div>
+  <div class="sp-dots"><span></span><span></span><span></span></div>
+  <div class="sp-load"><div id="loadFill" class="sp-fill"></div></div>
+</div>
 <div id="app">
 
   <div id="splash">
@@ -743,6 +795,11 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
       <span class="chal-ico">⏳</span>
       <div class="chal-info"><b>ساعة المذاكرة</b><p id="focusTime">وقت هادي تقرّب فيه المذاكرة — بدون ضغط</p></div>
       <button class="chal-btn" id="focusBtn">▶️ ابدأ التركيز</button>
+    </div>
+    <div class="chal" id="relaxCard">
+      <span class="chal-ico" style="background:linear-gradient(135deg,#7CB38C,#C89B3C)">🧘</span>
+      <div class="chal-info"><b>استراحة ووروقان</b><p>تنفّس معاي — شهيق وزفير على مهلك</p></div>
+      <button class="chal-btn" id="brOpen">افتح</button>
     </div>
     <div class="chal">
       <span class="chal-ico">🏅</span>
@@ -1161,6 +1218,26 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
         <input type="text" id="aiInput" placeholder="اسألني أي سؤال... أو اتركه فارغاً لشرح السؤال الحالي" maxlength="500" autocomplete="off">
         <button class="ai-send" id="aiSend">➤</button>
       </div>
+    </div>
+  </div>
+
+  <!-- RELAX (استراحة ووروقان) -->
+  <div id="relax" class="screen">
+    <div class="page-head"><button class="icon-btn" data-back="home">→</button><h2>🧘 استراحة ووروقان</h2></div>
+    <div class="relax-hero">
+      <div class="br-ring" id="brRing"><div class="br-core" id="brCore">🌿</div></div>
+      <div class="br-txt" id="brMsg">خد نفس عميق معاي...</div>
+      <button class="m-btn p" id="brBtn" style="width:auto;padding:10px 26px">▶ ابدأ التنفس</button>
+      <div class="relax-quote" id="relaxQuote">«اللي يفصل لحظة، بيرجع أقوى»</div>
+    </div>
+    <div class="home-note" style="margin-top:14px">
+      <b>توقيتات هادية</b>
+      <div id="relaxPresets" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button class="course-bt go" data-m="3">٣ دقائق</button>
+        <button class="course-bt go" data-m="5">٥ دقائق</button>
+        <button class="course-bt go" data-m="10">١٠ دقائق</button>
+      </div>
+      <p style="font-size:12px;color:var(--dim);margin:10px 0 0">وأنا شغال بيًا، هيعدّي بلطف... وفي النهاية هقولك «كده هنهض بقي»</p>
     </div>
   </div>
 
@@ -6678,7 +6755,7 @@ function sfx(type){
 function vibe(p){if(set.vib&&navigator.vibrate)navigator.vibrate(p)}
 
 /* ================= SHOW ================= */
-const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats',study:'study',studyBooks:'studyBooks',studyBook:'studyBook',studyRead:'studyRead',courses:'courses',courseView:'courseView'};
+const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats',study:'study',studyBooks:'studyBooks',studyBook:'studyBook',studyRead:'studyRead',courses:'courses',courseView:'courseView',relax:'relax'};
 function show(s){
   if((typeof listening==='boolean'&&listening)||(typeof podStop==='function'&&typeof podS!=='undefined'&&(podS.playing||podS.list.length>0))){
     try{window.speechSynthesis&&window.speechSynthesis.cancel()}catch(e){}
@@ -6905,6 +6982,73 @@ function closeFlash(){
   flashBox=null;
   const fm=document.getElementById('flashModal');if(fm)fm.classList.remove('show');
   show('studyRead');
+}
+
+/* ================= RELAX (وروقان) ================= */
+var relax={on:false,left:0,preset:3,phase:'شهيق',todo:null,breath:null};
+var relaxQuotes=['«اللي يفصل لحظة، بيرجع أقوى»','«استنشاقك بيقول لجسمك: كل حاجة تمام»','«سيب الأفكار تمشي زي الغيم»','«عقلك جميل، بس احتاج فاصل»','«إنجاز سؤال دلوقتي أرحم من توهان ساعة»','«الزفير الطويل بيرجّع هدوءك»'];
+function relaxPick(){
+  try{
+    const cur=document.getElementById('relaxQuote');
+    if(!cur)return;
+    let q=relaxQuotes[0];
+    const pool=relaxQuotes.filter(x=>x!==cur._last);
+    q=pool[Math.floor(Math.random()*pool.length)];
+    cur._last=q;cur.textContent=q;
+  }catch(e){}
+}
+function relaxPaint(){
+  const m=document.getElementById('brMsg');
+  if(!m)return;
+  if(!relax.on){m.textContent='خد نفس عميق معاي...';return}
+  const ph=Math.floor(relax.left/60),ps=relax.left%60;
+  const ring=document.getElementById('brRing');
+  if(ring){
+    if(relax.phase==='شهيق'){ring.classList.add('in');ring.classList.remove('out')}
+    else{ring.classList.add('out');ring.classList.remove('in')}
+  }
+  m.textContent=(relax.phase==='شهيق'?'🌬️ شهيق عميق...':'💨 زفير بتأنٍ...')+'  ·  باقي '+ph+' : '+(ps<10?'0':'')+ps;
+}
+function startBreath(){
+  try{relax.on=true;relax.left=relax.preset*60;relax.phase='شهيق';
+    if(relax.todo)clearInterval(relax.todo);if(relax.breath)clearInterval(relax.breath);
+    relaxTick();
+    relax.todo=setInterval(relaxTick,1000);
+    relax.breath=setInterval(()=>{relax.phase=relax.phase==='شهيق'?'زفير':'شهيق';relaxPaint()},4500);
+    const b=document.getElementById('brBtn');if(b)b.textContent='⏸ هادية حاليًا';
+  }catch(e){}
+}
+function relaxTick(){
+  if(!relax.on)return;
+  relax.left--;
+  relaxPaint();
+  if(relax.left<=0)relaxDone();
+}
+function relaxDone(){
+  try{
+    relax.on=false;
+    if(relax.todo)clearInterval(relax.todo);if(relax.breath)clearInterval(relax.breath);
+    relax.todo=relax.breath=null;
+    const ring=document.getElementById('brRing');if(ring){ring.classList.remove('in','out')}
+    const m=document.getElementById('brMsg');if(m)m.textContent='💪 كده هنهض بقي — نرجع للمذاكرة على مهلك';
+    const b=document.getElementById('brBtn');if(b)b.textContent='▶ ابدأ التنفس';
+    try{if(typeof toast==='function')toast('🧘 خلصت الجلسة — ارجع بقوة')}catch(e){}
+    try{navigator.vibrate&&navigator.vibrate([80,40,80])}catch(e){}
+  }catch(e){}
+}
+function toggleBreath(){
+  if(!relax.on){startBreath()}else{relaxDone()}
+}
+function setRelaxPreset(m){
+  relax.preset=m;
+  startBreath();
+  const bs=document.querySelectorAll('#relaxPresets .course-bt');
+  bs.forEach(x=>{const is=x.dataset.m==String(m);x.className='course-bt '+(is?'next':'go')});
+}
+function relaxOpen(){
+  relaxPick();
+  show('relax');
+  startBreath();
 }
 
 /* ---------- weekly performance tracker ---------- */
@@ -7633,6 +7777,12 @@ function bindEvents(){
   if(fc)fc.onclick=closeFlash;
   const fmx=document.getElementById('flashModal');
   if(fmx)fmx.onclick=function(e){if(e&&e.target&&e.target.id==='flashModal')closeFlash()};
+  const bro=document.getElementById('brOpen');
+  if(bro)bro.onclick=()=>{try{relaxOpen()}catch(e){console.error(e)}};
+  const brb=document.getElementById('brBtn');
+  if(brb)brb.onclick=()=>{try{toggleBreath()}catch(e){console.error(e)}};
+  const brp=document.querySelectorAll('#relaxPresets .course-bt');
+  brp.forEach(p=>{p.onclick=()=>{try{setRelaxPreset(parseInt(p.dataset.m||'3',10))}catch(e){console.error(e)}}});
   document.getElementById('monthBtn').onclick=()=>startChallenge('month');
   document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{
     const t=b.dataset.back||'home';
@@ -9177,8 +9327,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.38',SW_BUILD='v61';
+const APP_VERSION='1.3.39',SW_BUILD='v62';
 const CHANGES=[
+  {v:'v62 — شاشة بداية ملونة + استراحة ووروقان 🎨🧘',d:'24/9/2026',items:['أول ما التطبيق يفتح: شاشة تحميل ملوّنة هادية بألوان تتحرك (أخضر زيتي + ذهبي + كريمي) وعلامات عائمة ورسالة تهدّي — وبتختفي بنعومة','جزء جديد كامل: «استراحة ووروقان» من الرئيسية — تنفّس شهيق/زفير بجرس متحرك وأقوال محفّزة وتوقيتات ٣/٥/١٠ دقائق، وفي النهاية بيقولك «نرجع للمذاكرة على مهلك»']},
   {v:'v61 — بطاقات حفظ المادة كاملة 🃏🧠',d:'24/9/2026',items:['الآن المستوى الكامل: من قائمة المواد (الكورسات → الجزء) كل مادة تحتها «🃏 بطاقات حفظ المادة كاملة» — كل كتبها في جلسة واحدة (حتى 40 بطاقة)','مستويات الحفظ كلها موجودة: فصل → كتاب → مادة']},
   {v:'v60 — بطاقات حفظ الكتاب كامل 🃏📚',d:'24/9/2026',items:['جنب «قراءة سريعة» في أي كتاب تلاقي «🃏 بطاقات حفظ كامل الكتاب» — يجمع أسئلة كل فصوله في جلسة واحدة (حتى 30 بطاقة)','زر البطاقات الأصلي داخل الفصل شغال زي ما هو']},
   {v:'v59 — بطاقات الحفظ 🃏🧠',d:'24/9/2026',items:['زر «بطاقات حفظ الفصل» في كل درس: تشوف السؤال، تحاول، تدوس «إظهار الجواب»، وبتقيّم نفسك بصدق (✅ عرفتها / 🔁 محتاج أرجع لها)','اللي بتقولله «محتاج أرجع لها» بيترجعلأخطائك ويطلعلك في مراجعاتك والجرعة اليومية — وتقييم >=70% بيصربك كونفيتي ونقاط XP أصلية']},
