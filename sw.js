@@ -1,5 +1,5 @@
 const BASE = self.location.pathname.replace(/\/?sw\.js$/, '');
-const CACHE_NAME = 'ahmed-quiz-v66';
+const CACHE_NAME = 'ahmed-quiz-v67';
 
 const REL = {
     '/': '',
@@ -18,13 +18,27 @@ const BIG_FILES = {
     [BASE + '/questions.js']: { marker: '"QUESTIONS"', minSize: 10000 }
 };
 
+// v67: كل طلب نت له مهلة — لو الشبكة بطيئة/مقطوعة بنرجع للكاش فورًا بدل ما ننتظر
+function netFetch(req, ms) {
+    ms = ms || 6000;
+    let ctl = null;
+    try { if (typeof AbortController !== 'undefined') ctl = new AbortController(); } catch (e) { }
+    const opt = ctl ? { signal: ctl.signal } : {};
+    let timer = null;
+    const guard = new Promise((_, rej) => {
+        timer = setTimeout(() => { try { ctl && ctl.abort(); } catch (e) { } rej(new Error('timeout')); }, ms);
+    });
+    return Promise.race([fetch(req, opt), guard]).then(v => { clearTimeout(timer); return v; },
+        e => { clearTimeout(timer); throw e; });
+}
+
 function matchRule(rule, text) {
     if (!rule) return true;
     return text.length >= rule.minSize && text.indexOf(rule.marker) !== -1;
 }
 
 function putValidated(cache, url) {
-    return fetch(url).then(r => {
+    return netFetch(url, 20000).then(r => {
         if (!r.ok) return false;
         const rule = BIG_FILES[url];
         if (!rule) return cache.put(url, r).then(() => true);
@@ -70,16 +84,24 @@ self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
     if (event.request.method !== 'GET' || url.origin !== location.origin) return;
 
+    // index.html: تسليم فوري من الكاش + تحديث في الخلفية (زيرو انتظار على نت بطيء)
     if (url.pathname === BASE + '/' || url.pathname.endsWith('index.html')) {
-        event.respondWith(
-            fetch(event.request).then(res => {
-                if (res.ok) {
-                    const copy = res.clone();
-                    caches.open(CACHE_NAME).then(c => c.put(BASE + '/index.html', copy));
-                }
-                return res;
-            }).catch(() => caches.match(BASE + '/index.html'))
-        );
+        event.respondWith((async () => {
+            const key = BASE + '/index.html';
+            const cache = await caches.open(CACHE_NAME);
+            const cached = await cache.match(key);
+            const update = netFetch(event.request, 8000).then(res => {
+                if (res && res.ok) return cache.put(key, res.clone()).catch(() => { });
+            }).catch(() => { });
+            if (cached) { event.waitUntil(update); return cached; }
+            try {
+                const res = await netFetch(event.request, 8000);
+                if (res && res.ok) { cache.put(key, res.clone()); return res; }
+            } catch (e) { }
+            return new Response(
+                '<!doctype html><meta charset="utf-8"><body style="font-family:system-ui;text-align:center;padding:50px;line-height:2">📴 مفيش نت<br>افتح اللعبة مرة واحدة وأنت متصل، وأول ما تشتغل هتشتغل معاك بدون نت.</body>',
+                { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+        })());
         return;
     }
 
@@ -88,10 +110,10 @@ self.addEventListener('fetch', event => {
         event.respondWith(
             caches.match(event.request).then(cached => {
                 if (cached && cached.ok) return cached;
-                return fetch(event.request).then(res => {
+                return netFetch(event.request, 20000).then(res => {
                     if (res.ok) {
                         const copy = res.clone();
-                        caches.open(CACHE_NAME).then(c => c.put(event.request, copy).catch(() => {}));
+                        caches.open(CACHE_NAME).then(c => c.put(event.request, copy).catch(() => { }));
                     }
                     return res;
                 }).catch(() => cached);
@@ -101,6 +123,6 @@ self.addEventListener('fetch', event => {
     }
 
     event.respondWith(
-        caches.match(event.request).then(cached => cached || fetch(event.request))
+        caches.match(event.request).then(cached => cached || netFetch(event.request))
     );
 });

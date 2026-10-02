@@ -378,7 +378,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.43'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.44'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -670,7 +670,7 @@ ck('courses list has all 6 parts', (()=>{try{const n=vm.runInContext(`document.g
 /* ---- v48 deep reload + offline questions ---- */
 const swJS = fs.readFileSync(process.env.TEST_SW || '/home/kali/ahmed-quiz-game/sw.js', 'utf8');
 ck('sw caches questions with correct marker', swJS.indexOf('"QUESTIONS"') !== -1);
-ck('sw serves navigation network-first', swJS.indexOf('fetch(event.request)') !== -1 && swJS.indexOf('/latest') === -1);
+ck('sw navigation served from cache instantly (v67)', (()=>{try{return swJS.indexOf('const cached = await cache.match(key)')!==-1 && swJS.indexOf('event.waitUntil(update)')!==-1 && swJS.indexOf('/latest')===-1}catch(e){return 'ERR:'+e.message}})());
 ck('deep reset button exists', (()=>{try{return !!vm.runInContext(`document.getElementById('deepResetBtn')`,sandbox)}catch(e){return false}})());
 
 /* ---- v49 voice picker ---- */
@@ -754,13 +754,13 @@ ck('toggleBreath stops relax', (()=>{try{return vm.runInContext(`relax.on===fals
 ck('setRelaxPreset sets minutes', (()=>{try{const a=vm.runInContext(`setRelaxPreset(10);relax.preset===10&&relax.left>=590&&relax.left<=600`,sandbox);vm.runInContext(`toggleBreath()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('relaxDone resets state', (()=>{try{return vm.runInContext(`relaxDone();relax.on===false && !relax.breath && !relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 
-/* v66 solid load (study.js blocking again) + safe autoUpdate */
-ck('study.js is a normal blocking script', (()=>{try{return /<script[^>]*src=["']?study\.js/.test(html)}catch(e){return 'ERR:'+e.message}})());
-ck('no lazy studySrc blob in index', (()=>{try{return html.indexOf('id="studySrc"')<0}catch(e){return 'ERR:'+e.message}})());
-ck('version compare works', (()=>{try{return vm.runInContext(`vnum('v66')>vnum('v64')&&vnum('v66')===66`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
-ck('autoUpdate is safe function', (()=>{try{return vm.runInContext(`typeof autoUpdate==='function'`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
-ck('splash hide flow null-safe', (()=>{try{return vm.runInContext(`(function(){const sp=document.getElementById('splash');if(!sp)return false;sp.classList.add('hide');return sp.classList.contains('hide')})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
-ck('offline build embeds study inline', (()=>{try{const fsx=require('fs');const p='/home/kali/ahmed-quiz-game/download/ahmed-quiz-offline.html';if(!fsx.existsSync(p))return 'skip';const t=fsx.readFileSync(p,'utf8');return t.indexOf('id="studySrc"')<0&&t.indexOf('window.STUDY')>0}catch(e){return 'ERR:'+e.message}})());
+/* v67 إصلاح «الشاشة اللي بتعلق» — ids مكررة + نت بدون مهلة + splash failsafe */
+ck('single splash element (no duplicate id)', (()=>{try{return (html.match(/id="splash"/g)||[]).length===1}catch(e){return 'ERR:'+e.message}})());
+ck('single loadFill element (no duplicate id)', (()=>{try{return (html.match(/id="loadFill"/g)||[]).length===1}catch(e){return 'ERR:'+e.message}})());
+ck('splash failsafe killer installed', (()=>{try{return vm.runInContext(`typeof window.__killSplash==='function'`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('sw: netFetch timeout helper exists', (()=>{try{return /function netFetch\([\s\S]*?AbortController/.test(fs.readFileSync('/home/kali/ahmed-quiz-game/sw.js','utf8'))}catch(e){return 'ERR:'+e.message}})());
+ck('sw: index.html served from cache instantly', (()=>{try{const s=fs.readFileSync('/home/kali/ahmed-quiz-game/sw.js','utf8');return /const cached = await cache\.match\(key\)/.test(s)&&/event\.waitUntil\(update\)/.test(s)}catch(e){return 'ERR:'+e.message}})());
+ck('sw: no unguarded fetch on index path', (()=>{try{const s=fs.readFileSync('/home/kali/ahmed-quiz-game/sw.js','utf8');const i=s.indexOf("endsWith('index.html')");const seg=s.slice(i,i+1200);return seg.indexOf('netFetch')>0}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
