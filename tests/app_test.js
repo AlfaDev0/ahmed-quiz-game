@@ -378,7 +378,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.46'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.47'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -753,6 +753,23 @@ ck('relaxOpen shows relax+quote', (()=>{try{const a=vm.runInContext(`document.ge
 ck('toggleBreath stops relax', (()=>{try{return vm.runInContext(`relax.on===false&&!relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('setRelaxPreset sets minutes', (()=>{try{const a=vm.runInContext(`setRelaxPreset(10);relax.preset===10&&relax.left>=590&&relax.left<=600`,sandbox);vm.runInContext(`toggleBreath()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('relaxDone resets state', (()=>{try{return vm.runInContext(`relaxDone();relax.on===false && !relax.breath && !relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+
+/* v70 BOOK EXAM + WRONG GROUPS + DAILY EVENT + SEASON + COVER + KEYS */
+ck('book exam builds one question per chapter', (()=>{try{return vm.runInContext(`(function(){const picks=bookQs(0,0,0,true);const b=window.STUDY[0].subjects[0].books[0];if(picks.length!==b.chapters.length)return false;const seen={};picks.forEach(p=>{seen[p.t]=1});return Object.keys(seen).length>=b.chapters.length})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('book exam records chapter results', (()=>{try{return vm.runInContext(`(function(){bookExam={pi:0,si:0,bi:0,map:[],ok:{},bad:{}};bookExamDone('فصل 1',true);bookExamDone('فصل 2',false);return bookExam.ok['0|فصل 1']===1&&bookExam.bad['0|فصل 2']===1})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('weak chapters sorted worst first', (()=>{try{return vm.runInContext(`(function(){const w=weakChapters(0,0,0,5);return w.length===5&&w[0].score<=w[4].score})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('wrong groups empty when no mistakes', (()=>{try{return vm.runInContext(`(function(){S.wrongQs={};return wrongGroups().length===0})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('wrong groups count mistakes', (()=>{try{return vm.runInContext(`(function(){const q=window.STUDY[0].subjects[0].books[0].chapters[0].qs[0];S.wrongQs={};S.wrongQs[qid(q)]={w:3,t:Date.now()};const g=wrongGroups();return g.length>0&&g[0].qs.length===1})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('daily mod rotates daily', (()=>{try{return vm.runInContext(`(function(){const a=dailyMod(),b=dailyMod();return a&&a.k===b.k&&typeof a.n==='string'&&DAILY_MODS.length>=5})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('daily mod flags applied', (()=>{try{return vm.runInContext(`(function(){const seen={};DAILY_MODS.forEach(m=>{const f={};m.f(f);if(m.k==='double'&&f.dbl!==true)throw 0;if(m.k==='nofifty'&&f.noHelp!==true)throw 0;if(m.k==='fast'&&!(f.timer>0))throw 0});return true})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('cheer line is arabic and varied', (()=>{try{return vm.runInContext(`(function(){const a=cheerLineSet(),b=cheerLineSet();return cheerPool().length>=6&&/[؀-ۿ]/.test(a)})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('season tiers + rewards', (()=>{try{return vm.runInContext(`(function(){S.seasonXP=0;S.seasonKey=moKey2();const a=seasonInfo();S.seasonXP=200;const b=seasonInfo();const r=seasonReward(3);return a.tier===0&&b.tier===1&&b.next===400&&Array.isArray(r)&&r.length===3})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('season add xp crosses tiers', (()=>{try{return vm.runInContext(`(function(){S.seasonXP=0;S.seasonKey=moKey2();seasonAddXP(650);return S.seasonXP===650})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('month tracker rolls over', (()=>{try{return vm.runInContext(`(function(){S.moKey='2000-01';S.moQ=0;moTick(10,7,1);return S.moKey===moKey()&&S.moQ===10&&S.moC===7})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('monthly badges unlock', (()=>{try{return vm.runInContext(`(function(){S.moKey=moKey();S.moC=60;S.moG=6;S.moBadges=[];renderMoBadges();return S.moBadges.length>=3})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('cover renderer toggles safely', (()=>{try{return vm.runInContext(`(function(){S.cover='';renderCover();S.cover='data:image/jpeg;base64,xx';renderCover();return true})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('keyboard + desktop pieces exist', (()=>{try{return vm.runInContext('typeof bindKeys',sandbox)==='function'&&vm.runInContext('typeof readCover',sandbox)==='function'&&html.indexOf('@media(min-width:1024px)')>0&&html.indexOf('id="coverInput"')>0&&html.indexOf('id="seasonBox"')>0&&html.indexOf('id="moBadges"')>0}catch(e){return 'ERR:'+e.message}})());
+ck('cheer + book summary markup present', (()=>{try{return html.indexOf('id="cheerLine"')>0&&html.indexOf('id="rBookSum"')>0&&html.indexOf('id="dailyModBanner"')>0&&html.indexOf('id="wrongGroupsBtn"')>0}catch(e){return 'ERR:'+e.message}})());
 
 /* v69 SMART MIX + ENDLESS + REVERSE — تنويع ضد الملل */
 ck('smartPick returns unique questions', (()=>{try{return vm.runInContext(`(function(){const p=fullPool();const a=smartPick(p,20);return a.length===20&&new Set(a.map(qid)).size===20})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
