@@ -378,7 +378,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.45'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.46'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -753,6 +753,21 @@ ck('relaxOpen shows relax+quote', (()=>{try{const a=vm.runInContext(`document.ge
 ck('toggleBreath stops relax', (()=>{try{return vm.runInContext(`relax.on===false&&!relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('setRelaxPreset sets minutes', (()=>{try{const a=vm.runInContext(`setRelaxPreset(10);relax.preset===10&&relax.left>=590&&relax.left<=600`,sandbox);vm.runInContext(`toggleBreath()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('relaxDone resets state', (()=>{try{return vm.runInContext(`relaxDone();relax.on===false && !relax.breath && !relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+
+/* v69 SMART MIX + ENDLESS + REVERSE — تنويع ضد الملل */
+ck('smartPick returns unique questions', (()=>{try{return vm.runInContext(`(function(){const p=fullPool();const a=smartPick(p,20);return a.length===20&&new Set(a.map(qid)).size===20})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('smartPick avoids very recent repeats', (()=>{try{return vm.runInContext(`(function(){S.seen={};const p=fullPool();S.seen[qid(p[0])]={n:2,e:0,t:Date.now()};const a=smartPick(p,15);return a[0]!==p[0]||a.indexOf(p[0])>5})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('smartPick favors weak questions', (()=>{try{
+  vm.runInContext('window.__rnd=Math.random;Math.random=()=>0.5',sandbox);
+  const r=vm.runInContext(`(function(){S.seen={};const p=fullPool();for(let i=1;i<12;i++)S.seen[qid(p[i])]={n:4,e:4,t:Date.now()-9*864e5};const a=smartPick(p,8);let weak=0;a.forEach(q=>{const e=S.seen[qid(q)];if(e&&e.n)weak++});return weak>=2})()`,sandbox);
+  vm.runInContext('Math.random=window.__rnd',sandbox);
+  return r===true;
+}catch(e){return 'ERR:'+e.message}})());
+ck('markSeen tracks errors correctly', (()=>{try{return vm.runInContext(`(function(){S.seen={};const p=fullPool();markSeen(p[0],false);markSeen(p[0],true);const e=S.seen[qid(p[0])];return e.n===2&&e.e===1})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('reverse question built correctly', (()=>{try{return vm.runInContext(`(function(){const src=QUESTIONS[Object.keys(QUESTIONS)[0]][0];const r=makeRev(src);return r.rev===true&&r.a.length===4&&r.a[r.c]===src.q})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('endless timer ramps down', (()=>{try{return vm.runInContext(`(function(){endlessMode=true;qi=0;const a=qTimeLimit()===26;qi=25;const b=qTimeLimit()===16;qi=100;const c=qTimeLimit()===12;endlessMode=false;return a&&b&&c})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('endless + smart review exist', (()=>{try{return vm.runInContext(`typeof startEndless==='function'&&typeof startSmartReview==='function'&&typeof smartPick==='function'&&typeof srcQ==='function'`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('home has endless + review buttons', (()=>{try{return html.indexOf('id="endlessBtn"')>0&&html.indexOf('id="revBtn"')>0&&html.indexOf('id="sRev"')>0&&html.indexOf('id="sSmart"')>0}catch(e){return 'ERR:'+e.message}})());
 
 /* v68 TIME ATTACK + TF + BOSS + ZEN */
 ck('qTimeLimit follows setting / boss', (()=>{try{return vm.runInContext(`(function(){bossMode=false;set.qTime=0;const a=qTimeLimit()===0;set.qTime=30;const b=qTimeLimit()===30;bossMode=true;const c=qTimeLimit()===30;bossMode=false;set.qTime=0;return a&&b&&c})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
