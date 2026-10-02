@@ -668,15 +668,6 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 </div>
 <div id="app">
 
-  <div id="splash">
-    <div class="splash-inner">
-      <div class="brain-logo">🧠</div>
-      <h1 class="splash-title">تحدي الذكاء</h1>
-      <p class="splash-sub">بقلم: أحمد أيمن فكري</p>
-      <div class="loading"><div class="loading-fill" id="loadFill"></div></div>
-    </div>
-  </div>
-
   <!-- HOME -->
   <div id="home" class="screen active">
     <div class="header">
@@ -1403,16 +1394,30 @@ function toast(msg){
 }
 
 /* ================= SPLASH ================= */
-window.addEventListener('load',()=>{
-  load();loadSet();
-  try{const lf=document.getElementById('loadFill');if(lf)lf.style.width='100%'}catch(e){}
-  setTimeout(()=>{
-    const sp=document.getElementById('splash');
+/* v67: ضمان مطلق — شاشة البداية بتختفي مهما حصل (خطأ في أي سكريبت أو نت بطيء) */
+(function(){
+  var done=false;
+  function kill(){
+    if(done)return;done=true;
+    var sp=document.getElementById('splash');
     if(!sp)return;
     sp.classList.add('hide');
-    setTimeout(()=>{try{sp.remove()}catch(e){}},600);
-  },900);
-  applySettings();updateHome();checkDaily();setupNotif();maybeNotify();parseChallengeLink();wireLB();lbDisp();wireDownload();wireVoice();podS.rate=set&&set.voiceRate||0.9;if(typeof healData==='function')try{healData()}catch(e){}
+    setTimeout(function(){try{sp.remove()}catch(e){}},600);
+  }
+  window.__killSplash=kill;
+  window.addEventListener('load',function(){setTimeout(kill,300)});
+  setTimeout(kill,2600);
+})();
+window.addEventListener('load',()=>{
+  try{load()}catch(e){}
+  try{loadSet()}catch(e){}
+  try{const lf=document.getElementById('loadFill');if(lf)lf.style.width='100%'}catch(e){}
+  try{typeof window.__killSplash==='function'&&window.__killSplash()}catch(e){}
+  try{applySettings()}catch(e){}try{updateHome()}catch(e){}try{checkDaily()}catch(e){}
+  try{setupNotif()}catch(e){}try{maybeNotify()}catch(e){}try{parseChallengeLink()}catch(e){}
+  try{wireLB()}catch(e){}try{lbDisp()}catch(e){}try{wireDownload()}catch(e){}try{wireVoice()}catch(e){}
+  try{podS.rate=set&&set.voiceRate||0.9}catch(e){}
+  try{if(typeof healData==='function')healData()}catch(e){}
   try{autoUpdate()}catch(e){}
 });
 
@@ -3984,8 +3989,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.43',SW_BUILD='v66';
+const APP_VERSION='1.3.44',SW_BUILD='v67';
 const CHANGES=[
+  {v:'v67 — إصلاح الشاشة اللي كانت بتعلق 🎯💚',d:'24/9/2026',items:['كانت فيه شاشتين فوق بعض بنفس الاسم، والتانية كانت بتغطي اللعبة وبتوقف عند 0% — اتشالت، ف اللعبة بتفتح فورًا','الصفحة بقت بتتفتح فورًا من الكاش حتى لو النت بطيء أو مقطوع (كان بيستنى النت الأول وممكن يعلق)، والتحديث بيحصل في الخلفية','كل طلب نت بقى له مهلة: لو النت بطيء بنرجع للنسخة المحفوظة فورًا بدل ما نتفرج على شاشة بيضا','شاشة البداية بقت ليها ضمان إضافي: بتختفي حتى لو حصل أي خطأ غير متوقع']},
   {v:'v66 — رجّعنا الضمان 🔧💚',d:'24/9/2026',items:['رجّعنا تحميل الفصول زي ما كان مضمون 100% — عشان ما يحصلش أي «جاري تحميل…» معلق تاني','شاشة البداية بتختفي لوحدها بأمان تام (مش بتتعلّق أبدًا)، والتحديث التلقائي بقى أذكى: بيفحص كل 30 دقيقة، وبيحدّث بس لو فيه نسخة أحدث فعلاً — ممنوع أي ريلoad متكرر','النسخة المحمّلة رجعت كمان لتحميل الفصول الفوري الكامل']},
   {v:'v65 — إقلاع فوري ⚡',d:'24/9/2026',items:['أهم إصلاح: اللعبة بتشتغل فورًا — كانت بتستنى 3.2MB (الفصول) قبل ما تفتح وتاخد ثواني طويلة على الموبايل','دلوقتي الفصول بتتحمّل في الخلفية بعد ما تشتغل اللعبة: الشاشة بتفتح فورًا والأقسام بتظهر أول ما تجهز','النسخة المحمّلة كمان بقت فورية — الفصول متحطمة جواه文件 كفص شغّال بيتقرا عند اللزوم','لو فتحت «كورسات» بسرعة هتشوف «جاري تحميل الفصول…» لثانية وبعدها كل حاجة تظهر لوحدها']},
   {v:'v64 — تحديث تلقائي 🔄✅',d:'24/9/2026',items:['التطبيق بقى يحدّث نفسه لوحده: أول ما تفتحه بيجيب أحدث نسخة من النت ويقارنها، ولو فيه نسخة جديدة بيعمل تحديث فوري من غير ما تحتاج تدوس حاجة','مهم جدًا لإلغاء مشكلة «مبيتحملش الجديد» اللي كانت بتظهر عندك: البيانات بتتعبى تاني لوحدها']},
