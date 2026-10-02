@@ -637,6 +637,24 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 .br-ring.out{transform:scale(.92);border-color:var(--primary)}
 .br-core{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#7C8F3C,#C89B3C);display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 14px 30px -12px rgba(124,143,60,.7)}
 .br-txt{font-size:16px;font-weight:800;min-height:24px}
+.qtime{display:none;align-items:center;gap:8px;margin-top:12px}
+.qtime.on{display:flex}
+.qtime-bar{flex:1;height:7px;border-radius:8px;background:var(--bg3);overflow:hidden}
+.qtime-fill{height:100%;width:100%;border-radius:8px;background:linear-gradient(90deg,#7C8F3C,#C89B3C);transition:width .3s linear}
+.qtime.warn .qtime-fill{background:linear-gradient(90deg,#ff9a9e,#e8503a)}
+.qtime-val{font-size:12px;font-weight:900;color:var(--dim);min-width:38px;text-align:left}
+.boss-card{margin:0 14px 12px;border-radius:18px;padding:12px 14px;background:linear-gradient(120deg,#2b1b3a,#3a1f2e);border:1.5px solid #ff6a6a55;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.boss-in{display:flex;align-items:center;gap:12px}
+.boss-ico{font-size:30px}
+.boss-in b{font-size:15px}
+.boss-in p{margin:3px 0 0;font-size:11px;opacity:.8}
+.boss-go{margin-right:auto;background:linear-gradient(120deg,#ff6a6a,#ffa06a);border:0;color:#2b0f0f;font-weight:900;padding:9px 14px;border-radius:14px;font-size:13px}
+.zen-fab{position:fixed;left:16px;bottom:96px;width:46px;height:46px;border-radius:50%;border:1.5px solid var(--bg3);background:var(--bg2);font-size:20px;z-index:60;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.zen-fab.on{background:linear-gradient(120deg,#a8e063,#4caf50);border-color:#4caf50}
+body.zen .counters{opacity:.2}
+body.zen .timer-box{opacity:.45}
+body.zen .mini-stats{opacity:.45}
+body.zen .prog-wrap{gap:6px}
 .relax-quote{margin-top:6px;padding:12px 18px;border-radius:16px;background:var(--bg2);border:1px solid var(--bg3);color:var(--dim);font-size:13px;font-weight:700;max-width:320px;line-height:2;text-align:center}
 
 </style></head><body>
@@ -664,6 +682,7 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 
   <!-- HOME -->
   <div id="home" class="screen active">
+    <div class="boss-card" id="bossCard" style="display:none"></div>
     <div class="header">
       <div class="avatar"><img src="icons/avatar.jpg" id="hmAv" alt=""></div>
       <div style="flex:1">
@@ -848,6 +867,7 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
       <span class="diff medium" id="diffBadge">متوسط</span>
       <button class="speak-btn" id="speakQ" title="🔊 استمع للسؤال">🔊</button>
       <div class="quest-text" id="qText">السؤال هنا</div>
+      <div class="qtime" id="qTimeWrap"><div class="qtime-bar"><div class="qtime-fill" id="qTimeFill"></div></div><span class="qtime-val" id="qTimeVal"></span></div>
     </div>
     <div class="ans-wrap" id="ansWrap"></div>
     <button class="ai-btn" id="aiBtn">🤖 اسأل مرشدك</button>
@@ -953,6 +973,14 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:8px">
         <span class="set-label" style="font-size:13px">⏳ مدة جلسة ساعة المذاكرة</span>
         <div id="focusMBox" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+      <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <span class="set-label" style="font-size:13px">⚡ وقت لكل سؤال <span style="font-size:10px;color:var(--dim);display:block">مؤقت ينزل مع كل سؤال + مكافأة نقاط لو جاوبت بسرعة</span></span>
+        <div id="qTimeBox" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+      <div class="set-item">
+        <span class="set-label" style="font-size:13px">✅❌ أسئلة صح وخطأ <span style="font-size:10px;color:var(--dim);display:block">يدخل معاها سؤال صح/خطأ أحيانًا عشان تنشط الذاكرة</span></span>
+        <label class="tgl"><input type="checkbox" id="sTF"><span class="slider"></span></label>
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:8px">
         <span class="set-label" style="font-size:13px">🎯 هدف النهاردة (إجابات صحيحة)</span>
@@ -1301,6 +1329,7 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
     <button class="pod-btn pod-speed" id="podSpeed" onclick="podSpeed()">1×</button>
   </div>
 </div>
+<button class="zen-fab" id="zenBtn" title="وضع الهدوء">🌿</button>
 <button class="ai-fab" id="aiFab" title="مرشدك الخاص">🤖</button>
 <div class="toast" id="toast"></div>
 
@@ -6692,8 +6721,8 @@ window.STUDY = [{"id":"adabi","name":"مسار الآداب والفنون — �
 </script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0,gday:''};
-const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'***REMOVED-SECRET***',jsonbinBin:'***REMOVED-BIN***',voiceId:'',voiceRate:0.9,focusM:25,dayGoal:50};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0,gday:'',bossQ:0,bossDue:false,bossDone:0,zen:false};
+const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'***REMOVED-SECRET***',jsonbinBin:'***REMOVED-BIN***',voiceId:'',voiceRate:0.9,focusM:25,dayGoal:50,qTime:0,tfOn:false};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
@@ -6718,11 +6747,12 @@ function healData(){
     else act();
   }catch(e){}
 }
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50}
+function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50;if(![0,20,30,45].includes(set.qTime))set.qTime=0;if(typeof set.tfOn!=='boolean')set.tfOn=false}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
 const CAT_NAMES={culture:'الثقافة العامة',math:'الرياضيات',logic:'المنطق والذكاء',language:'اللغة العربية',science:'العلوم',speed:'تحدي السرعة',english:'الإنجليزية',history:'التاريخ',geography:'الجغرافيا',biology:'الأحياء',chemistry:'الكيمياء',physics:'الفيزياء',football:'كرة القدم',mixed:'الاختبار الشامل'};
+var bossMode=false,qTimer=null,qT=0,bossSaved=20;
 let curCat=null,questions=[],qi=0,score=0,cor=0,wro=0,streak=0,timer=null,tLeft=0,answered=false,doubleMode=false,origTimer=20,dailyMode=false,curQ=null,diffFilter='',chScope=null,startCoins=0;
 const usedLL={fifty:false,skip:false,hint:false,double:false};
 var studyCtx=null,replayStudy=null,_studyPi=0,_studySi=0,aiCtx=null;
@@ -6789,6 +6819,7 @@ function toast(msg){
 })();
 window.addEventListener('load',()=>{
   try{load()}catch(e){}
+  try{if(typeof applyZen==='function')applyZen()}catch(e){}
   try{loadSet()}catch(e){}
   try{const lf=document.getElementById('loadFill');if(lf)lf.style.width='100%'}catch(e){}
   try{typeof window.__killSplash==='function'&&window.__killSplash()}catch(e){}
@@ -7139,6 +7170,8 @@ function renderWeekReport(){
 }
 function updateHome(){
   try{renderDayGoal()}catch(e){}
+  try{renderBoss()}catch(e){}
+  try{applyZen()}catch(e){}
   document.getElementById('hmLv').textContent=S.level;
   document.getElementById('hmXp').textContent=S.xp;
   document.getElementById('hmCoins').textContent=S.coins;
@@ -7185,7 +7218,7 @@ function checkDaily(){
 
 /* ================= GAME ================= */
 function startGame(cat,daily){
-  curCat=cat;dailyMode=!!daily;quickMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
+  curCat=cat;dailyMode=!!daily;quickMode=false;bossMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
   replayStudy=null;studyCtx=null;
   startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
@@ -7202,7 +7235,7 @@ function startGame(cat,daily){
   show('game');showQ();updateLL();
 }
 function startQuickGame(){
-  quickMode=true;curCat='mixed';dailyMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
+  quickMode=true;curCat='mixed';dailyMode=false;bossMode=false;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;examMode=false;
   replayStudy=null;studyCtx=null;
   startCoins=S.coins;
   usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
@@ -7221,9 +7254,92 @@ function showAutoReview(){
   else rw.style.display='none';
 }
 function makeQ(src){
+  try{if(set&&set.tfOn&&src&&src.a&&src.a.length>=3&&Math.random()<0.3)return makeTF(src)}catch(e){}
   const idx=shuffle([0,1,2,3]);
   return {q:src.q,a:idx.map(i=>src.a[i]),c:idx.indexOf(src.c),d:src.d,hint:src.hint,expl:src.expl};
 }
+
+/* ================= v68: TIME ATTACK + TF + BOSS + ZEN ================= */
+function qTimeLimit(){return bossMode?30:(set.qTime||0)}
+function hideQTime(){const w=document.getElementById('qTimeWrap');if(w)w.classList.remove('on')}
+function clearQTimer(){clearInterval(qTimer);qTimer=null}
+function startQTimer(){
+  clearQTimer();
+  const lim=qTimeLimit(),wrap=document.getElementById('qTimeWrap');
+  if(!lim||!wrap)return;
+  qT=lim;wrap.classList.add('on');wrap.classList.remove('warn');
+  const f=document.getElementById('qTimeFill'),v=document.getElementById('qTimeVal');
+  if(f)f.style.width='100%';if(v)v.textContent=lim+'ث';
+  qTimer=setInterval(()=>{
+    qT--;
+    const p=Math.max(0,qT/lim*100);
+    const f2=document.getElementById('qTimeFill'),v2=document.getElementById('qTimeVal');
+    if(f2)f2.style.width=p+'%';if(v2)v2.textContent=qT+'ث';
+    if(qT<=5)wrap.classList.add('warn');
+    if(qT<=0){clearQTimer();qTimeUp()}
+  },1000);
+}
+function qTimeUp(){
+  if(answered)return;
+  answered=true;clearQTimer();hideQTime();wro++;streak=0;weekTick('wro',0);
+  const q=curQ,btns=document.querySelectorAll('.ans-btn');
+  btns.forEach(b=>{b.classList.add('disabled');if(+b.dataset.i===q.c)b.classList.add('correct')});
+  recordWrong(q);toast('⏰ خلص الوقت! الجواب: '+q.a[q.c]);sfx('no');vibe([100,50,100]);
+  setTimeout(nextQ,1400);
+}
+function makeTF(src){
+  const wrongs=src.a.filter((_,i)=>i!==src.c);
+  const pick=wrongs[Math.floor(Math.random()*wrongs.length)];
+  const isTrue=Math.random()<0.5;
+  const shown=isTrue?src.a[src.c]:pick;
+  return {q:src.q+'\n\n⟢ صح أم خطأ: «'+shown+'»',a:['صح','خطأ'],c:isTrue?0:1,d:src.d,hint:src.hint,expl:src.expl,tf:true};
+}
+function startBoss(){
+  curCat='mixed';dailyMode=false;quickMode=false;examMode=false;bossMode=true;qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  replayStudy=null;studyCtx=null;startCoins=S.coins;bossSaved=set.timer;set.timer=0;
+  usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=true;
+  let pool=[];Object.keys(QUESTIONS).forEach(k=>pool.push(...(QUESTIONS[k]||[])));
+  pool=pool.filter(q=>q.d!=='easy');shuffle(pool);questions=pool.slice(0,12);
+  origTimer=bossSaved;
+  const c=document.getElementById('gCat');if(c)c.textContent='👹 بوس التحدي — 12 سؤال صعب · 30 ثانية لكل سؤال · نقاط مضاعفة';
+  show('game');showQ();
+}
+function renderBoss(){
+  const box=document.getElementById('bossCard');
+  if(!box)return;
+  const q=S.bossQ||0;
+  if(!q){box.style.display='none';return}
+  if(S.bossDue){
+    box.style.display='block';
+    box.innerHTML='<div class="boss-in"><div class="boss-ico">👹</div><div><b>بوس جاهز!</b><p>12 سؤال صعب · 30 ثانية لكل سؤال · نقاط مضاعفة</p></div><button class="boss-go" id="bossGo">اتحاك 🗡️</button></div>';
+  }else{
+    box.style.display='block';
+    box.innerHTML='<div class="boss-in"><div class="boss-ico">🛡️</div><div><b>البوس القادم بعد '+(100-(q%100))+' سؤال</b><p>ماشي كويس — '+(q%100)+'/100 من الطريق</p></div></div>';
+  }
+  const bg=document.getElementById('bossGo');if(bg)bg.onclick=startBoss;
+}
+function applyZen(){try{document.body.classList.toggle('zen',!!S.zen)}catch(e){}}
+function toggleZen(){
+  S.zen=!S.zen;save();applyZen();
+  try{const b=document.getElementById('zenBtn');if(b)b.classList.toggle('on',!!S.zen)}catch(e){}
+  toast(S.zen?'🌿 وضع الهدوء — واجهة أخف وأهدأ':'⚡ رجعنا الوضع العادي');
+}
+function renderQTimeChips(){
+  const box=document.getElementById('qTimeBox');
+  if(!box)return;
+  box.innerHTML='';
+  [0,20,30,45].forEach(t=>{
+    const b=document.createElement('button');
+    b.className='course-bt'+((set&&set.qTime)===t?' next':' go');
+    b.style.margin=0;b.style.padding='8px 12px';
+    b.textContent=t===0?'بدون':t+' ثانية';
+    b.onclick=()=>{set.qTime=t;saveSet();renderQTimeChips();toast(t===0?'⏱️ التوقيت العام بس':'⚡ كل سؤال ليك '+t+' ثانية + مكافأة سرعة')};
+    box.appendChild(b);
+  });
+  const tf=document.getElementById('sTF');
+  if(tf){tf.checked=!!(set&&set.tfOn);tf.onchange=()=>{set.tfOn=tf.checked;saveSet();toast(tf.checked?'✅ صح/خطأ هيظهر أحيانًا':'✅ رجعنا الأسئلة العادية')}}
+}
+
 function showQ(){
   if(qi>=questions.length){finish();return}
   try{curQ=makeQ(questions[qi]);aiCtx=curQ}
@@ -7248,7 +7364,7 @@ function showQ(){
     btn.onclick=()=>answer(i);
     w.appendChild(btn);
   });
-  updateLL();startTimer();
+  updateLL();startTimer();startQTimer();
 }
 function startTimer(){
   clearInterval(timer);
@@ -7263,7 +7379,8 @@ function startTimer(){
 }
 function answer(i){
   if(answered)return;
-  answered=true;clearInterval(timer);
+  answered=true;clearInterval(timer);clearQTimer();hideQTime();
+  const lim=qTimeLimit();const fast=(lim>0&&qT>=Math.ceil(lim*0.6));
   const q=curQ,btns=document.querySelectorAll('.ans-btn');
   btns.forEach(b=>{
     b.classList.add('disabled');
@@ -7274,10 +7391,11 @@ function answer(i){
     let p=10;if(q.d==='medium')p=15;else if(q.d==='hard')p=25;
     if(doubleMode)p*=2;
     if(streak>=3)p+=5;if(streak>=5)p+=10;if(streak>=10)p+=25;
+    if(fast)p+=5;
     score+=p;
     const cg=Math.floor(p/2);S.coins+=cg;S.totalCoins+=cg;
     weekTick('cor',cg);
-    toast('✅ صحيح! +'+p+' نقطة');
+    toast('✅ صحيح! +'+p+' نقطة'+(fast?' ⚡ سريعة!':''));
     if(curCat==='review'){if(S.wrongQs){delete S.wrongQs[qid(q)];save()}}
     sfx('ok');vibe(40);
     if(streak>=5)sfx('streak');
@@ -7293,7 +7411,7 @@ function answer(i){
 }
 function timeUp(){
   if(answered)return;
-  answered=true;wro++;streak=0;weekTick('wro',0);
+  answered=true;clearQTimer();hideQTime();wro++;streak=0;weekTick('wro',0);
   const q=curQ,btns=document.querySelectorAll('.ans-btn');
   btns.forEach(b=>{b.classList.add('disabled');if(+b.dataset.i===q.c)b.classList.add('correct')});
   toast('⏰ انتهى الوقت! الجواب: '+q.a[q.c]);
@@ -7368,6 +7486,16 @@ function finish(){
   S.correct+=cor;
   S.wrong+=wro;wkTrack(cor);
   if(quickMode){S.quickGames=(S.quickGames||0)+1;quickMode=false}
+  const wasBoss=bossMode;
+  if(!wasBoss){
+    const prevB=S.bossQ||0;
+    S.bossQ=prevB+questions.length;
+    if(Math.floor(S.bossQ/100)>Math.floor(prevB/100))S.bossDue=true;
+  }else{
+    const rw=60+cor*15+(cor===questions.length?80:0);
+    S.coins+=rw;S.totalCoins+=rw;S.bossDone=(S.bossDone||0)+1;S.bossDue=false;
+  }
+  bossMode=false;
   if(curCat==='review')S.reviewed=(S.reviewed||0)+questions.length;
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
@@ -7396,6 +7524,7 @@ function finish(){
   else if(acc>=50){em='👍';t='أداء جيد'}
   else if(acc>=30){em='💪';t='حاول مرة أخرى'}
   else{em='📚';t='تدرب أكثر'}
+  if(wasBoss){em='👹';t=cor>=9?'هزمت البوس! 🎉':(cor>=6?'كسبت نصفها':'البوس قوية… حطمها المرة الجاية');confetti();sfx('win')}
   document.getElementById('rEmoji').textContent=em;
   document.getElementById('rTitle').textContent=t;
   document.getElementById('rScore').textContent=score;
@@ -7797,7 +7926,7 @@ function bindEvents(){
     startGame('culture',true);
   };
   document.getElementById('exitGame').onclick=()=>{
-    clearInterval(timer);set.timer=origTimer;saveSet();studyCtx=null;examMode=false;show('home');updateHome();checkDaily();
+    clearInterval(timer);clearQTimer();set.timer=origTimer;saveSet();studyCtx=null;examMode=false;bossMode=false;show('home');updateHome();checkDaily();
   };
   document.getElementById('replayBtn').onclick=()=>{if(replayStudy){replayStudy()}else{startGame(curCat,false)}};
   document.getElementById('homeBtn').onclick=()=>{studyCtx=null;show('home');updateHome();checkDaily()};
@@ -8486,6 +8615,7 @@ function wireVoice(){
   renderVoiceSettings();
   renderVoiceRates();
   if(typeof renderFocusChips==='function')renderFocusChips();
+  if(typeof renderQTimeChips==='function')renderQTimeChips();
   if(typeof renderDayGoalChips==='function')renderDayGoalChips();
 }
 function toChunks(t){
@@ -9347,6 +9477,8 @@ function openAIKey(){
 (function(){
   const snd=()=>{const i=document.getElementById('aiInput');aiAsk(i.value);i.value=''};
   const fab=document.getElementById('aiFab');if(fab)fab.onclick=openAISheet;
+  const zen=document.getElementById('zenBtn');if(zen)zen.onclick=toggleZen;
+  try{renderBoss()}catch(e){}
   document.getElementById('aiBtn').onclick=openAISheet;
   document.getElementById('aiClose').onclick=closeAISheet;
   document.getElementById('aiSheet').onclick=e=>{if(e.target.id==='aiSheet')closeAISheet()};
@@ -9368,8 +9500,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.44',SW_BUILD='v67';
+const APP_VERSION='1.3.45',SW_BUILD='v68';
 const CHANGES=[
+  {v:'v68 — السرعة والبوس 🌿⚡👹',d:'24/9/2026',items:['⚡ مؤقت لكل سؤال: تحدد وقت (20/30/45 ثانية) من الإعدادات، ولو جاوبت بسرعة بتاخد +5 نقطة','✅❌ أسئلة صح وخطأ: تفعّلها من الإعدادات وتدخل مع أسئلتك العادية عشان تنشط الذاكرة','👹 بوس كل 100 سؤال: 12 سؤال صعب · 30 ثانية لكل سؤال · بدون مساعدات · نقاط مضاعفة ومكافأة عملة — وشريط على الرئيسية يقولك قد إيه باقيلك','🌿 زر التهدئة (فوق زرار المساعد): يخفي الأرقام ويهدّي الشاشة لو عايز تذاكر براحتك','كل ده اتضاف من غير ما أكسر أي حاجة قديمة (271 اختبار ناجح)']},
   {v:'v67 — إصلاح الشاشة اللي كانت بتعلق 🎯💚',d:'24/9/2026',items:['كانت فيه شاشتين فوق بعض بنفس الاسم، والتانية كانت بتغطي اللعبة وبتوقف عند 0% — اتشالت، ف اللعبة بتفتح فورًا','الصفحة بقت بتتفتح فورًا من الكاش حتى لو النت بطيء أو مقطوع (كان بيستنى النت الأول وممكن يعلق)، والتحديث بيحصل في الخلفية','كل طلب نت بقى له مهلة: لو النت بطيء بنرجع للنسخة المحفوظة فورًا بدل ما نتفرج على شاشة بيضا','شاشة البداية بقت ليها ضمان إضافي: بتختفي حتى لو حصل أي خطأ غير متوقع']},
   {v:'v66 — رجّعنا الضمان 🔧💚',d:'24/9/2026',items:['رجّعنا تحميل الفصول زي ما كان مضمون 100% — عشان ما يحصلش أي «جاري تحميل…» معلق تاني','شاشة البداية بتختفي لوحدها بأمان تام (مش بتتعلّق أبدًا)، والتحديث التلقائي بقى أذكى: بيفحص كل 30 دقيقة، وبيحدّث بس لو فيه نسخة أحدث فعلاً — ممنوع أي ريلoad متكرر','النسخة المحمّلة رجعت كمان لتحميل الفصول الفوري الكامل']},
   {v:'v65 — إقلاع فوري ⚡',d:'24/9/2026',items:['أهم إصلاح: اللعبة بتشتغل فورًا — كانت بتستنى 3.2MB (الفصول) قبل ما تفتح وتاخد ثواني طويلة على الموبايل','دلوقتي الفصول بتتحمّل في الخلفية بعد ما تشتغل اللعبة: الشاشة بتفتح فورًا والأقسام بتظهر أول ما تجهز','النسخة المحمّلة كمان بقت فورية — الفصول متحطمة جواه文件 كفص شغّال بيتقرا عند اللزوم','لو فتحت «كورسات» بسرعة هتشوف «جاري تحميل الفصول…» لثانية وبعدها كل حاجة تظهر لوحدها']},

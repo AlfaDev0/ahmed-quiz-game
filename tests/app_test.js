@@ -378,7 +378,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.44'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.45'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -753,6 +753,17 @@ ck('relaxOpen shows relax+quote', (()=>{try{const a=vm.runInContext(`document.ge
 ck('toggleBreath stops relax', (()=>{try{return vm.runInContext(`relax.on===false&&!relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('setRelaxPreset sets minutes', (()=>{try{const a=vm.runInContext(`setRelaxPreset(10);relax.preset===10&&relax.left>=590&&relax.left<=600`,sandbox);vm.runInContext(`toggleBreath()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('relaxDone resets state', (()=>{try{return vm.runInContext(`relaxDone();relax.on===false && !relax.breath && !relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+
+/* v68 TIME ATTACK + TF + BOSS + ZEN */
+ck('qTimeLimit follows setting / boss', (()=>{try{return vm.runInContext(`(function(){bossMode=false;set.qTime=0;const a=qTimeLimit()===0;set.qTime=30;const b=qTimeLimit()===30;bossMode=true;const c=qTimeLimit()===30;bossMode=false;set.qTime=0;return a&&b&&c})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('makeTF makes 2-option true/false', (()=>{try{return vm.runInContext(`(function(){set.tfOn=false;const src=QUESTIONS[Object.keys(QUESTIONS)[0]][0];const t=makeTF(src);return t.a.length===2&&(t.c===0||t.c===1)&&(t.a[0]==='صح')&&(t.tf===true)})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('tf mode builds tf question', (()=>{try{return vm.runInContext(`(function(){set.tfOn=true;const src=QUESTIONS[Object.keys(QUESTIONS)[0]][0];let ok=false;for(let i=0;i<40;i++){if(makeQ(src).tf){ok=true;break}}set.tfOn=false;return ok})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('speed bonus flag works', (()=>{try{return vm.runInContext(`(function(){bossMode=false;set.qTime=30;qT=25;const lim=qTimeLimit();const fast=(lim>0&&qT>=Math.ceil(lim*0.6));qT=5;const slow=(lim>0&&qT>=Math.ceil(lim*0.6));qT=0;set.qTime=0;return fast===true&&slow===false})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('boss card renders when due', (()=>{try{return vm.runInContext(`(function(){S.bossQ=250;S.bossDue=true;renderBoss();const el=document.getElementById('bossCard');const ok=el.style.display==='block'&&el.innerHTML.indexOf('bossGo')>0;S.bossQ=0;S.bossDue=false;renderBoss();return ok})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('boss progress card shows countdown', (()=>{try{return vm.runInContext(`(function(){S.bossQ=40;S.bossDue=false;renderBoss();const el=document.getElementById('bossCard');const ok=el.innerHTML.indexOf('60')>0;S.bossQ=0;renderBoss();return ok})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('zen toggle flips state', (()=>{try{return vm.runInContext(`(function(){S.zen=false;toggleZen();const a=S.zen===true;toggleZen();const b=S.zen===false;return a&&b})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('zen + tf controls exist in markup', (()=>{try{return html.indexOf('id="zenBtn"')>0&&html.indexOf('id="qTimeBox"')>0&&html.indexOf('id="sTF"')>0&&html.indexOf('id="bossCard"')>0}catch(e){return 'ERR:'+e.message}})());
+ck('startBoss exists', (()=>{try{return vm.runInContext(`typeof startBoss==='function'&&typeof renderBoss==='function'&&typeof renderQTimeChips==='function'`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 
 /* v67 إصلاح «الشاشة اللي بتعلق» — ids مكررة + نت بدون مهلة + splash failsafe */
 ck('single splash element (no duplicate id)', (()=>{try{return (html.match(/id="splash"/g)||[]).length===1}catch(e){return 'ERR:'+e.message}})());
