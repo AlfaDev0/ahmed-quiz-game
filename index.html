@@ -643,6 +643,7 @@ html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 .br-ring.out{transform:scale(.92);border-color:var(--primary)}
 .br-core{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#7C8F3C,#C89B3C);display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 14px 30px -12px rgba(124,143,60,.7)}
 .br-txt{font-size:16px;font-weight:800;min-height:24px}
+.study-banner.alt{border-style:dashed}
 .qtime{display:none;align-items:center;gap:8px;margin-top:12px}
 .qtime.on{display:flex}
 .qtime-bar{flex:1;height:7px;border-radius:8px;background:var(--bg3);overflow:hidden}
@@ -765,6 +766,24 @@ body.zen .prog-wrap{gap:6px}
         <p>10 أسئلة من أضعف فصولك — راجع أخطاءك كل يوم</p>
       </div>
       <button class="sb-btn" id="quickBtn">ابدأ</button>
+    </div>
+
+    <div class="study-banner alt" id="endlessBanner">
+      <span class="sb-ico">♾️</span>
+      <div class="sb-info">
+        <b>الوضع اللانهائي</b>
+        <p>محدودش عدد الأسئلة — 3 محاولات والصعوبة بتزيد كل 5 أسئلة</p>
+      </div>
+      <button class="sb-btn" id="endlessBtn">ابدأ</button>
+    </div>
+
+    <div class="study-banner alt" id="revBanner">
+      <span class="sb-ico">🎯</span>
+      <div class="sb-info">
+        <b>مراجعة ذكية</b>
+        <p id="revBannerTxt">أخطائك + أضعف المواد — 12 سؤال مركّز</p>
+      </div>
+      <button class="sb-btn" id="revBtn">ابدأ</button>
     </div>
 
     <div class="study-banner" id="pomoBanner">
@@ -987,6 +1006,14 @@ body.zen .prog-wrap{gap:6px}
       <div class="set-item">
         <span class="set-label" style="font-size:13px">✅❌ أسئلة صح وخطأ <span style="font-size:10px;color:var(--dim);display:block">يدخل معاها سؤال صح/خطأ أحيانًا عشان تنشط الذاكرة</span></span>
         <label class="tgl"><input type="checkbox" id="sTF"><span class="slider"></span></label>
+      </div>
+      <div class="set-item">
+        <span class="set-label" style="font-size:13px">🔄 اسئلة معكوسة <span style="font-size:10px;color:var(--dim);display:block">تعطيك الإجابة وانت تختار السؤال الصح</span></span>
+        <label class="tgl"><input type="checkbox" id="sRev"><span class="slider"></span></label>
+      </div>
+      <div class="set-item">
+        <span class="set-label" style="font-size:13px">🧠 اختيار ذكي للأسئلة <span style="font-size:10px;color:var(--dim);display:block">مايعطيش نفس السؤال مرتين قريب + يركز على نقاط ضعفك + يجيب الجديد</span></span>
+        <label class="tgl"><input type="checkbox" id="sSmart"><span class="slider"></span></label>
       </div>
       <div class="set-item" style="flex-direction:column;align-items:flex-start;gap:8px">
         <span class="set-label" style="font-size:13px">🎯 هدف النهاردة (إجابات صحيحة)</span>
@@ -1342,8 +1369,8 @@ body.zen .prog-wrap{gap:6px}
 <script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0,gday:'',bossQ:0,bossDue:false,bossDone:0,zen:false};
-const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9,focusM:25,dayGoal:50,qTime:0,tfOn:false};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0,gday:'',bossQ:0,bossDue:false,bossDone:0,zen:false,seen:{},endlessBest:0};
+const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'$2a$10$N1aADufUfG/KTqI88z/ydOxhWzRBUnrAhUi8GhR.TeGzGLpf9Mmmy',jsonbinBin:'6aa7cb9fffd5d160530482ab',voiceId:'',voiceRate:0.9,focusM:25,dayGoal:50,qTime:0,tfOn:true,revOn:true,smartOn:true};
 let S,set;
 function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
 function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
@@ -1368,12 +1395,12 @@ function healData(){
     else act();
   }catch(e){}
 }
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50;if(![0,20,30,45].includes(set.qTime))set.qTime=0;if(typeof set.tfOn!=='boolean')set.tfOn=false}
+function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50;if(![0,20,30,45].includes(set.qTime))set.qTime=0;if(typeof set.tfOn!=='boolean')set.tfOn=true;if(typeof set.revOn!=='boolean')set.revOn=true;if(typeof set.smartOn!=='boolean')set.smartOn=true}
 function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
 const CAT_NAMES={culture:'الثقافة العامة',math:'الرياضيات',logic:'المنطق والذكاء',language:'اللغة العربية',science:'العلوم',speed:'تحدي السرعة',english:'الإنجليزية',history:'التاريخ',geography:'الجغرافيا',biology:'الأحياء',chemistry:'الكيمياء',physics:'الفيزياء',football:'كرة القدم',mixed:'الاختبار الشامل'};
-var bossMode=false,qTimer=null,qT=0,bossSaved=20;
+var bossMode=false,qTimer=null,qT=0,bossSaved=20,endlessMode=false,lives=0;
 let curCat=null,questions=[],qi=0,score=0,cor=0,wro=0,streak=0,timer=null,tLeft=0,answered=false,doubleMode=false,origTimer=20,dailyMode=false,curQ=null,diffFilter='',chScope=null,startCoins=0;
 const usedLL={fifty:false,skip:false,hint:false,double:false};
 var studyCtx=null,replayStudy=null,_studyPi=0,_studySi=0,aiCtx=null;
@@ -1792,6 +1819,7 @@ function renderWeekReport(){
 function updateHome(){
   try{renderDayGoal()}catch(e){}
   try{renderBoss()}catch(e){}
+  try{renderRevBanner()}catch(e){}
   try{applyZen()}catch(e){}
   document.getElementById('hmLv').textContent=S.level;
   document.getElementById('hmXp').textContent=S.xp;
@@ -1849,7 +1877,7 @@ function startGame(cat,daily){
   if(pool.length<4){pool=[...(QUESTIONS[cat]||[])];if(cat==='mixed'){pool=[];Object.keys(QUESTIONS).forEach(k=>pool.push(...QUESTIONS[k]))}}
   shuffle(pool);
   const qn=Math.min(set.qCount,pool.length||1);
-  questions=pool.slice(0,qn);
+  questions=(set.smartOn===false)?pool.slice(0,qn):smartPick(pool,qn);
   origTimer=set.timer;
   if(cat==='speed')set.timer=10;
   document.getElementById('gCat').textContent=(daily?'تحدي اليوم — ':'')+CAT_NAMES[cat];
@@ -1875,13 +1903,117 @@ function showAutoReview(){
   else rw.style.display='none';
 }
 function makeQ(src){
-  try{if(set&&set.tfOn&&src&&src.a&&src.a.length>=3&&Math.random()<0.3)return makeTF(src)}catch(e){}
+  try{if(set&&set.tfOn&&src&&src.a&&src.a.length>=3&&Math.random()<0.28)return makeTF(src)}catch(e){}
+  try{if(set&&set.revOn&&src&&src.a&&src.a.length>=3&&Math.random()<0.18)return makeRev(src)}catch(e){}
   const idx=shuffle([0,1,2,3]);
   return {q:src.q,a:idx.map(i=>src.a[i]),c:idx.indexOf(src.c),d:src.d,hint:src.hint,expl:src.expl};
 }
 
+
+/* ================= v69: SMART MIX + ENDLESS + REVERSE ================= */
+function srcQ(){try{return questions[qi]||curQ}catch(e){return curQ}}
+function seenKey(q){return qid(q)}
+function markSeen(q,ok){
+  try{
+    if(!S.seen)S.seen={};
+    const k=seenKey(q);if(!k)return;
+    const e=S.seen[k]||{n:0,e:0,t:0};
+    e.n++;if(!ok)e.e++;e.t=Date.now();
+    S.seen[k]=e;
+    if(Object.keys(S.seen).length>4200){const arr=Object.keys(S.seen).sort((a,b)=>(S.seen[a].t||0)-(S.seen[b].t||0));arr.slice(0,400).forEach(x=>{delete S.seen[x]})}
+    save();
+  }catch(e){}
+}
+function smartPick(pool,n,opts){
+  opts=opts||{};
+  const want=opts.diff||null,now=Date.now(),DAY=864e5;
+  const sc=q=>{
+    let sc0=Math.random()*10;
+    const e=(S.seen&&S.seen[seenKey(q)])||null;
+    if(e){
+      const ago=(now-(e.t||0))/DAY;
+      sc0+=Math.min(42,ago*4.2);
+      sc0+=(e.e/Math.max(1,e.n))*28;
+      if(ago<0.4)sc0-=40;else if(ago<1)sc0-=22;else if(ago<3)sc0-=8;
+    }else sc0+=20;
+    if(want)sc0+=(q.d===want?14:-8);
+    if(q.d==='easy'&&streak>=8)sc0-=5;
+    return sc0;
+  };
+  const arr=pool.map(q=>({q,s:sc(q)}));
+  arr.sort((a,b)=>b.s-a.s);
+  const top=arr.slice(0,Math.max(n*3,n+10)).map(x=>x.q);
+  shuffle(top);
+  return top.slice(0,n);
+}
+function fullPool(){
+  let pool=[];
+  try{Object.keys(QUESTIONS||{}).forEach(k=>pool.push(...(QUESTIONS[k]||[])))}catch(e){}
+  return pool;
+}
+function makeRev(src){
+  const keys=Object.keys(QUESTIONS||{}),others=[];
+  for(let k=0;k<20&&others.length<3;k++){
+    const arr=QUESTIONS[keys[Math.floor(Math.random()*keys.length)]];
+    const r=arr&&arr[Math.floor(Math.random()*arr.length)];
+    if(r&&r.q&&r.q!==src.q)others.push(r.q);
+  }
+  while(others.length<3)others.push(src.q.slice(0,26)+' ✦');
+  const idx=shuffle([0,1,2,3]);
+  return {q:'🔄 اعكس الاتجاه — اختار السؤال الصح للإجابة دي:\n«'+src.a[src.c]+'»',
+    a:idx.map(i=>i===0?src.q:others[i-1]),c:idx.indexOf(0),d:src.d,hint:src.hint,expl:src.expl,rev:true};
+}
+function startEndless(){
+  curCat='mixed';dailyMode=false;quickMode=false;examMode=false;bossMode=false;endlessMode=true;
+  qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;lives=3;
+  replayStudy=null;studyCtx=null;startCoins=S.coins;
+  usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=true;
+  let pool=fullPool().filter(q=>q.d==='easy');
+  if(pool.length<10)pool=fullPool();
+  questions=smartPick(pool,20,{diff:'easy'});
+  bossSaved=set.timer;set.timer=0;origTimer=bossSaved;
+  const c=document.getElementById('gCat');if(c)c.textContent='♾️ لا نهائي — محاولات: '+lives+' · الصعوبة بتزيد';
+  show('game');showQ();
+}
+function startSmartReview(){
+  if(studyCtx)studyCtx=null;
+  let list=wrongQuestions();
+  const all=fullPool();
+  if(list.length<6){
+    const weak=[];
+    try{
+      Object.keys(S.catStats||{}).forEach(k=>{
+        const c=S.catStats[k];if(!c||!c.g)return;
+        const acc=c.cor/Math.max(1,c.g+c.wro);
+        if(acc<0.7)weak.push({k,acc});
+      });
+    }catch(e){}
+    weak.sort((a,b)=>a.acc-b.acc);
+    weak.slice(0,4).forEach(w=>{
+      (QUESTIONS[w.k]||[]).slice(0,6).forEach(q=>{if(!list.some(x=>qid(x)===qid(q)))list.push(q)});
+    });
+  }
+  if(!list.length){toast('مفيش أخطاء دلوقتي — ممتاز! 🎉');return}
+  shuffle(list);
+  curCat='review';dailyMode=false;quickMode=false;bossMode=false;endlessMode=false;
+  qi=0;score=0;cor=0;wro=0;streak=0;answered=false;doubleMode=false;
+  startCoins=S.coins;
+  usedLL.fifty=usedLL.skip=usedLL.hint=usedLL.double=false;
+  questions=list.slice(0,Math.min(12,list.length));
+  origTimer=set.timer;
+  const c=document.getElementById('gCat');if(c)c.textContent='🎯 مراجعة ذكية ('+questions.length+' سؤال)';
+  replayStudy=startSmartReview;
+  show('game');showQ();updateLL();
+}
+function renderRevBanner(){
+  const t=document.getElementById('revBannerTxt');
+  if(!t)return;
+  let n=0;try{n=wrongQuestions().length}catch(e){}
+  t.textContent=n?('أخطائك ('+n+') + أضعف المواد — 12 سؤال مركّز'):('مفيش أخطاء — جرّب 12 سؤال من أضعف المواد');
+}
+
 /* ================= v68: TIME ATTACK + TF + BOSS + ZEN ================= */
-function qTimeLimit(){return bossMode?30:(set.qTime||0)}
+function qTimeLimit(){if(bossMode)return 30;if(endlessMode)return Math.max(12,26-Math.floor(qi/5)*2);return set.qTime||0}
 function hideQTime(){const w=document.getElementById('qTimeWrap');if(w)w.classList.remove('on')}
 function clearQTimer(){clearInterval(qTimer);qTimer=null}
 function startQTimer(){
@@ -1905,7 +2037,7 @@ function qTimeUp(){
   answered=true;clearQTimer();hideQTime();wro++;streak=0;weekTick('wro',0);
   const q=curQ,btns=document.querySelectorAll('.ans-btn');
   btns.forEach(b=>{b.classList.add('disabled');if(+b.dataset.i===q.c)b.classList.add('correct')});
-  recordWrong(q);toast('⏰ خلص الوقت! الجواب: '+q.a[q.c]);sfx('no');vibe([100,50,100]);
+  recordWrong(srcQ());toast('⏰ خلص الوقت! الجواب: '+q.a[q.c]);sfx('no');vibe([100,50,100]);
   setTimeout(nextQ,1400);
 }
 function makeTF(src){
@@ -1959,6 +2091,10 @@ function renderQTimeChips(){
   });
   const tf=document.getElementById('sTF');
   if(tf){tf.checked=!!(set&&set.tfOn);tf.onchange=()=>{set.tfOn=tf.checked;saveSet();toast(tf.checked?'✅ صح/خطأ هيظهر أحيانًا':'✅ رجعنا الأسئلة العادية')}}
+  const rv=document.getElementById('sRev');
+  if(rv){rv.checked=set&&set.revOn!==false;rv.onchange=()=>{set.revOn=rv.checked;saveSet();toast(rv.checked?'🔄 أسئلة معكوسة شغالة':'🔄 رجعنا الأسئلة العادية')}};
+  const sm=document.getElementById('sSmart');
+  if(sm){sm.checked=set&&set.smartOn!==false;sm.onchange=()=>{set.smartOn=sm.checked;saveSet();toast(sm.checked?'🧠 كل سؤال هيكون مختلف':'🧠 رجعنا الاختيار العادي')}}
 }
 
 function showQ(){
@@ -2013,17 +2149,22 @@ function answer(i){
     if(doubleMode)p*=2;
     if(streak>=3)p+=5;if(streak>=5)p+=10;if(streak>=10)p+=25;
     if(fast)p+=5;
+    if(endlessMode)p+=Math.min(25,qi);
     score+=p;
     const cg=Math.floor(p/2);S.coins+=cg;S.totalCoins+=cg;
     weekTick('cor',cg);
     toast('✅ صحيح! +'+p+' نقطة'+(fast?' ⚡ سريعة!':''));
-    if(curCat==='review'){if(S.wrongQs){delete S.wrongQs[qid(q)];save()}}
+    markSeen(srcQ(),true);
+    if(curCat==='review'){if(S.wrongQs){delete S.wrongQs[qid(srcQ())];save()}}
     sfx('ok');vibe(40);
     if(streak>=5)sfx('streak');
   }else{
     wro++;streak=0;weekTick('wro',0);
+    if(endlessMode){lives--;if(lives<=0){hideQTime();toast('💔 خلصت المحاولات!');setTimeout(finish,900);return}}
     btns[+i].classList.add('wrong');
-    recordWrong(q);
+    const sw=srcQ();
+    markSeen(sw,false);
+    recordWrong(sw);
     toast('❌ خطأ! الجواب: '+q.a[q.c]);
     sfx('no');vibe([60,30,60]);
   }
@@ -2036,13 +2177,25 @@ function timeUp(){
   const q=curQ,btns=document.querySelectorAll('.ans-btn');
   btns.forEach(b=>{b.classList.add('disabled');if(+b.dataset.i===q.c)b.classList.add('correct')});
   toast('⏰ انتهى الوقت! الجواب: '+q.a[q.c]);
-  recordWrong(q);
+  recordWrong(srcQ());
   sfx('no');vibe([100,50,100]);
   setTimeout(nextQ,1500);
 }
 function nextQ(){
-  try{qi++;showQ()}
-  catch(e){console.error(e);finish()}
+  try{
+    qi++;
+    if(endlessMode&&qi%5===0){
+      const lvl=Math.floor(qi/5);
+      const want=lvl<2?'easy':(lvl<5?'medium':'hard');
+      const p=fullPool().filter(q=>q.d===want);
+      questions=smartPick(p.length>=8?p:fullPool(),5,{diff:want});
+      const c=document.getElementById('gCat');
+      if(c)c.textContent='♾️ لا نهائي — المرحلة '+lvl+' · محاولات: '+lives;
+      toast('⬆️ صعوبة أعلى! مستواك '+lvl);
+      sfx('lv');
+    }
+    showQ();
+  }catch(e){console.error(e);finish()}
 }
 
 /* LIFELINES */
@@ -2117,6 +2270,7 @@ function finish(){
     S.coins+=rw;S.totalCoins+=rw;S.bossDone=(S.bossDone||0)+1;S.bossDue=false;
   }
   bossMode=false;
+  const wasEndless=endlessMode;endlessMode=false;
   if(curCat==='review')S.reviewed=(S.reviewed||0)+questions.length;
   if(streak>S.bestStreak)S.bestStreak=streak;
   if(score>S.bestScore)S.bestScore=score;
@@ -2145,6 +2299,7 @@ function finish(){
   else if(acc>=50){em='👍';t='أداء جيد'}
   else if(acc>=30){em='💪';t='حاول مرة أخرى'}
   else{em='📚';t='تدرب أكثر'}
+  if(wasEndless){const qn2=qi;if(qn2>(S.endlessBest||0))S.endlessBest=qn2;em='♾️';t='وصلت للسؤال '+qn2+' في وضع اللانهائي';if(qn2>=10){confetti();sfx('win')}}
   if(wasBoss){em='👹';t=cor>=9?'هزمت البوس! 🎉':(cor>=6?'كسبت نصفها':'البوس قوية… حطمها المرة الجاية');confetti();sfx('win')}
   document.getElementById('rEmoji').textContent=em;
   document.getElementById('rTitle').textContent=t;
@@ -4099,6 +4254,8 @@ function openAIKey(){
   const snd=()=>{const i=document.getElementById('aiInput');aiAsk(i.value);i.value=''};
   const fab=document.getElementById('aiFab');if(fab)fab.onclick=openAISheet;
   const zen=document.getElementById('zenBtn');if(zen)zen.onclick=toggleZen;
+  const eb=document.getElementById('endlessBtn');if(eb)eb.onclick=startEndless;
+  const rb=document.getElementById('revBtn');if(rb)rb.onclick=startSmartReview;
   try{renderBoss()}catch(e){}
   document.getElementById('aiBtn').onclick=openAISheet;
   document.getElementById('aiClose').onclick=closeAISheet;
@@ -4121,8 +4278,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.45',SW_BUILD='v68';
+const APP_VERSION='1.3.46',SW_BUILD='v69';
 const CHANGES=[
+  {v:'v69 — وضع اللانهائي + تنويع ذكي ♾️🧠',d:'24/9/2026',items:['♾️ وضع اللانهائي: أسئلة ما بتخلصش، 3 محاولات، والمؤقت والصعوبة بيزيدوا كل 5 أسئلة — تحدى نفسك واوصل لفين','🧠 محرك الاختيار الذكي: مايعطيش نفس السؤال مرتين قريب، بيجيب الجديد الأول، وبيركز على نقاط ضعفك — فكل جلسة مختلفة عن اللي قبلها','🔄 أسئلة معكوسة جديدة: بتديك الإجابة وانت تختار السؤال الصح','🎯 مراجعة ذكية: أخطائك + أضعف المواد في 12 سؤال مركّز','⚠️ إصلاح مهم: bookkeeping بقى مربوط بالسؤال الأصلي مش النوع المعروض — فمفيش أخطاء وهمية في المراجعة','كل ده 279 اختبار ناجح']},
   {v:'v68 — السرعة والبوس 🌿⚡👹',d:'24/9/2026',items:['⚡ مؤقت لكل سؤال: تحدد وقت (20/30/45 ثانية) من الإعدادات، ولو جاوبت بسرعة بتاخد +5 نقطة','✅❌ أسئلة صح وخطأ: تفعّلها من الإعدادات وتدخل مع أسئلتك العادية عشان تنشط الذاكرة','👹 بوس كل 100 سؤال: 12 سؤال صعب · 30 ثانية لكل سؤال · بدون مساعدات · نقاط مضاعفة ومكافأة عملة — وشريط على الرئيسية يقولك قد إيه باقيلك','🌿 زر التهدئة (فوق زرار المساعد): يخفي الأرقام ويهدّي الشاشة لو عايز تذاكر براحتك','كل ده اتضاف من غير ما أكسر أي حاجة قديمة (271 اختبار ناجح)']},
   {v:'v67 — إصلاح الشاشة اللي كانت بتعلق 🎯💚',d:'24/9/2026',items:['كانت فيه شاشتين فوق بعض بنفس الاسم، والتانية كانت بتغطي اللعبة وبتوقف عند 0% — اتشالت، ف اللعبة بتفتح فورًا','الصفحة بقت بتتفتح فورًا من الكاش حتى لو النت بطيء أو مقطوع (كان بيستنى النت الأول وممكن يعلق)، والتحديث بيحصل في الخلفية','كل طلب نت بقى له مهلة: لو النت بطيء بنرجع للنسخة المحفوظة فورًا بدل ما نتفرج على شاشة بيضا','شاشة البداية بقت ليها ضمان إضافي: بتختفي حتى لو حصل أي خطأ غير متوقع']},
   {v:'v66 — رجّعنا الضمان 🔧💚',d:'24/9/2026',items:['رجّعنا تحميل الفصول زي ما كان مضمون 100% — عشان ما يحصلش أي «جاري تحميل…» معلق تاني','شاشة البداية بتختفي لوحدها بأمان تام (مش بتتعلّق أبدًا)، والتحديث التلقائي بقى أذكى: بيفحص كل 30 دقيقة، وبيحدّث بس لو فيه نسخة أحدث فعلاً — ممنوع أي ريلoad متكرر','النسخة المحمّلة رجعت كمان لتحميل الفصول الفوري الكامل']},
