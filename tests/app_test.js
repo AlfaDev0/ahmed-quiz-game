@@ -378,7 +378,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.47'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.48'));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -754,10 +754,41 @@ ck('toggleBreath stops relax', (()=>{try{return vm.runInContext(`relax.on===fals
 ck('setRelaxPreset sets minutes', (()=>{try{const a=vm.runInContext(`setRelaxPreset(10);relax.preset===10&&relax.left>=590&&relax.left<=600`,sandbox);vm.runInContext(`toggleBreath()`,sandbox);return a===true}catch(e){return 'ERR:'+e.message}})());
 ck('relaxDone resets state', (()=>{try{return vm.runInContext(`relaxDone();relax.on===false && !relax.breath && !relax.todo`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 
+/* v71 إصلاحات: شاشة الأخطاء، عدّاد الوقت، أضعف الفصول */
+ck('wrongGroups screen registered in scrPairs', (()=>{try{return /wrongGroups:'wrongGroups'/.test(html)}catch(e){return 'ERR:'+e.message}})());
+ck('wrongGroups screen is top-level (not nested)', (()=>{try{
+  const before=documentCount();
+  vm.runInContext('S.wrongQs={};openWrongGroups()',sandbox);
+  const el=sandbox.document.getElementById('wrongGroups');
+  const parent=el&&el.parentNode;
+  return !!el&&!!parent&&(parent.tagName==='BODY'||parent.id==='app');
+}catch(e){return 'ERR:'+e.message}})());
+ck('daily mod does not overwrite user timer', (()=>{try{return vm.runInContext(`(function(){
+  const real=DAILY_MODS[0];
+  DAILY_MODS[0]={k:'t',i:'⏱️',n:'t',d:'t',f:(g)=>{g.timer=7}};
+  const savedIdx=todayIdx();todayIdx=()=>0;
+  set.qCount=4;set.timer=20;const keep=set.timer;
+  startGame('mixed',false);
+  const usedInGame=set.timer;
+  finish();
+  todayIdx=savedIdx;DAILY_MODS[0]=real;
+  return usedInGame===7&&set.timer===keep;
+})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('weak chapters ranked by real mistakes', (()=>{try{return vm.runInContext(`(function(){
+  const b=window.STUDY[0].subjects[0].books[0];
+  S.seen={};S.wrongQs={};
+  const q0=b.chapters[0].qs[0],q1=b.chapters[1].qs[0];
+  S.wrongQs[qid(q1)]={w:5,t:Date.now()};
+  S.seen[qid(q1)]={n:5,e:5,t:Date.now()};
+  const w=weakChapters(0,0,0,0);
+  const i1=w.findIndex(x=>x.ci===1),i0=w.findIndex(x=>x.ci===0);
+  return i1>=0&&i0>=0&&i1<i0;
+})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+
 /* v70 BOOK EXAM + WRONG GROUPS + DAILY EVENT + SEASON + COVER + KEYS */
 ck('book exam builds one question per chapter', (()=>{try{return vm.runInContext(`(function(){const picks=bookQs(0,0,0,true);const b=window.STUDY[0].subjects[0].books[0];if(picks.length!==b.chapters.length)return false;const seen={};picks.forEach(p=>{seen[p.t]=1});return Object.keys(seen).length>=b.chapters.length})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('book exam records chapter results', (()=>{try{return vm.runInContext(`(function(){bookExam={pi:0,si:0,bi:0,map:[],ok:{},bad:{}};bookExamDone('فصل 1',true);bookExamDone('فصل 2',false);return bookExam.ok['0|فصل 1']===1&&bookExam.bad['0|فصل 2']===1})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
-ck('weak chapters sorted worst first', (()=>{try{return vm.runInContext(`(function(){const w=weakChapters(0,0,0,5);return w.length===5&&w[0].score<=w[4].score})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('weak chapters sorted worst first', (()=>{try{return vm.runInContext(`(function(){const w=weakChapters(0,0,0,5);return w.length===5&&w[0].score>=w[4].score})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('wrong groups empty when no mistakes', (()=>{try{return vm.runInContext(`(function(){S.wrongQs={};return wrongGroups().length===0})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('wrong groups count mistakes', (()=>{try{return vm.runInContext(`(function(){const q=window.STUDY[0].subjects[0].books[0].chapters[0].qs[0];S.wrongQs={};S.wrongQs[qid(q)]={w:3,t:Date.now()};const g=wrongGroups();return g.length>0&&g[0].qs.length===1})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('daily mod rotates daily', (()=>{try{return vm.runInContext(`(function(){const a=dailyMod(),b=dailyMod();return a&&a.k===b.k&&typeof a.n==='string'&&DAILY_MODS.length>=5})()`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());

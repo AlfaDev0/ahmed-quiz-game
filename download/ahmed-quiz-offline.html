@@ -6844,7 +6844,7 @@ function sfx(type){
 function vibe(p){if(set.vib&&navigator.vibrate)navigator.vibrate(p)}
 
 /* ================= SHOW ================= */
-const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats',study:'study',studyBooks:'studyBooks',studyBook:'studyBook',studyRead:'studyRead',courses:'courses',courseView:'courseView',relax:'relax'};
+const scrPairs={home:'home',game:'game',result:'result',leaderboard:'leaderboard',profile:'profile',settings:'settings',shop:'shop',stats:'stats',study:'study',studyBooks:'studyBooks',studyBook:'studyBook',studyRead:'studyRead',wrongGroups:'wrongGroups',courses:'courses',courseView:'courseView',relax:'relax'};
 function show(s){
   if((typeof listening==='boolean'&&listening)||(typeof podStop==='function'&&typeof podS!=='undefined'&&(podS.playing||podS.list.length>0))){
     try{window.speechSynthesis&&window.speechSynthesis.cancel()}catch(e){}
@@ -7287,6 +7287,7 @@ function startGame(cat,daily){
   if(diffFilter)pool=pool.filter(q=>q.d===diffFilter);
   if(pool.length<4){pool=[...(QUESTIONS[cat]||[])];if(cat==='mixed'){pool=[];Object.keys(QUESTIONS).forEach(k=>pool.push(...QUESTIONS[k]))}}
   shuffle(pool);
+  origTimer=set.timer;
   doubleAll=false;autoExpl=false;
   try{
     const md=modFlags();
@@ -7301,9 +7302,9 @@ function startGame(cat,daily){
   }catch(e){}
   const qn=Math.min(set.qCount,pool.length||1);
   questions=(set.smartOn===false)?pool.slice(0,qn):smartPick(pool,qn);
-  origTimer=set.timer;
   if(cat==='speed')set.timer=10;
-  document.getElementById('gCat').textContent=(daily?'تحدي اليوم — ':'')+CAT_NAMES[cat];
+  if(dailyModKey){const m=dailyMod();if(m)document.getElementById('gCat').textContent=(daily?'تحدي اليوم — ':'')+m.n+' · '+CAT_NAMES[cat];}
+  else document.getElementById('gCat').textContent=(daily?'تحدي اليوم — ':'')+CAT_NAMES[cat];
   show('game');showQ();updateLL();
 }
 function startQuickGame(){
@@ -7493,14 +7494,21 @@ function weakChapters(pi,si,bi,lim){
     const bk=window.STUDY[pi].subjects[si].books[bi];
     (bk.chapters||[]).forEach((ch,ci)=>{
       const k=chKey(pi,si,bi,ci);
-      let st=(S.study&&S.study[k])||{};
-      const att=st.a||0,cor=st.c||0;
-      const acc=att?cor/att:0;
-      const score=ch.qs&&ch.qs.length?acc*100-(st.last||0)/1e4:0;
-      out.push({ci:ci,ch:ch,acc:acc,att:att,score:score,stars:getChStars(k)});
+      const stars=getChStars(k);
+      let bad=0,tot=0;
+      (ch.qs||[]).forEach(q=>{
+        tot++;
+        const e=S.seen&&S.seen[qid(q)];
+        if(e)bad+=(e.n||0)-(e.c||0);
+        if(S.wrongQs&&S.wrongQs[qid(q)])bad+=(S.wrongQs[qid(q)].w||1);
+      });
+      const rate=tot?bad/tot:0;
+      // كل ما الأخطاء أعلى والنجوم أقل = الأضعف (رقم أكبر = أضعف)
+      const score=rate*100+(stars===0?25:0)-(stars*8);
+      out.push({ci:ci,ch:ch,acc:1-Math.min(1,rate),att:bad,score:score,stars:stars,bad:bad,tot:tot});
     });
   }catch(e){}
-  out.sort((a,b)=>a.score-b.score);
+  out.sort((a,b)=>b.score-a.score);
   return lim?out.slice(0,lim):out;
 }
 function startWeakExam(pi,si,bi,lim){
@@ -7516,7 +7524,8 @@ function startWeakExam(pi,si,bi,lim){
   questions=picks.map(x=>x.q);
   bookExam={pi:pi,si:si,bi:bi,map:picks,ok:{},bad:{}};
   bossSaved=set.timer;origTimer=set.timer;
-  const c=document.getElementById('gCat');if(c)c.textContent='🎯 اختبار أضعف الفصول — '+picks.length+' سؤال';
+  const nm=list.slice(0,3).map(w=>'ف'+((w.ci%10)+1)).join(' · ');
+  const c=document.getElementById('gCat');if(c)c.textContent='🎯 أضعف فصولك: '+nm+' ('+picks.length+' سؤال)';
   show('game');showQ();updateLL();
 }
 function wrongGroups(){
@@ -7556,7 +7565,7 @@ function startGroupReview(gi){
 function openWrongGroups(){
   let body=document.getElementById('wrongGroupsBody');
   if(!body){
-    const sc=document.getElementById('stats')||document.body;
+    const sc=document.body;
     const d=document.createElement('div');
     d.className='screen';d.id='wrongGroups';
     d.innerHTML='<div class="page-head"><button class="icon-btn" id="wgBack">→</button><h2>🎯 أخطائي بالتفصيل</h2></div><div class="set-wrap" id="wrongGroupsBody"></div>';
@@ -10019,8 +10028,9 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.47',SW_BUILD='v70';
+const APP_VERSION='1.3.48',SW_BUILD='v71';
 const CHANGES=[
+  {v:'v71 — إصلاح 4 مشاكل 🐛',d:'24/9/2026',items:['🐛 «أخطائي بالتفصيل» كانت مش بتفتح خالص (الشاشة كانت مسجّلة خطأ ورا شاشة تانية) — دلوقتي بتفتح صح','🐛 «أضعف الفصول» كانت بتختار فصول عشوائي — دلوقتي بتحسب الضعف من أخطائك الحقيقية ونجومك','🐛 الحدث اليومي كان بيفتحل عدّاد الوقت المختار عندك ويغيّره للأبد — اترجّع زي ما كان','🐛 اسم الحدث اليومي ماكانش بيظهر في اللعبة — بقى ظاهر','اختبارات ضد تكرار نفس المشاكل (298 ناجح)']},
   {v:'v70 — كل المميزات المتبقية 🎯🎖️🖼️',d:'24/9/2026',items:['🧪 اختبار الكتاب كامل: سؤال من كل فصل + ملخص بالنهاية يقولك اتقنت كل إيه ومحتاج مراجعة إيه','🎯 اختبار أضعف الفصول: 5 فصول محتاجة مراجعة عندك 선택','🎯 أخطائي بالتفصيل: مجموعات الأخطاء حسب الكتاب/الفصل، ودوس «راجع» على أي مجموعة','🎲 حدث يومي بيتبدّل كل يوم: دقة/سرعة/بدون مساعدات/نقاط مضاعفة/امتحان/يوم هادي — بينزل في 게임ات النهاردة','💬 رسالة تشجيع جديدة بعد كل لعبة','🎖️ موسم بـ10 مستويات ومكافآت كل 200 نقطة + عدّاد أيام الشهر','🖼️ صورة غلاف شخصية في ملفك','⌨️ اختصارات كيبورد (1-4 للإجابة، Enter، Esc، مسافة للصوت) + تخطيط سطح مكتب من 1024px','🏅 أوسمة شهرية (10/50/150 إجابة · 5/20 لعبة)','294 اختبار ناجح']},
   {v:'v69 — وضع اللانهائي + تنويع ذكي ♾️🧠',d:'24/9/2026',items:['♾️ وضع اللانهائي: أسئلة ما بتخلصش، 3 محاولات، والمؤقت والصعوبة بيزيدوا كل 5 أسئلة — تحدى نفسك واوصل لفين','🧠 محرك الاختيار الذكي: مايعطيش نفس السؤال مرتين قريب، بيجيب الجديد الأول، وبيركز على نقاط ضعفك — فكل جلسة مختلفة عن اللي قبلها','🔄 أسئلة معكوسة جديدة: بتديك الإجابة وانت تختار السؤال الصح','🎯 مراجعة ذكية: أخطائك + أضعف المواد في 12 سؤال مركّز','⚠️ إصلاح مهم: bookkeeping بقى مربوط بالسؤال الأصلي مش النوع المعروض — فمفيش أخطاء وهمية في المراجعة','كل ده 279 اختبار ناجح']},
   {v:'v68 — السرعة والبوس 🌿⚡👹',d:'24/9/2026',items:['⚡ مؤقت لكل سؤال: تحدد وقت (20/30/45 ثانية) من الإعدادات، ولو جاوبت بسرعة بتاخد +5 نقطة','✅❌ أسئلة صح وخطأ: تفعّلها من الإعدادات وتدخل مع أسئلتك العادية عشان تنشط الذاكرة','👹 بوس كل 100 سؤال: 12 سؤال صعب · 30 ثانية لكل سؤال · بدون مساعدات · نقاط مضاعفة ومكافأة عملة — وشريط على الرئيسية يقولك قد إيه باقيلك','🌿 زر التهدئة (فوق زرار المساعد): يخفي الأرقام ويهدّي الشاشة لو عايز تذاكر براحتك','كل ده اتضاف من غير ما أكسر أي حاجة قديمة (271 اختبار ناجح)']},
