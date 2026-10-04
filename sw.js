@@ -1,5 +1,5 @@
 const BASE = self.location.pathname.replace(/\/?sw\.js$/, '');
-const CACHE_NAME = 'ahmed-quiz-v75';
+const CACHE_NAME = 'ahmed-quiz-v76';
 
 const REL = {
     '/': '',

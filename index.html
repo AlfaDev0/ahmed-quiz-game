@@ -2241,10 +2241,13 @@ function renderQuests(){
     else h+='<button class="q-btn" disabled>'+Math.min(q.p,q.g)+'/'+q.g+'</button>';
     h+='</div>';
   });
-  if(allDone)h+='<div class="q-bonus"><span>🎉 مهام اليوم كاملة</span><b>+60💰 +40⭐</b></div>';
-  else h+='<div class="q-bonus"><span>خلّص الـ3 وخد مكافأة كاملة</span><b>'+(3-doneN)+' متبقّي</b></div>';
+  if(allDone)h+='<div class="q-bonus"><span>🎉 مهام اليوم كاملة — والمكافأة جت 💰</span><b>🔥 '+(S.questStreak||0)+' يوم</b></div>';
+  if((S.questStreak||0)>0)h+='<div class="q-bonus"><span>🔥 سلسلة '+S.questStreak+' يوم — شاركها واشجع صاحبك</span><button class="q-btn ready" id="questShare">📤 شارك</button></div>';
+  else h+='<div class="q-bonus"><span>خلّص الـ3 وابدأ سلسلتك 🔥</span><b>'+(3-doneN)+' متبقّي</b></div>';
   box.innerHTML=h;
   box.style.display='block';
+  const shb=document.getElementById('questShare');
+  if(shb)shb.onclick=()=>{try{shareQuestStreak()}catch(e){}};
   box.querySelectorAll('[data-quest]').forEach(b=>{b.onclick=()=>{try{claimQuest(b.getAttribute('data-quest'))}catch(e){}}});
 }
 function renderMoBadges(){
@@ -3204,7 +3207,10 @@ function maybeNotify(){
       if(S.notifDay===today)return;
       if(now.getHours()<(set.notifH||19))return;
       S.notifDay=today;save();
-      try{new Notification('🧠 يلا نذاكر شوية!',{body:'أنا فاكرك — جرعة اليوم والتحدي والروح كلهم مستنيينك 💪',icon:'icons/avatar.jpg'})}catch(e){}
+      try{
+        let left=0;
+        try{left=(questToday()||[]).filter(q=>!q.claimed).length}catch(e){}
+        new Notification('🧠 يلا نذاكر شوية!',{body:left?('مفيش غير '+left+' مهمة اليوم وبس — خالص في دقايق! جرعة اليوم والتحدي موجودين كمان 🏁'):'جرعة اليوم والتحدي والروح كلهم مستنيينك 💪',icon:'icons/avatar.jpg'})}catch(e){}
       try{toast('🔔 وقت المذاكرة — يلا بينا 💪')}catch(e){}
     }catch(e){}
   },60000);
@@ -3233,6 +3239,17 @@ function shareResult(){
   if(navigator.share){navigator.share({title:'تحدي الذكاء - أحمد أيمن فكري',text:txt}).catch(()=>{})}
   else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast('📤 تم نسخ النتيجة!')).catch(()=>toast('📤 '+txt))}
   else{toast('📤 '+txt.slice(0,60))}
+}
+function shareQuestStreak(){
+  try{
+    const st=S.questStreak||0;
+    const done=Number(S.questAllDone||0);
+    const txt='🔥 تحدي الذكاء\n✅ خلّصت مهام '+done+' يوم ورا بعض\n🔥 سلسلة '+st+' يوم متتالي\n📋 مهامي النهارده: '+
+      (questToday()||[]).map(q=>(q.claimed?'✔️ ':'')+q.t).join(' · ')+'\n\nجرب كمان — تحدّيني!';
+    if(navigator.share){navigator.share({title:'تحدي الذكاء - سلسلتي',text:txt}).catch(()=>{})}
+    else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast('📤 تم نسخ سلسلتك!')).catch(()=>toast('📤 '+txt.slice(0,50)))}
+    else toast('📤 '+txt.slice(0,50));
+  }catch(e){}
 }
 function resolveStudyChapter(key){
   try{
@@ -4894,7 +4911,7 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.52',SW_BUILD='v75';
+const APP_VERSION='1.3.53',SW_BUILD='v76';
 const CHANGES=[
   {v:'v71 — إصلاح 4 مشاكل 🐛',d:'24/9/2026',items:['🐛 «أخطائي بالتفصيل» كانت مش بتفتح خالص (الشاشة كانت مسجّلة خطأ ورا شاشة تانية) — دلوقتي بتفتح صح','🐛 «أضعف الفصول» كانت بتختار فصول عشوائي — دلوقتي بتحسب الضعف من أخطائك الحقيقية ونجومك','🐛 الحدث اليومي كان بيفتحل عدّاد الوقت المختار عندك ويغيّره للأبد — اترجّع زي ما كان','🐛 اسم الحدث اليومي ماكانش بيظهر في اللعبة — بقى ظاهر','اختبارات ضد تكرار نفس المشاكل (298 ناجح)']},
   {v:'v70 — كل المميزات المتبقية 🎯🎖️🖼️',d:'24/9/2026',items:['🧪 اختبار الكتاب كامل: سؤال من كل فصل + ملخص بالنهاية يقولك اتقنت كل إيه ومحتاج مراجعة إيه','🎯 اختبار أضعف الفصول: 5 فصول محتاجة مراجعة عندك 선택','🎯 أخطائي بالتفصيل: مجموعات الأخطاء حسب الكتاب/الفصل، ودوس «راجع» على أي مجموعة','🎲 حدث يومي بيتبدّل كل يوم: دقة/سرعة/بدون مساعدات/نقاط مضاعفة/امتحان/يوم هادي — بينزل في 게임ات النهاردة','💬 رسالة تشجيع جديدة بعد كل لعبة','🎖️ موسم بـ10 مستويات ومكافآت كل 200 نقطة + عدّاد أيام الشهر','🖼️ صورة غلاف شخصية في ملفك','⌨️ اختصارات كيبورد (1-4 للإجابة، Enter، Esc، مسافة للصوت) + تخطيط سطح مكتب من 1024px','🏅 أوسمة شهرية (10/50/150 إجابة · 5/20 لعبة)','294 اختبار ناجح']},
