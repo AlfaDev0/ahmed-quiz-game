@@ -855,7 +855,7 @@ body.zen .prog-wrap{gap:6px}
     <div class="chal">
       <span class="chal-ico">⚡</span>
       <div class="chal-info"><b>جرعة خاطفة</b><p>8 أسئلة سريعة — لأي دقيقة فراغ بين المحاضرات</p></div>
-      <button class="chal-btn" id="quickBtn">ابدأ</button>
+      <button class="chal-btn" id="quickGameBtn">ابدأ</button>
     </div>
     <div class="chal">
       <span class="chal-ico">⏳</span>
@@ -1395,6 +1395,54 @@ body.zen .prog-wrap{gap:6px}
 <button class="zen-fab" id="zenBtn" title="وضع الهدوء">🌿</button>
 <button class="ai-fab" id="aiFab" title="مرشدك الخاص">🤖</button>
 <div class="toast" id="toast"></div>
+<script>
+/* v72: ضمان شاشة البداية — تشتغل قبل أي سكريبت تاني */
+(function(){
+  var done=false;
+  function kill(){
+    if(done)return;done=true;
+    var sp=document.getElementById('splash');
+    if(!sp)return;
+    try{sp.classList.add('hide')}catch(e){}
+    setTimeout(function(){try{sp.remove()}catch(e){}},700);
+  }
+  window.__killSplash=kill;
+  window.addEventListener('load',function(){setTimeout(kill,250)});
+  setTimeout(kill,2400);
+  window.addEventListener('error',function(){kill()});
+})();
+/* v72: صمّان الشيتات — مفيش شيت يقدر يقفل اللعبة على الموبايل (كان #aboutSheet بياخد كل الضغطات) */
+(function(){
+  window.__closeTopSheet=function(){
+    var all=[];
+    try{all=[].slice.call(document.querySelectorAll('.ai-sheet'))}catch(e){}
+    if(!all.length){try{['aboutSheet','examSheet','planSheet','pomoSheet','fastSheet','aiSheet'].forEach(function(id){var el=document.getElementById(id);if(el)all.push(el)})}catch(e){}}
+    var list=all.filter(function(s){
+      try{var d=s&&s.style&&s.style.display;return (d&&d!=='none')||(typeof getComputedStyle==='function'&&getComputedStyle(s).display!=='none')}catch(e){return false}
+    });
+    if(!list.length)return false;
+    var t=list[list.length-1];
+    if(t.id==='aboutSheet'&&typeof window.markSeenAbout==='function'){
+      try{window.markSeenAbout()}catch(e){try{t.style.display='none'}catch(e2){}}
+    }else{try{t.style.display='none'}catch(e){}}
+    return true;
+  };
+  try{
+    document.addEventListener('keydown',function(e){
+      if((e.key==='Escape'||e.keyCode===27)&&window.__closeTopSheet()){try{e.preventDefault()}catch(x){}}
+    });
+    document.addEventListener('click',function(e){
+      var t=e.target;if(!t||!t.closest)return;
+      var s=t.closest('.ai-sheet');
+      if(s&&t===s&&window.__closeTopSheet()){try{e.preventDefault()}catch(x){}}
+    },true);
+  }catch(e){}
+  // إنقاذ إضافي: أي شيت يفضل مفتوح وهو مش ظاهر أصلاً (صفحة مخفية) يقفل لوحده
+  try{document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState!=='visible'){try{window.__closeTopSheet()}catch(e){}}
+  })}catch(e){}
+})();
+</script>
 <script src="questions.js"></script>
 <script src="study.js"></script>
 <script>
@@ -1402,8 +1450,25 @@ body.zen .prog-wrap{gap:6px}
 const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0,gday:'',bossQ:0,bossDue:false,bossDone:0,zen:false,seen:{},endlessBest:0,moKey:'',moQ:0,moC:0,moG:0,moBadges:[],cheer:'',cover:'',seasonN:1,seasonXP:0,seasonKey:'',dailyKey:''};
 const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'***REMOVED-SECRET***',jsonbinBin:'***REMOVED-BIN***',voiceId:'',voiceRate:0.9,focusM:25,dayGoal:50,qTime:0,tfOn:true,revOn:true,smartOn:true};
 let S,set;
-function load(){try{S=JSON.parse(localStorage.getItem('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
-function save(){localStorage.setItem('iq_state',JSON.stringify(S))}
+function load(){try{S=JSON.parse(safeGet('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
+var MEM_STORE={};
+function safeSet(k,v){
+  try{localStorage.setItem(k,v);return true}
+  catch(e){
+    try{MEM_STORE[k]=v}catch(e2){}
+    try{
+      // نخفّف الحِمل: نشيل سجل الأسئلة الكبير أو صورة الغلاف ونحاول تاني
+      if(S&&S.seen){const ks=Object.keys(S.seen).sort((a,b)=>((S.seen[a]||{}).t||0)-((S.seen[b]||{}).t||0));ks.slice(0,Math.ceil(ks.length/2)).forEach(x=>{delete S.seen[x]})}
+      const v2=JSON.stringify(S);
+      localStorage.setItem(k,v2);return true;
+    }catch(e3){
+      try{if(S){delete S.cover;delete S.seen}}catch(e4){}
+      try{localStorage.setItem(k,JSON.stringify(S));return true}catch(e5){return false}
+    }
+  }
+}
+function safeGet(k){try{const v=localStorage.getItem(k);return v===null&&MEM_STORE[k]?MEM_STORE[k]:v}catch(e){return MEM_STORE[k]||null}}
+function save(){safeSet('iq_state',JSON.stringify(S))}
 let healRan=false;
 function healData(){
   try{
@@ -1425,8 +1490,8 @@ function healData(){
     else act();
   }catch(e){}
 }
-function loadSet(){try{set=JSON.parse(localStorage.getItem('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50;if(![0,20,30,45].includes(set.qTime))set.qTime=0;if(typeof set.tfOn!=='boolean')set.tfOn=true;if(typeof set.revOn!=='boolean')set.revOn=true;if(typeof set.smartOn!=='boolean')set.smartOn=true}
-function saveSet(){localStorage.setItem('iq_set',JSON.stringify(set))}
+function loadSet(){try{set=JSON.parse(safeGet('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50;if(![0,20,30,45].includes(set.qTime))set.qTime=0;if(typeof set.tfOn!=='boolean')set.tfOn=true;if(typeof set.revOn!=='boolean')set.revOn=true;if(typeof set.smartOn!=='boolean')set.smartOn=true}
+function saveSet(){safeSet('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
 const CAT_NAMES={culture:'الثقافة العامة',math:'الرياضيات',logic:'المنطق والذكاء',language:'اللغة العربية',science:'العلوم',speed:'تحدي السرعة',english:'الإنجليزية',history:'التاريخ',geography:'الجغرافيا',biology:'الأحياء',chemistry:'الكيمياء',physics:'الفيزياء',football:'كرة القدم',mixed:'الاختبار الشامل'};
@@ -1481,27 +1546,14 @@ function toast(msg){
   clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove('show'),1600);
 }
 
-/* ================= SPLASH ================= */
-/* v67: ضمان مطلق — شاشة البداية بتختفي مهما حصل (خطأ في أي سكريبت أو نت بطيء) */
-(function(){
-  var done=false;
-  function kill(){
-    if(done)return;done=true;
-    var sp=document.getElementById('splash');
-    if(!sp)return;
-    sp.classList.add('hide');
-    setTimeout(function(){try{sp.remove()}catch(e){}},600);
-  }
-  window.__killSplash=kill;
-  window.addEventListener('load',function(){setTimeout(kill,300)});
-  setTimeout(kill,2600);
-})();
+/* ================= BOOT ================= */
 window.addEventListener('load',()=>{
   try{load()}catch(e){}
   try{if(typeof applyZen==='function')applyZen()}catch(e){}
   try{loadSet()}catch(e){}
   try{const lf=document.getElementById('loadFill');if(lf)lf.style.width='100%'}catch(e){}
   try{typeof window.__killSplash==='function'&&window.__killSplash()}catch(e){}
+  try{setTimeout(()=>{try{if(typeof updateHome==='function')updateHome()}catch(e){}},900)}catch(e){}
   try{applySettings()}catch(e){}try{updateHome()}catch(e){}try{checkDaily()}catch(e){}
   try{setupNotif()}catch(e){}try{maybeNotify()}catch(e){}try{parseChallengeLink()}catch(e){}
   try{wireLB()}catch(e){}try{lbDisp()}catch(e){}try{wireDownload()}catch(e){}try{wireVoice()}catch(e){}
@@ -1522,9 +1574,9 @@ function autoUpdate(){
   try{
     if(location.protocol==='file:')return;
     if(typeof fetch!=='function')return;
-    let last=0;try{last=parseInt(localStorage.getItem('iq_auc')||'0',10)||0}catch(e){}
+    let last=0;try{last=parseInt(safeGet('iq_auc')||'0',10)||0}catch(e){}
     if(Date.now()-last<1800000)return;
-    try{localStorage.setItem('iq_auc',String(Date.now()))}catch(e){}
+    try{safeSet('iq_auc',String(Date.now()))}catch(e){}
     fetch('index.html?iu='+Date.now(),{cache:'no-store'}).then(function(r){return r&&r.ok?r.text():''}).then(function(txt){
       if(!txt)return;
       const m=txt.match(/SW_BUILD\s*=\s*'v(\d+)'/);
@@ -3066,8 +3118,8 @@ function bindEvents(){
   document.getElementById('shareBtn').onclick=shareResult;
   document.getElementById('inviteBtn').onclick=buildChallengeLink;
   document.getElementById('weekBtn').onclick=()=>startChallenge('week');
-  const qb=document.getElementById('quickBtn');
-  if(qb)qb.onclick=()=>{try{startQuickGame()}catch(e){console.error(e);toast('⚠️ حصل خطأ — حاول تاني');startGame('mixed',false)}};
+  const qg=document.getElementById('quickGameBtn');
+  if(qg)qg.onclick=()=>{try{startQuickGame()}catch(e){console.error(e);toast('⚠️ حصل خطأ — حاول تاني');startGame('mixed',false)}};
   const fb=document.getElementById('focusBtn');
   if(fb)fb.onclick=()=>{try{focusToggle()}catch(e){console.error(e)}};
   const fr=document.getElementById('flashReveal');
@@ -3181,7 +3233,7 @@ function setLbTab(id){
   renderLB();
 }
 function showInstall(ev){
-  if(localStorage.getItem('iq_noInstall'))return;
+  if(safeGet('iq_noInstall'))return;
   if(window.matchMedia('(display-mode: standalone)').matches)return;
   const d=document.createElement('div');d.className='install';
   d.innerHTML='<div class="install-card">'
@@ -3193,7 +3245,7 @@ function showInstall(ev){
     +'</div>';
   d.onclick=e=>{if(!e.target.closest('.install-card'))d.remove()};
   d.querySelector('.install-btn').onclick=async()=>{await ev.prompt();d.remove()};
-  d.querySelector('.install-nobtn').onclick=()=>{localStorage.setItem('iq_noInstall','1');d.remove()};
+  d.querySelector('.install-nobtn').onclick=()=>{safeSet('iq_noInstall','1');d.remove()};
   document.body.appendChild(d);
 }
 function maybeShowIOSInstall(){if(typeof navigator!=='undefined'&&/iphone|ipad|ipod/i.test(navigator.userAgent))showInstall({prompt:()=>{}})}
@@ -3938,11 +3990,24 @@ function markSeenAbout(){
   const sn=document.getElementById('aboutSeen');if(sn)sn.style.display='none';
   const cl=document.getElementById('aboutClose');if(cl)cl.style.display='';
 }
-function maybeShowWhatsNew(){
-  if(swSeen()>=swVer())return false;
+try{window.markSeenAbout=markSeenAbout}catch(e){}
+function visibleScreen(){
+  try{const l=document.querySelectorAll('.screen');for(let i=0;i<l.length;i++){const c=l[i].classList;if(c&&c.contains('active'))return l[i].id}return ''}catch(e){return ''}
+}
+function anySheetOpen(){
+  try{const l=document.querySelectorAll('.ai-sheet');for(let i=0;i<l.length;i++){const d=l[i].style&&l[i].style.display;if(d&&d!=='none')return true}
+    const o=document.getElementById('aboutSheet');if(o&&o.style.display==='flex')return true;
+    return false}catch(e){return false}
+}
+function maybeShowWhatsNew(force){
+  if(!force&&swSeen()>=swVer())return false;
+  // ما نفتحش حاجة فوق لعبة شغالة أو فوق شيت مفتوح — كان بياكل الضغطات
+  const cur=visibleScreen();
+  if(!force&&(anySheetOpen()||(cur&&cur!=='home')))return false;
+  try{document.removeEventListener('visibilitychange',window.__vcGuard)}catch(e){}
   openAbout();
   const sn=document.getElementById('aboutSeen');if(sn)sn.style.display='block';
-  const cl=document.getElementById('aboutClose');if(cl)cl.style.display='none';
+  const cl=document.getElementById('aboutClose');if(cl)cl.style.display='';
   return true;
 }
 (function(){
@@ -3962,9 +4027,9 @@ function maybeShowWhatsNew(){
   const pb=document.getElementById('planBtn');if(pb)pb.onclick=openPlan;
   setTimeout(()=>{
     try{
-      if(typeof maybeShowWhatsNew==='function'&&maybeShowWhatsNew())toast('🆕 تحديثات جديدة! افتح قسم ما الجديد');
+      if(typeof maybeShowWhatsNew==='function'&&maybeShowWhatsNew())toast('🆕 جديد! تقدر تقفله بأي وقت — اضغط ✕ أو بره الشيت');
     }catch(e){console.error(e)}
-  },2600);
+  },7000);
 })();
 /* ================= DOWNLOAD CENTER ================= */
 function bookLabel(pi,si,bi){
@@ -4649,7 +4714,7 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.48',SW_BUILD='v71';
+const APP_VERSION='1.3.49',SW_BUILD='v72';
 const CHANGES=[
   {v:'v71 — إصلاح 4 مشاكل 🐛',d:'24/9/2026',items:['🐛 «أخطائي بالتفصيل» كانت مش بتفتح خالص (الشاشة كانت مسجّلة خطأ ورا شاشة تانية) — دلوقتي بتفتح صح','🐛 «أضعف الفصول» كانت بتختار فصول عشوائي — دلوقتي بتحسب الضعف من أخطائك الحقيقية ونجومك','🐛 الحدث اليومي كان بيفتحل عدّاد الوقت المختار عندك ويغيّره للأبد — اترجّع زي ما كان','🐛 اسم الحدث اليومي ماكانش بيظهر في اللعبة — بقى ظاهر','اختبارات ضد تكرار نفس المشاكل (298 ناجح)']},
   {v:'v70 — كل المميزات المتبقية 🎯🎖️🖼️',d:'24/9/2026',items:['🧪 اختبار الكتاب كامل: سؤال من كل فصل + ملخص بالنهاية يقولك اتقنت كل إيه ومحتاج مراجعة إيه','🎯 اختبار أضعف الفصول: 5 فصول محتاجة مراجعة عندك 선택','🎯 أخطائي بالتفصيل: مجموعات الأخطاء حسب الكتاب/الفصل، ودوس «راجع» على أي مجموعة','🎲 حدث يومي بيتبدّل كل يوم: دقة/سرعة/بدون مساعدات/نقاط مضاعفة/امتحان/يوم هادي — بينزل في 게임ات النهاردة','💬 رسالة تشجيع جديدة بعد كل لعبة','🎖️ موسم بـ10 مستويات ومكافآت كل 200 نقطة + عدّاد أيام الشهر','🖼️ صورة غلاف شخصية في ملفك','⌨️ اختصارات كيبورد (1-4 للإجابة، Enter، Esc، مسافة للصوت) + تخطيط سطح مكتب من 1024px','🏅 أوسمة شهرية (10/50/150 إجابة · 5/20 لعبة)','294 اختبار ناجح']},
@@ -4754,8 +4819,8 @@ function hardRefresh(){
   const w=document.getElementById('whatsNewBtn');if(w)w.onclick=openAbout;
   const c=document.getElementById('chkUpdBtn');if(c)c.onclick=checkUpdates;
   const r=document.getElementById('refreshBtn');if(r)r.onclick=hardRefresh;
-  const cl=document.getElementById('aboutClose');if(cl)cl.onclick=()=>{document.getElementById('aboutSheet').style.display='none'};
-  const as=document.getElementById('aboutSheet');if(as)as.onclick=e=>{if(e.target.id==='aboutSheet')as.style.display='none'};
+  const cl=document.getElementById('aboutClose');if(cl)cl.onclick=()=>{try{markSeenAbout()}catch(e){try{document.getElementById('aboutSheet').style.display='none'}catch(x){}}};
+  const as=document.getElementById('aboutSheet');if(as)as.onclick=e=>{if(e.target.id==='aboutSheet'){try{markSeenAbout()}catch(x){try{as.style.display='none'}catch(y){}}}};
   const vl=document.getElementById('appVersionLine');if(vl)vl.textContent='الإصدار '+APP_VERSION+' • البناء '+SW_BUILD;
 })();
 </script>

@@ -2,6 +2,7 @@ const fs = require('fs');
 const vm = require('vm');
 
 const html = fs.readFileSync(process.env.TEST_INDEX || '/home/kali/ahmed-quiz-game/index.html', 'utf8');
+const APP_VER=(html.match(/APP_VERSION='([^']+)'/)||[,''])[1];
 const questionsJS = fs.readFileSync(process.env.TEST_QUESTIONS || '/home/kali/ahmed-quiz-game/questions.js', 'utf8');
 const studyJS = fs.readFileSync(process.env.TEST_STUDY || '/home/kali/ahmed-quiz-game/study.js', 'utf8');
 
@@ -261,7 +262,7 @@ try {
   sandbox.window._load && sandbox.window._load();
   pump(6000);
 } catch (e) { console.log('  !! boot threw: ' + e.message + ' @' + (e.stack || '').split('\n')[1]); }
-ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S().level));
+ck('boot did not throw (updateHome ran)', (()=>{const el=document.getElementById('hmLv');return !!el&&el.textContent===String(t().S().level)})());
 
 /* ---- normal game flow ---- */
 (function game() {
@@ -378,7 +379,7 @@ ck('boot did not throw (updateHome ran)', byId.hmLv.textContent === String(t().S
 })();
 
 /* ---- about / changelog ---- */
-ck('about version line set', (byId.appVersionLine.textContent || '').includes('1.3.48'));
+ck('about version line set', (byId.appVersionLine.textContent || '').includes(APP_VER));
 sandbox.renderAbout();
 const aboutHtml = byId.aboutBody._inner || '';
 ck('changelog rendered (v23 entry)', aboutHtml.includes('v23'));
@@ -390,7 +391,9 @@ byId.aboutClose.onclick();
 ck('about sheet closes', byId.aboutSheet.style.display === 'none');
 
 /* ---- whats-new banner ---- */
-t().S().lastSeenVer='';
+t().S().lastSeenVer='';t().S().lastSeenVerNum=0;
+ck('whats-new gate: no popup while result screen shown', sandbox.maybeShowWhatsNew()===false);
+sandbox.show('home');
 ck('whats-new banner opens when new version', sandbox.maybeShowWhatsNew()===true);
 ck('banner shows confirm button', byId.aboutSeen.style.display==='block');
 sandbox.markSeenAbout();
@@ -835,6 +838,78 @@ ck('splash failsafe killer installed', (()=>{try{return vm.runInContext(`typeof 
 ck('sw: netFetch timeout helper exists', (()=>{try{return /function netFetch\([\s\S]*?AbortController/.test(fs.readFileSync('/home/kali/ahmed-quiz-game/sw.js','utf8'))}catch(e){return 'ERR:'+e.message}})());
 ck('sw: index.html served from cache instantly', (()=>{try{const s=fs.readFileSync('/home/kali/ahmed-quiz-game/sw.js','utf8');return /const cached = await cache\.match\(key\)/.test(s)&&/event\.waitUntil\(update\)/.test(s)}catch(e){return 'ERR:'+e.message}})());
 ck('sw: no unguarded fetch on index path', (()=>{try{const s=fs.readFileSync('/home/kali/ahmed-quiz-game/sw.js','utf8');const i=s.indexOf("endsWith('index.html')");const seg=s.slice(i,i+1200);return seg.indexOf('netFetch')>0}catch(e){return 'ERR:'+e.message}})());
+
+/* v72 موبايل: زرار ميت + تخزين ممتلئ + صور مكسورة + شاشة بتعلق */
+ck('no duplicate ids in markup (dead-button guard)', (()=>{try{
+  const ids=[...html.matchAll(/\bid=["']([\w-]+)["']/g)].map(x=>x[1]);
+  const c={};ids.forEach(i=>c[i]=(c[i]||0)+1);
+  const d=Object.entries(c).filter(([k,v])=>v>1).map(([k,v])=>k+'×'+v);
+  return d.length===0||'dups:'+d.join(',');
+}catch(e){return 'ERR:'+e.message}})());
+ck('quickGameBtn + quickBtn both exist and are distinct', (()=>{try{
+  return html.indexOf('id="quickBtn"')>0&&html.indexOf('id="quickGameBtn"')>0
+    &&(html.match(/id="quickBtn"/g)||[]).length===1&&(html.match(/id="quickGameBtn"/g)||[]).length===1;
+}catch(e){return 'ERR:'+e.message}})());
+ck('quickGameBtn wired to startQuickGame', (()=>{try{
+  const i=html.indexOf("getElementById('quickGameBtn')");
+  return i>0&&html.slice(i,i+260).indexOf('startQuickGame')>0;
+}catch(e){return 'ERR:'+e.message}})());
+ck('safeSet/safeGet exist (storage never throws)', (()=>{try{return vm.runInContext(`typeof safeSet==='function'&&typeof safeGet==='function'`,sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('save() and saveSet() use safeSet', (()=>{try{return html.indexOf('function save(){safeSet(')>0&&html.indexOf('function saveSet(){safeSet(')>0}catch(e){return 'ERR:'+e.message}})());
+ck('safeSet survives quota error (degrades to memory)', (()=>{try{return /catch\(e\)\{[\s\S]{0,80}MEM_STORE\[k\]=v/.test(html)}catch(e){return 'ERR:'+e.message}})());
+ck('splash killer is FIRST inline script (runs before app code)', (()=>{try{
+  const firstSrc=html.indexOf('<script src=');
+  const before=html.slice(0,firstSrc);
+  return before.indexOf('v72: ضمان شاشة البداية')>0;
+}catch(e){return 'ERR:'+e.message}})());
+ck('splash killer also listens to window error', (()=>{try{return /addEventListener\('error',function\(\)\{kill\(\)\}\)/.test(html)}catch(e){return 'ERR:'+e.message}})());
+ck('closing whats-new marks it seen (never re-opens)', (()=>{try{
+  const S=t().S();S.lastSeenVer='';S.lastSeenVerNum=0;
+  sandbox.show('home');
+  const opened=sandbox.maybeShowWhatsNew()===true;
+  byId.aboutClose.onclick();
+  const closed=byId.aboutSheet.style.display==='none';
+  const reopened=sandbox.maybeShowWhatsNew();
+  return opened&&closed&&reopened===false;
+}catch(e){return 'ERR:'+e.message}})());
+ck('backdrop tap marks whats-new seen', (()=>{try{
+  const S=t().S();S.lastSeenVer='';S.lastSeenVerNum=0;
+  sandbox.show('home');
+  sandbox.maybeShowWhatsNew();
+  byId.aboutSheet.onclick({target:{id:'aboutSheet'}});
+  return byId.aboutSheet.style.display==='none'&&sandbox.maybeShowWhatsNew()===false;
+}catch(e){return 'ERR:'+e.message}})());
+ck('whats-new keeps a visible close button', (()=>{try{
+  const S=t().S();S.lastSeenVer='';S.lastSeenVerNum=0;
+  sandbox.show('home');sandbox.maybeShowWhatsNew();
+  return byId.aboutClose.style.display!=='none'&&byId.aboutSeen.style.display==='block';
+}catch(e){return 'ERR:'+e.message}})());
+ck('__closeTopSheet installed (ESC/backdrop rescue)', (()=>{try{return typeof sandbox.window.__closeTopSheet==='function'}catch(e){return 'ERR:'+e.message}})());
+ck('__closeTopSheet closes open sheets', (()=>{try{
+  const S=t().S();S.lastSeenVer='';S.lastSeenVerNum=0;
+  sandbox.show('home');sandbox.maybeShowWhatsNew();
+  const closed=sandbox.window.__closeTopSheet();
+  return closed===true&&byId.aboutSheet.style.display==='none';
+}catch(e){return 'ERR:'+e.message}})());
+ck('whats-new popup delayed past splash (>=5s)', (()=>{try{return /\},(7000)\);/.test(html)}catch(e){return 'ERR:'+e.message}})());
+ck('visibleScreen() helper exists', (()=>{try{return vm.runInContext('typeof visibleScreen==="function"&&typeof anySheetOpen==="function"',sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('offline build has no broken icon refs', (()=>{try{
+  const p='/home/kali/ahmed-quiz-game/download/ahmed-quiz-offline.html';
+  if(!fs.existsSync(p))return true;
+  const o=fs.readFileSync(p,'utf8');
+  return (o.match(/icons\/(avatar|icon-192|icon-512)\.(jpg|png)/g)||[]).length===0;
+}catch(e){return 'ERR:'+e.message}})());
+ck('offline build embeds images as data uri', (()=>{try{
+  const p='/home/kali/ahmed-quiz-game/download/ahmed-quiz-offline.html';
+  if(!fs.existsSync(p))return true;
+  const o=fs.readFileSync(p,'utf8');
+  return o.includes('data:image/jpeg;base64,')&&o.includes('data:image/png;base64,');
+}catch(e){return 'ERR:'+e.message}})());
+ck('offline build has exactly one splash killer copy', (()=>{try{
+  const p='/home/kali/ahmed-quiz-game/download/ahmed-quiz-offline.html';
+  if(!fs.existsSync(p))return true;
+  return (fs.readFileSync(p,'utf8').match(/v72: ضمان شاشة البداية/g)||[]).length===1;
+}catch(e){return 'ERR:'+e.message}})());
 
 /* ---- persistence (check before AI resets it) ---- */
   ck('state persisted', localStorage._d.iq_state && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'] && JSON.parse(localStorage._d.iq_state).study['0.0.0.0'].stars === 3);
