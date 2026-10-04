@@ -564,6 +564,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Cairo",Tahoma,Aria
 .nav-btn.active{color:var(--primary-dark,var(--primary));background:linear-gradient(180deg,var(--primary),var(--secondary));color:#0B0C07;box-shadow:0 4px 14px -4px rgba(124,143,60,.6);transform:translateY(-2px)}
 html.night .nav-btn.active,html.dark .nav-btn.active{color:#0B0C07}
 
+/* ==== المهام اليومية (v75) ==== */
+.quest-card{background:linear-gradient(135deg,rgba(111,157,74,.14),rgba(0,201,167,.08));border:1px solid var(--bg3);border-radius:18px;padding:12px;margin-bottom:12px}
+.quest-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.quest-head b{font-size:14px}
+.quest-head .qstreak{font-size:12px;font-weight:800;color:var(--gold);background:var(--bg3);padding:3px 10px;border-radius:12px}
+.q-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px dashed var(--bg3)}
+.q-row:first-of-type{border-top:none}
+.q-emo{font-size:20px;width:26px;text-align:center;flex-shrink:0}
+.q-mid{flex:1;min-width:0}
+.q-mid .qt{font-size:13px;font-weight:700;display:block}
+.q-bar{height:7px;background:var(--bg3);border-radius:6px;overflow:hidden;margin-top:5px}
+.q-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:6px;transition:width .3s}
+.q-rw{font-size:11px;color:var(--dim);margin-top:3px;display:block}
+.q-btn{flex-shrink:0;border:none;border-radius:12px;padding:7px 12px;font-family:inherit;font-weight:800;font-size:12px;cursor:pointer;background:var(--bg3);color:var(--dim)}
+.q-btn.ready{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#0B0C07;box-shadow:0 4px 14px -4px rgba(0,201,167,.7)}
+.q-btn.claimed{background:var(--bg3);color:var(--primary);cursor:default}
+.q-bonus{margin-top:8px;padding:8px 10px;border-radius:14px;background:var(--bg3);font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+
 /* ==== لمسات الموبايل (v73): responsiveness ==== */
 button,.opt,.nav-btn,.chal-btn,.sb-btn,.sec-btn,.btn-main,.ll-btn,.ai-chip,.course-bt,.chip,.opt,.stat-card,.chal,.pod-item{
   touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none
@@ -729,6 +747,7 @@ body.zen .prog-wrap{gap:6px}
       <button class="wn-see" id="wnSee">شوف</button>
       <button class="wn-x" id="wnX" aria-label="إغلاق">✕</button>
     </div>
+    <div class="quest-card" id="questCard" style="display:none"></div>
     <div class="boss-card" id="bossCard" style="display:none"></div>
     <div class="header">
       <div class="avatar"><img src="icons/avatar.jpg" id="hmAv" alt=""></div>
@@ -1688,6 +1707,7 @@ function focusToggle(){
 }
 function focusDone(){
   clearTimeout(focusState.id);
+  try{qTick('focus',Math.round(((set&&set.focusM)||25)/5)||1)}catch(e){}
   focusState.on=false;focusState.paused=false;
   const b=document.getElementById('focusBtn');if(b)b.textContent='▶️ ابدأ التركيز';
   const el=document.getElementById('focusTime');if(el)el.textContent='🎉 استراحة — خذ 5 دقائق بهدوء';
@@ -1922,6 +1942,7 @@ function renderWeekReport(){
 }
 function updateHome(){
   try{renderDayGoal()}catch(e){}
+  try{renderQuests()}catch(e){}
   try{renderBoss()}catch(e){}
   try{renderRevBanner()}catch(e){}
   try{applyDailyMod()}catch(e){}
@@ -2105,6 +2126,126 @@ function moTick(q,c,g){
     S.moQ=(S.moQ||0)+(q||0);S.moC=(S.moC||0)+(c||0);S.moG=(S.moG||0)+(g||0);
     save();
   }catch(e){}
+}
+/* ================= المهام اليومية (v75) ================= */
+function questKey(d){
+  const t=d||new Date();
+  return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+}
+function questHash(k){
+  let h=0;const s2=String(k);
+  for(let i=0;i<s2.length;i++){h=(h*31+s2.charCodeAt(i))>>>0}
+  return h;
+}
+const QUEST_DEFS=[
+  {id:'ans5',    e:'📝', t:'أجب على 5 أسئلة',            g:5, c:25, x:20, k:'ans'},
+  {id:'ans12',   e:'📚', t:'أجب على 12 سؤال',             g:12,c:40, x:30, k:'ans'},
+  {id:'cor5',    e:'✅', t:'5 إجابات صحيحة',             g:5, c:30, x:25, k:'cor'},
+  {id:'cor8',    e:'🎯', t:'8 إجابات صحيحة',             g:8, c:45, x:35, k:'cor'},
+  {id:'games2',  e:'🎮', t:'أنهي جولتين',                 g:2, c:30, x:25, k:'games'},
+  {id:'streak4', e:'🔥', t:'سلسلة 4 صحيحة متتالية',      g:4, c:35, x:30, k:'streak'},
+  {id:'streak6', e:'⚡', t:'سلسلة 6 صحيحة متتالية',      g:6, c:50, x:40, k:'streak'},
+  {id:'perfect1',e:'💎', t:'جولة كاملة بدون أخطاء',       g:1, c:55, x:45, k:'perfect'},
+  {id:'review4', e:'🔁', t:'راجع 4 أسئلة من أخطائك',      g:4, c:35, x:30, k:'review'},
+  {id:'focus5',  e:'🌿', t:'جلسة تركيز 5 دقايق',          g:5, c:40, x:30, k:'focus'},
+  {id:'endless8',e:'♾️', t:'8 أسئلة في وضع اللانهائي',    g:8, c:45, x:35, k:'endless'},
+  {id:'zen5',    e:'🧘', t:'5 أسئلة في وضع Zen',          g:5, c:35, x:30, k:'zen'}
+];
+function questToday(){
+  try{
+    const key=questKey();
+    if(S.questDay!==key||!Array.isArray(S.questList)||!S.questList.length){
+      const h=questHash(key);
+      const easy=QUEST_DEFS.filter(d=>d.id==='ans5'||d.id==='ans12');
+      const rest=QUEST_DEFS.filter(d=>d.id!=='ans5'&&d.id!=='ans12');
+      const a=easy[h%easy.length];
+      const r1=rest[(h>>>2)%rest.length];
+      let r2=rest[(h>>>5)%rest.length];
+      let guard=0;
+      while(r2.id===r1.id&&guard++<8)r2=rest[((h>>>5)+guard)%rest.length];
+      S.questDay=key;
+      S.questList=[a,r1,r2].map(d=>({id:d.id,e:d.e,t:d.t,g:d.g,c:d.c,x:d.x,k:d.k,p:0,claimed:false}));
+      save();
+    }
+    return S.questList;
+  }catch(e){return []}
+}
+function qTick(kind,n){
+  try{
+    const add=Number(n)||0;if(!add)return;
+    const list=questToday();if(!list.length)return;
+    let changed=false;
+    list.forEach(q=>{
+      if(q.k!==kind||q.claimed)return;
+      if(q.p<q.g){q.p=Math.min(q.g,q.p+add);changed=true}
+    });
+    if(changed){save();try{renderQuests()}catch(e){}
+      const rdy=list.filter(q=>q.p>=q.g&&!q.claimed).length;
+      if(rdy)try{toast('📋 مهمة جاهزة للاستلام!')}catch(e){}
+    }
+  }catch(e){}
+}
+function claimQuest(id){
+  try{
+    const list=questToday();const q=list.find(x=>x.id===id);
+    if(!q||q.claimed||q.p<q.g)return false;
+    q.claimed=true;
+    S.coins+=q.c;S.totalCoins=(S.totalCoins||0)+q.c;S.xp+=q.x;
+    const before=S.level;
+    while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++}
+    save();
+    try{sfx('lv')}catch(e){}
+    try{toast('🎁 '+q.t+' — +'+q.c+'💰 +'+q.x+'⭐')}catch(e){}
+    if(S.level>before)try{toast('🎉 رفعت مستواك!_level'+S.level)}catch(e){}
+    const all=list.every(x=>x.claimed);
+    if(all)questBonus();
+    try{renderQuests()}catch(e){}
+    try{updateHome()}catch(e){}
+    return true;
+  }catch(e){return false}
+}
+function questBonus(){
+  try{
+    const key=questKey();
+    if(S.questBonusDay===key)return;
+    S.questBonusDay=key;
+    S.coins+=60;S.totalCoins=(S.totalCoins||0)+60;S.xp+=40;
+    // سلسلة الأيام: كل يوم تخلّص فيه الـ3 تاني = يوم متتالي
+    const y=questKey(new Date(Date.now()-86400000));
+    S.questStreak=(S.questLastDay===y)?((S.questStreak||0)+1):1;
+    S.questLastDay=key;
+    S.questAllDone=(S.questAllDone||0)+1;
+    S.questTotal=(S.questTotal||0)+3;
+    save();
+    try{sfx('win')}catch(e){}
+    try{confetti()}catch(e){}
+    try{toast('🎉 خلصت مهام اليوم كاملة! +60💰 +40⭐ — سلسلة '+S.questStreak+' يوم')}catch(e){}
+  }catch(e){}
+}
+function renderQuests(){
+  const box=document.getElementById('questCard');
+  if(!box)return;
+  const list=questToday();
+  if(!list.length){box.style.display='none';return}
+  const doneN=list.filter(q=>q.claimed).length;
+  const allDone=doneN>=list.length;
+  let h='<div class="quest-head"><b>📋 مهام اليوم</b><span class="qstreak">🔥 '+(S.questStreak||0)+' يوم</span></div>';
+  list.forEach(q=>{
+    const ready=q.p>=q.g,pc=Math.min(100,Math.round(q.p/q.g*100));
+    h+='<div class="q-row"><span class="q-emo">'+(q.claimed?'✅':q.e)+'</span>'+
+       '<div class="q-mid"><span class="qt">'+q.t+'</span>'+
+       '<div class="q-bar"><div class="q-fill" style="width:'+pc+'%"></div></div>'+
+       '<span class="q-rw">'+Math.min(q.p,q.g)+'/'+q.g+' · +'+q.c+'💰 +'+q.x+'⭐</span></div>';
+    if(q.claimed)h+='<button class="q-btn claimed" disabled>تم ✓</button>';
+    else if(ready)h+='<button class="q-btn ready" data-quest="'+q.id+'">استلم</button>';
+    else h+='<button class="q-btn" disabled>'+Math.min(q.p,q.g)+'/'+q.g+'</button>';
+    h+='</div>';
+  });
+  if(allDone)h+='<div class="q-bonus"><span>🎉 مهام اليوم كاملة</span><b>+60💰 +40⭐</b></div>';
+  else h+='<div class="q-bonus"><span>خلّص الـ3 وخد مكافأة كاملة</span><b>'+(3-doneN)+' متبقّي</b></div>';
+  box.innerHTML=h;
+  box.style.display='block';
+  box.querySelectorAll('[data-quest]').forEach(b=>{b.onclick=()=>{try{claimQuest(b.getAttribute('data-quest'))}catch(e){}}});
 }
 function renderMoBadges(){
   const box=document.getElementById('moBadges');
@@ -2704,6 +2845,16 @@ function finish(){
   S.xp+=score;
   try{seasonAddXP(score)}catch(e){}
   try{moTick(questions.length,cor,1)}catch(e){}
+  try{
+    qTick('ans',questions.length);
+    qTick('cor',cor);
+    qTick('games',1);
+    qTick('streak',streak);
+    if(cor===questions.length)qTick('perfect',1);
+    if(curCat==='review')qTick('review',questions.length);
+    if(wasEndless)qTick('endless',questions.length);
+    if(S.zen)qTick('zen',questions.length);
+  }catch(e){}
   let lvup=false;
   while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;lvup=true}
   if(dailyMode&&!S.dailyDone){S.dailyDone=true;S.coins+=50;S.totalCoins+=50}
@@ -4743,7 +4894,7 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.51',SW_BUILD='v74';
+const APP_VERSION='1.3.52',SW_BUILD='v75';
 const CHANGES=[
   {v:'v71 — إصلاح 4 مشاكل 🐛',d:'24/9/2026',items:['🐛 «أخطائي بالتفصيل» كانت مش بتفتح خالص (الشاشة كانت مسجّلة خطأ ورا شاشة تانية) — دلوقتي بتفتح صح','🐛 «أضعف الفصول» كانت بتختار فصول عشوائي — دلوقتي بتحسب الضعف من أخطائك الحقيقية ونجومك','🐛 الحدث اليومي كان بيفتحل عدّاد الوقت المختار عندك ويغيّره للأبد — اترجّع زي ما كان','🐛 اسم الحدث اليومي ماكانش بيظهر في اللعبة — بقى ظاهر','اختبارات ضد تكرار نفس المشاكل (298 ناجح)']},
   {v:'v70 — كل المميزات المتبقية 🎯🎖️🖼️',d:'24/9/2026',items:['🧪 اختبار الكتاب كامل: سؤال من كل فصل + ملخص بالنهاية يقولك اتقنت كل إيه ومحتاج مراجعة إيه','🎯 اختبار أضعف الفصول: 5 فصول محتاجة مراجعة عندك 선택','🎯 أخطائي بالتفصيل: مجموعات الأخطاء حسب الكتاب/الفصل، ودوس «راجع» على أي مجموعة','🎲 حدث يومي بيتبدّل كل يوم: دقة/سرعة/بدون مساعدات/نقاط مضاعفة/امتحان/يوم هادي — بينزل في 게임ات النهاردة','💬 رسالة تشجيع جديدة بعد كل لعبة','🎖️ موسم بـ10 مستويات ومكافآت كل 200 نقطة + عدّاد أيام الشهر','🖼️ صورة غلاف شخصية في ملفك','⌨️ اختصارات كيبورد (1-4 للإجابة، Enter، Esc، مسافة للصوت) + تخطيط سطح مكتب من 1024px','🏅 أوسمة شهرية (10/50/150 إجابة · 5/20 لعبة)','294 اختبار ناجح']},
