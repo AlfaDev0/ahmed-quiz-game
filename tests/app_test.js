@@ -892,6 +892,20 @@ ck('__closeTopSheet closes open sheets', (()=>{try{
   return closed===true&&byId.aboutSheet.style.display==='none';
 }catch(e){return 'ERR:'+e.message}})());
 ck('whats-new popup delayed past splash (>=5s)', (()=>{try{return /\},(7000)\);/.test(html)}catch(e){return 'ERR:'+e.message}})());
+ck('auto-open shows banner, never the modal (v72)', (()=>{try{
+  const S=t().S();S.lastSeenVer='';S.lastSeenVerNum=0;
+  sandbox.show('home');
+  byId.aboutSheet.style.display='none';
+  pump(9000);
+  return byId.aboutSheet.style.display!=='flex'&&byId.wnBanner.style.display==='flex';
+}catch(e){return 'ERR:'+e.message}})());
+ck('banner close marks seen + hides itself', (()=>{try{
+  byId.wnX.onclick();
+  return byId.wnBanner.style.display==='none'&&sandbox.maybeShowWhatsNew(true)===true;
+}catch(e){return 'ERR:'+e.message}})());
+ck('banner has see+close buttons in markup', (()=>{try{return html.indexOf('id="wnSee"')>0&&html.indexOf('id="wnX"')>0&&html.indexOf('class="wn-banner"')>0}catch(e){return 'ERR:'+e.message}})());
+ck('wn-banner is NOT position:fixed (cannot block taps)', (()=>{try{const i=html.indexOf('.wn-banner{');return i>0&&html.slice(i,i+120).indexOf('fixed')<0}catch(e){return 'ERR:'+e.message}})());
+ck('no auto-open call to maybeShowWhatsNew()', (()=>{try{const k=html.indexOf('setTimeout(()=>{',html.indexOf('id="wnSee"')-600);const seg=html.slice(k,k+400);return seg.indexOf('maybeShowWhatsNew()')<0}catch(e){return 'ERR:'+e.message}})());
 ck('visibleScreen() helper exists', (()=>{try{return vm.runInContext('typeof visibleScreen==="function"&&typeof anySheetOpen==="function"',sandbox)===true}catch(e){return 'ERR:'+e.message}})());
 ck('offline build has no broken icon refs', (()=>{try{
   const p='/home/kali/ahmed-quiz-game/download/ahmed-quiz-offline.html';
