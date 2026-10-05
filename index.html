@@ -2992,7 +2992,7 @@ function lbsSelfEntry(){
   return{name:S.name||'لاعب',games:S.games||0,correct:S.correct||0,wrong:S.wrong||0,ptsAll:(S.correct||0)*5,ptsWeek:S.weekBest||0,ptsMonth:S.monthBest||0,at:Date.now()};
 }
 function lbUpsert(){
-  if(!lbMode())return Promise.resolve();
+  if(!lbMode()){lbNeedKey();return Promise.resolve()}
   lbLastPush=Date.now();
   const self=lbsSelfEntry();if(!self)return Promise.resolve();
   return lbEnsureBin(set.jsonbinKey).then(bin=>{
