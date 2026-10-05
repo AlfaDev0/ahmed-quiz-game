@@ -28,14 +28,23 @@ const re=/<script(?![^>]*src)(?![^>]*text\/plain)[^>]*>([\s\S]*?)<\/script>/g;
 let m;while((m=re.exec(html.slice(firstScript))))blocks.push(m[1]);
 const esc=(s)=>s.replace(/<\/script>/gi,'<\\/script>');
 
+// هوية التطبيق من BRAND (عشان البائع يعدّلها في مكان واحد)
+const brandBlk=(html.match(/const BRAND\s*=\s*\{([\s\S]*?)\}/)||[,''])[1];
+const bget=(k,d)=>{const m=brandBlk.match(new RegExp(k+"\\s*:\\s*'([^']*)'"))||[];return m[1]||d};
+const B_APP=bget('app','تحدي الذكاء'),B_OWNER=bget('owner','');
+const OFF_TITLE=B_APP+(B_OWNER?' — '+B_OWNER:'')+' (نسخة تحميل)';
+
+// 2) شيل طلب خط جوجل — النسخة المحملة لازم تشتغل بصفر إنترنت
+const styleTxt=style[1].replace(/@import\s+url\(['"]?https:\/\/fonts\.googleapis\.com[^;]*;?\s*/gi,'');
+
 const out=[
  '<!DOCTYPE html><html dir="rtl" lang="ar"><head>',
  '<meta charset="utf-8">',
  '<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">',
  '<meta name="theme-color" content="#0b1020">',
  '<link rel="icon" href="'+APP_ICON+'">',
- '<title>تحدي الذكاء — أحمد أيمن فكري (نسخة تحميل)</title>',
- '<style>',style[1],'</style></head><body>',
+ '<title>'+esc(OFF_TITLE)+'</title>',
+ '<style>',styleTxt,'</style></head><body>',
  bodyMarkup,
  '<script>',esc(questions),'</script>',
  '<script>',esc(study),'</script>',
