@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#7C8F3C">
-<title>تحدي الذكاء - أحمد أيمن فكري</title>
+<title>تحدي الذكاء</title>
 <link rel="icon" href="icons/avatar.jpg">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -422,6 +422,11 @@ html.night .read-sec p{line-height:1.85;color:#EAE6D4}
 .ai-clear{width:34px;height:34px;border-radius:12px;background:var(--bg3);border:none;color:var(--dim);font-size:15px;cursor:pointer;font-family:inherit;margin-left:8px}
 .ai-fab{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#6F9D4A,#7C8F3C);color:#fff;font-size:24px;z-index:498;box-shadow:0 8px 26px rgba(18,134,255,.45);cursor:pointer;align-items:center;justify-content:center;display:flex;animation:fabPulse 2.6s infinite;line-height:1}
 @keyframes fabPulse{0%,100%{box-shadow:0 8px 26px rgba(18,134,255,.4)}50%{box-shadow:0 10px 34px rgba(0,201,167,.65)}}
+/* زر المرشد العائم ما يغطّيش أي زر: يختفي أثناء التمرير */
+.ai-fab.fab-mini{opacity:0;transform:translateX(-50%) scale(.5);pointer-events:none;transition:opacity .18s,transform .18s}
+/* مساحة سفلية تضمن إن آخر زرار في كل شاشة يوصل فوق زر المرشد */
+.screen:not(#game):not(#result):not(#loading){padding-bottom:106px}
+@media(min-width:700px){.screen:not(#game):not(#result):not(#loading){padding-bottom:34px}}
 
 /* ---- ABOUT / CHANGELOG ---- */
 .about-brand{text-align:center;padding:2px 0 14px}
@@ -752,7 +757,7 @@ body.zen .prog-wrap{gap:6px}
     <div class="header">
       <div class="avatar"><img src="icons/avatar.jpg" id="hmAv" alt=""></div>
       <div style="flex:1">
-        <div class="name" id="hmName">أحمد أيمن فكري</div>
+        <div class="name" id="hmName">لاعب</div>
         <span class="title-badge" id="titleBadge">مبتدئ</span>
         <div class="mini-stats">
           <span class="mini">🏆 مستوى <b id="hmLv">1</b></span>
@@ -1027,7 +1032,7 @@ body.zen .prog-wrap{gap:6px}
     <div class="page-head"><button class="icon-btn" data-back="home">→</button><h2>👤 ملفي</h2></div>
     <div class="profile-top">
       <div class="big-av"><img src="icons/avatar.jpg" id="pfAv" alt=""></div>
-      <h2 id="pfName">أحمد أيمن فكري</h2>
+      <h2 id="pfName">لاعب</h2>
       <p>المستوى <span id="pfLv">1</span></p>
       <button class="sec-btn" id="editProfBtn" style="margin-top:8px;width:auto;display:inline-block;padding:8px 26px">✏️ تعديل الملف</button>
     </div>
@@ -1195,7 +1200,7 @@ body.zen .prog-wrap{gap:6px}
       <button class="sec-btn" id="whatsNewBtn">🆕 ما الجديد؟</button>
       <button class="sec-btn" id="chkUpdBtn">🔄 فحص التحديث</button>
       <button class="sec-btn" id="refreshBtn" style="background:#fff2d9;border:0">🧹 تحديث إجباري — مسح الكاش وإعادة التحميل</button>
-      <div style="font-size:11px;color:var(--dim);text-align:center;padding:6px 0 0">💛 صُنع بحب وصراحة — بـقلم أحمد أيمن فكري</div>
+      <div style="font-size:11px;color:var(--dim);text-align:center;padding:6px 0 0">💛 صُنع بحب وصراحة — بـقلم <span data-owner>المطوّر</span></div>
     </div>
   </div>
 
@@ -1483,14 +1488,32 @@ body.zen .prog-wrap{gap:6px}
   })}catch(e){}
 })();
 </script>
+<script>
+/* ===== إعدادات البيع: غيّر هنا بس ===== */
+const BRAND={
+  app:'تحدي الذكاء',
+  owner:'أحمد أيمن فكري',
+  repo:'https://alfadev0.github.io/ahmed-quiz-game/',
+  support:'',
+  defaultName:'لاعب'
+};
+function applyBrand(){
+  try{
+    if(document.title)document.title=BRAND.app+' - '+BRAND.owner;
+    const foot=document.getElementById('ownerFoot');
+    if(foot)foot.textContent='💛 بـقلم '+BRAND.owner;
+    document.querySelectorAll('[data-owner]').forEach(el=>{el.textContent=BRAND.owner});
+  }catch(e){}
+}
+</script>
 <script src="questions.js"></script>
 <script src="study.js"></script>
 <script>
 /* ================= DATA MODEL ================= */
-const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'أحمد أيمن فكري',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0,gday:'',bossQ:0,bossDue:false,bossDone:0,zen:false,seen:{},endlessBest:0,moKey:'',moQ:0,moC:0,moG:0,moBadges:[],cheer:'',cover:'',seasonN:1,seasonXP:0,seasonKey:'',dailyKey:''};
-const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'***REMOVED-SECRET***',jsonbinBin:'***REMOVED-BIN***',voiceId:'',voiceRate:0.9,focusM:25,dayGoal:50,qTime:0,tfOn:true,revOn:true,smartOn:true};
+const DEFAULTS={level:1,xp:0,coins:50,games:0,correct:0,wrong:0,bestStreak:0,bestScore:0,perfect:0,totalCoins:0,playedCats:[],achv:[],dailyDone:false,dailyDate:null,name:'',avatar:null,lifelines:{fifty:1,skip:0,hint:1,double:0},catStats:{},weekBest:0,weekKey:'',weekPaid:false,weekL:null,monthBest:0,monthKey:'',monthPaid:false,notifDay:null,study:{},studyLast:null,wrongQs:{},plan:null,planCelebrated:false,quickGames:0,reviewed:0,audioCount:0,gday:'',bossQ:0,bossDue:false,bossDone:0,zen:false,seen:{},endlessBest:0,moKey:'',moQ:0,moC:0,moG:0,moBadges:[],cheer:'',cover:'',seasonN:1,seasonXP:0,seasonKey:'',dailyKey:''};
+const SETDEF={sound:true,vib:true,dark:false,nightRead:false,notif:false,notifH:19,qCount:20,timer:20,aiKey:'',jsonbinKey:'',jsonbinBin:'',voiceId:'',voiceRate:0.9,focusM:25,dayGoal:50,qTime:0,tfOn:true,revOn:true,smartOn:true};
 let S,set;
-function load(){try{S=JSON.parse(safeGet('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=DEFAULTS.name;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
+function load(){try{S=JSON.parse(safeGet('iq_state'))||{...DEFAULTS}}catch(e){S={...DEFAULTS}};if(!S.playedCats)S.playedCats=[];if(!S.achv)S.achv=[];if(!S.lifelines)S.lifelines={fifty:1,skip:0,hint:1,double:0};if(!S.catStats)S.catStats={};if(!S.name)S.name=BRAND.defaultName;if(!S.wrong)S.wrong=0;S.avatar=S.avatar||null;if(S.plan===undefined)S.plan=null;if(S.planCelebrated===undefined)S.planCelebrated=false;if(S.weekL===undefined)S.weekL=null;if(S.quickGames===undefined)S.quickGames=0;if(S.reviewed===undefined)S.reviewed=0;if(S.audioCount===undefined)S.audioCount=0}
 var MEM_STORE={};
 function safeSet(k,v){
   try{localStorage.setItem(k,v);return true}
@@ -1530,7 +1553,9 @@ function healData(){
     else act();
   }catch(e){}
 }
-function loadSet(){try{set=JSON.parse(safeGet('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50;if(![0,20,30,45].includes(set.qTime))set.qTime=0;if(typeof set.tfOn!=='boolean')set.tfOn=true;if(typeof set.revOn!=='boolean')set.revOn=true;if(typeof set.smartOn!=='boolean')set.smartOn=true}
+function loadSet(){try{set=JSON.parse(safeGet('iq_set'))||{...SETDEF}}catch(e){set={...SETDEF}};
+  // v77: إزالة أي مفتاح قديم مدفون كان موجود عند المستخدم
+  try{if(/^\$2[aby]\$/.test(String(set.jsonbinKey||''))){set.jsonbinKey='';set.jsonbinBin='';saveSet()}}catch(e){}if(typeof set.dark!=='boolean')set.dark=false;if(typeof set.nightRead!=='boolean')set.nightRead=false;if(typeof set.notif!=='boolean')set.notif=false;if(typeof set.notifH!=='number')set.notifH=19;if(!set.themeVersion){set.dark=false;set.themeVersion='v40'};if(typeof set.jsonbinKey!=='string'||!set.jsonbinKey)set.jsonbinKey=SETDEF.jsonbinKey;if(typeof set.jsonbinBin!=='string'||!set.jsonbinBin)set.jsonbinBin=SETDEF.jsonbinBin;if(typeof set.voiceId!=='string')set.voiceId='';if(typeof set.voiceRate!=='number'||!set.voiceRate)set.voiceRate=0.9;if(typeof set.focusM!=='number'||![25,45,60,90].includes(set.focusM))set.focusM=25;if(typeof set.dayGoal!=='number'||![15,25,50,100].includes(set.dayGoal))set.dayGoal=50;if(![0,20,30,45].includes(set.qTime))set.qTime=0;if(typeof set.tfOn!=='boolean')set.tfOn=true;if(typeof set.revOn!=='boolean')set.revOn=true;if(typeof set.smartOn!=='boolean')set.smartOn=true}
 function saveSet(){safeSet('iq_set',JSON.stringify(set))}
 
 /* ================= STATE ================= */
@@ -1943,6 +1968,7 @@ function renderWeekReport(){
 function updateHome(){
   try{renderDayGoal()}catch(e){}
   try{renderQuests()}catch(e){}
+  try{applyBrand()}catch(e){}
   try{renderBoss()}catch(e){}
   try{renderRevBanner()}catch(e){}
   try{applyDailyMod()}catch(e){}
@@ -2934,6 +2960,12 @@ let lbLastPush=0;
 function lbLoadCache(){try{const v=JSON.parse(localStorage.getItem(LB_CACHE));return (v&&Array.isArray(v.entries))?v.entries:[]}catch(e){return []}}
 function lbSaveCache(entries){try{localStorage.setItem(LB_CACHE,JSON.stringify({entries}))}catch(e){}}
 function lbMode(){return !!(set&&set.jsonbinKey)}
+let _lbTold=false;
+function lbNeedKey(){
+  if(_lbTold)return;
+  _lbTold=true;
+  try{toast('🔗 اربط لوحة المتصدرين من الإعدادات (مفتاح jsonbin.io خاص بيك)')}catch(e){}
+}
 function lbEnsureBin(key){
   return Promise.resolve().then(()=>{
     if(set.jsonbinBin)return set.jsonbinBin;
@@ -3236,7 +3268,7 @@ function startChallenge(scope){
 function shareResult(){
   const acc=Math.round(cor/questions.length*100);
   const txt='🧠 تحدي الذكاء\n🎯 النتيجة: '+score+' نقطة\n✅ '+cor+' صحيحة · ❌ '+wro+' خاطئة\n📊 الدقة: '+acc+'%\n\nهل تستطيع التغلب عليّ؟ 😎';
-  if(navigator.share){navigator.share({title:'تحدي الذكاء - أحمد أيمن فكري',text:txt}).catch(()=>{})}
+  if(navigator.share){navigator.share({title:BRAND.app+' - '+BRAND.owner,text:txt}).catch(()=>{})}
   else if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast('📤 تم نسخ النتيجة!')).catch(()=>toast('📤 '+txt))}
   else{toast('📤 '+txt.slice(0,60))}
 }
@@ -4290,7 +4322,7 @@ function dlStats(){
     nd.sos.forEach(so=>so.books.forEach(b=>{chn+=b.bk.chapters.length;b.bk.chapters.forEach(c=>qn+=(c.qs||[]).length)}));
     return nd.pname;
   });
-  return '<footer class="foot">📁 النطاق: '+names.join(' + ')+' • '+'<b>'+chn+' فصل</b> • <b>'+qn+' سؤال</b> • صُنع في بكالوريا 2027 بـقلم أحمد أيمن فكري 💛</footer>';
+  return '<footer class="foot">📁 النطاق: '+names.join(' + ')+' • '+'<b>'+chn+' فصل</b> • <b>'+qn+' سؤال</b> • صُنع في بكالوريا 2027 بـقلم <span data-owner>المطوّر</span> — وَكري 💛</footer>';
 }
 function dlEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function dlShell(title,body){
@@ -4881,6 +4913,18 @@ function openAIKey(){
 (function(){
   const snd=()=>{const i=document.getElementById('aiInput');aiAsk(i.value);i.value=''};
   const fab=document.getElementById('aiFab');if(fab)fab.onclick=openAISheet;
+  // المرشد العائم يختفى فور أي تمرير ويرجع بعد الوقوف — عشان ما يحبسش أي زرار
+  (function(){
+    const f=document.getElementById('aiFab');if(!f)return;
+    const A=(typeof window!=='undefined'&&window.addEventListener)?window.addEventListener.bind(window):null;if(!A)return;
+    let tm=null;
+    const off=()=>f.classList.add('fab-mini');
+    const on=()=>{clearTimeout(tm);tm=setTimeout(()=>f.classList.remove('fab-mini'),600)};
+    A('scroll',off,{passive:true});
+    A('touchmove',off,{passive:true});
+    A('touchend',on,{passive:true});
+    A('wheel',off,{passive:true});
+  })();
   const zen=document.getElementById('zenBtn');if(zen)zen.onclick=toggleZen;
   const eb=document.getElementById('endlessBtn');if(eb)eb.onclick=startEndless;
   const rb=document.getElementById('revBtn');if(rb)rb.onclick=startSmartReview;
@@ -4911,7 +4955,7 @@ function openAIKey(){
 </script>
 <script>
 /* ================= ABOUT / WHAT'S NEW ================= */
-const APP_VERSION='1.3.53',SW_BUILD='v76';
+const APP_VERSION='1.4.0',SW_BUILD='v77';
 const CHANGES=[
   {v:'v71 — إصلاح 4 مشاكل 🐛',d:'24/9/2026',items:['🐛 «أخطائي بالتفصيل» كانت مش بتفتح خالص (الشاشة كانت مسجّلة خطأ ورا شاشة تانية) — دلوقتي بتفتح صح','🐛 «أضعف الفصول» كانت بتختار فصول عشوائي — دلوقتي بتحسب الضعف من أخطائك الحقيقية ونجومك','🐛 الحدث اليومي كان بيفتحل عدّاد الوقت المختار عندك ويغيّره للأبد — اترجّع زي ما كان','🐛 اسم الحدث اليومي ماكانش بيظهر في اللعبة — بقى ظاهر','اختبارات ضد تكرار نفس المشاكل (298 ناجح)']},
   {v:'v70 — كل المميزات المتبقية 🎯🎖️🖼️',d:'24/9/2026',items:['🧪 اختبار الكتاب كامل: سؤال من كل فصل + ملخص بالنهاية يقولك اتقنت كل إيه ومحتاج مراجعة إيه','🎯 اختبار أضعف الفصول: 5 فصول محتاجة مراجعة عندك 선택','🎯 أخطائي بالتفصيل: مجموعات الأخطاء حسب الكتاب/الفصل، ودوس «راجع» على أي مجموعة','🎲 حدث يومي بيتبدّل كل يوم: دقة/سرعة/بدون مساعدات/نقاط مضاعفة/امتحان/يوم هادي — بينزل في 게임ات النهاردة','💬 رسالة تشجيع جديدة بعد كل لعبة','🎖️ موسم بـ10 مستويات ومكافآت كل 200 نقطة + عدّاد أيام الشهر','🖼️ صورة غلاف شخصية في ملفك','⌨️ اختصارات كيبورد (1-4 للإجابة، Enter، Esc، مسافة للصوت) + تخطيط سطح مكتب من 1024px','🏅 أوسمة شهرية (10/50/150 إجابة · 5/20 لعبة)','294 اختبار ناجح']},
@@ -4979,7 +5023,7 @@ function renderAbout(){
     '<span class="about-badge">🟢 تصلح وتتحسّن باستمرار</span>'+
     '<div style="font-size:12px;color:var(--dim);margin-top:10px">📚 '+total+' فصل • ❓ '+qq+' سؤال • 🧠 مرشدك الخاص</div></div>';
   const list=CHANGES.map(c=>'<div class="cl-item"><div class="cl-head"><span class="cl-v">'+c.v+'</span><span class="cl-d">'+c.d+'</span></div><ul>'+c.items.map(i=>'<li>'+i+'</li>').join('')+'</ul></div>').join('');
-  const foot='<div class="about-foot"><b>💛 بـقلم أحمد أيمن فكري</b><br>بنيتُ هذا التطبيق بنفسي — خطوة بخطوة — عشان أذاكر بيه بكل حب، وبفوتله على مذاكرتي كلها.<br>🔒 خصوصيتك أمانة: كل بياناتك على جهازك فقط، ولا حتة منها تطلع لأي حد.<br>💬 لو لقيت حاجة تروقنيها أو مشكلة عانقتك: <a href="https://github.com/AlfaDev0/ahmed-quiz-game/issues" target="_blank" rel="noopener">اقترح لي هنا</a></div>';
+  const foot='<div class="about-foot"><b>💛 بـقلم '+(typeof BRAND!=='undefined'?BRAND.owner:'المطوّر')+'<br>بنيتُ هذا التطبيق بنفسي — خطوة بخطوة — عشان أذاكر بيه بكل حب، وبفوتله على مذاكرتي كلها.<br>🔒 خصوصيتك أمانة: كل بياناتك على جهازك فقط، ولا حتة منها تطلع لأي حد.<br>💬 لو لقيت حاجة تروقنيها أو مشكلة عانقتك: <a href="https://github.com/AlfaDev0/ahmed-quiz-game/issues" target="_blank" rel="noopener">اقترح لي هنا</a></div>';
   body.innerHTML=brand+'<b>🆕 ما الجديد؟</b>'+list+foot;
 }
 function openAbout(){renderAbout();document.getElementById('aboutSheet').style.display='flex'}

@@ -658,7 +658,24 @@ ck('renderLB shows cached real entries', (()=>{try{vm.runInContext(`localStorage
 ck('renderLB renders rows from cache', (()=>{try{vm.runInContext(`document.getElementById('lbKeyInput')&&0`,sandbox);vm.runInContext(`renderLB()`,sandbox);const n=vm.runInContext(`document.getElementById('lbList').children.length`,sandbox);return n===2}catch(e){return 'ERR:'+e.message}})());
 ck('renderLB no network without key', (()=>{const before=fetchCalls.length;try{vm.runInContext(`set.jsonbinKey='';renderLB()`,sandbox)}catch(e){return 'ERR:'+e.message}return fetchCalls.length===before})());
 ck('lbUpsert safe in offline env', (()=>{try{vm.runInContext(`set.jsonbinKey='K';set.jsonbinBin='x';window.__p=lbUpsert()`,sandbox);vm.runInContext(`set.jsonbinKey='';set.jsonbinBin=''`,sandbox);return true}catch(e){return 'ERR:'+e.message}})());
-ck('default config ships the real leaderboard key', (()=>{try{return typeof SETDEF_x!=='undefined'?false:vm.runInContext(`window.__k=SETDEF.jsonbinKey`,sandbox).length>=40}catch(e){return 'ERR:'+e.message}})());
+/* ---- v77: أمان البيع — مفيش أسرار مدفونة ---- */
+ck('SHIPS NO hardcoded secret (security)', (()=>{try{return !/\$2a\$10\$/.test(html)&&!/X-Master-Key':\s*'[^']{20,}/.test(html)}catch(e){return 'ERR:'+e.message}})());
+ck('leaderboard key empty by default', (()=>{try{return vm.runInContext('SETDEF.jsonbinKey===""&&SETDEF.jsonbinBin===""',sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('legacy leaderboard keys are purged on load', (()=>{try{
+  const D=36;
+  const fake=String.fromCharCode(D)+'2a'+String.fromCharCode(D)+'10'+String.fromCharCode(D)+'FAKEFAKEFAKE';
+  const hasPattern=html.indexOf('2[aby]')>0;
+  const clears=html.indexOf("set.jsonbinKey='';set.jsonbinBin=''")>0;
+  const r=vm.runInContext('(function(k){set={...SETDEF,jsonbinKey:k,jsonbinBin:"zz"};loadSet();return set.jsonbinKey===String()&&set.jsonbinBin===String()})("'+fake+'")',sandbox);
+  return hasPattern&&clears&&r===true;
+}catch(e){return 'ERR:'+e.message}})());
+ck('loadSet drops legacy key from storage', (()=>{try{return vm.runInContext('(function(){set={...SETDEF,jsonbinKey:"\$2a\$10\$fake",jsonbinBin:"x"};loadSet();return set.jsonbinKey===""&&set.jsonbinBin===""})()',sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('BRAND config exists with fields', (()=>{try{return vm.runInContext('typeof BRAND==="object"&&!!BRAND.app&&!!BRAND.owner&&!!BRAND.defaultName&&!!BRAND.repo',sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('owner name not hardcoded in title/UI (BRAND-driven)', (()=>{try{const nm=vm.runInContext('BRAND.owner',sandbox);const t=(/<title>([^<]*)<\/title>/.exec(html)||[,''])[1];const hasUI=/data-owner/.test(html);const applyOk=/document.title=BRAND.app/.test(html);return t.indexOf(nm)<0&&hasUI&&applyOk}catch(e){return 'ERR:'+e.message}})());
+ck('default player name is not the owner', (()=>{try{return vm.runInContext('DEFAULTS.name===""&&(S.name||"")!==BRAND.owner',sandbox)===true}catch(e){return 'ERR:'+e.message}})());
+ck('applyBrand runs on home render', (()=>{try{return /applyBrand/.test(html)}catch(e){return 'ERR:'+e.message}})());
+ck('lbNeedKey tells user to link own bin', (()=>{try{return /function lbNeedKey/.test(html)&&/jsonbin.io خاص بيك/.test(html)}catch(e){return 'ERR:'+e.message}})());
+
 
 /* ---- v46 data self-heal ---- */
 vm.runInContext(`healRan=false`,sandbox);
