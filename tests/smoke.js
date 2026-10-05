@@ -13,7 +13,7 @@ try { chromium = require('playwright-core').chromium; }
 catch (e) { chromium = require('/usr/share/nodejs/playwright-core').chromium; }
 
 const TARGET=process.argv[2]||'https://alfadev0.github.io/ahmed-quiz-game/';
-const LABEL=process.argv[2]?'offline':'live';
+const LABEL=/^https?:/i.test(TARGET)?'live':'offline';
 const VIEWPORTS=[{w:390,h:844,n:'mobile'},{w:1280,h:900,n:'desktop'}];
 const SKIP=/^(resetBtn|deepResetBtn|importFile|avFile)$/;   // أزرار بتمسح/ترفع بيانات
 const MAX_CLICKS=26;                                        // سقف لكل شاشة
